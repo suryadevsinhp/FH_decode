@@ -26,13 +26,16 @@ job_progress = {}
 
 # MongoDB connection
 try:
-    client = MongoClient('mongodb://localhost:27017/')
+    client = MongoClient('mongodb://localhost:27017/', serverSelectionTimeoutMS=5000)
+    # Test the connection
+    client.admin.command('ping')
     db = client['frequency_hopping_db']
     collection = db['processing_jobs']
     print("Connected to MongoDB successfully")
 except Exception as e:
     print(f"MongoDB connection failed: {e}")
     db = None
+    collection = None
 
 # Create directories if they don't exist
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
@@ -236,7 +239,7 @@ class FrequencyHoppingDecoder:
             self.emit_progress(100, "Processing completed successfully!")
             
             # Save results to database
-            if db:
+            if db is not None and collection is not None:
                 result = {
                     'job_id': self.job_id,
                     'timestamp': datetime.now(),
@@ -259,7 +262,7 @@ class FrequencyHoppingDecoder:
             
         except Exception as e:
             self.emit_progress(0, f"Error: {str(e)}")
-            if db:
+            if db is not None and collection is not None:
                 collection.insert_one({
                     'job_id': self.job_id,
                     'timestamp': datetime.now(),
@@ -353,10 +356,13 @@ def get_plot(filename):
 
 @app.route('/api/jobs')
 def get_jobs():
-    if not db:
+    if db is None or collection is None:
         return jsonify({'error': 'Database not available'}), 500
     
-    jobs = list(collection.find({}, {'_id': 0}).sort('timestamp', -1).limit(10))
+    try:
+        jobs = list(collection.find({}, {'_id': 0}).sort('timestamp', -1).limit(10))
+    except Exception as e:
+        return jsonify({'error': f'Database query failed: {str(e)}'}), 500
     # Convert datetime objects to strings
     for job in jobs:
         if 'timestamp' in job:
