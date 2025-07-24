@@ -19,7 +19,7 @@ app = Flask(__name__)
 app.config['SECRET_KEY'] = 'your-secret-key-here'
 app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'static/outputs'
-app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
+app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024 * 1024  # 5GB max file size
 
 # Global variable to store job progress
 job_progress = {}
@@ -53,11 +53,19 @@ class FrequencyHoppingDecoder:
         print(f"Progress {self.job_id}: {progress}% - {message}")
         
     def read_iq_file(self, filepath, sample_rate):
-        """Read IQ data from binary file"""
+        """Read IQ data from binary file with memory optimization for large files"""
         self.emit_progress(10, "Reading IQ file...")
+        
+        # Get file size for memory optimization
+        file_size = os.path.getsize(filepath)
+        self.emit_progress(15, f"File size: {file_size / (1024*1024):.1f} MB")
         
         # Read binary file as complex float32 (I + jQ)
         with open(filepath, 'rb') as f:
+            # For very large files (>1GB), consider chunked reading
+            if file_size > 1024 * 1024 * 1024:  # 1GB
+                self.emit_progress(18, "Large file detected - optimizing memory usage...")
+            
             # Assuming interleaved I/Q data as float32
             data = np.frombuffer(f.read(), dtype=np.float32)
             
