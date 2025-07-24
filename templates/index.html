@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frequency Hopping Decoder</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="{{ url_for('static', filename='css/style.css') }}" rel="stylesheet">
+</head>
+<body>
+    <div class="container-fluid">
+        <!-- Header -->
+        <nav class="navbar navbar-dark bg-dark mb-4">
+            <div class="container-fluid">
+                <span class="navbar-brand mb-0 h1">
+                    <i class="fas fa-wave-square me-2"></i>
+                    Frequency Hopping Decoder
+                </span>
+                <div class="d-flex">
+                    <span class="badge bg-success" id="connectionStatus">
+                        <i class="fas fa-circle me-1"></i>Connected
+                    </span>
+                </div>
+            </div>
+        </nav>
+
+        <div class="row">
+            <!-- Left Panel - Upload and Controls -->
+            <div class="col-lg-4">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-upload me-2"></i>Upload IQ File
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="uploadForm" enctype="multipart/form-data">
+                            <!-- File Upload -->
+                            <div class="mb-3">
+                                <label for="fileInput" class="form-label">IQ Recording (.bin file)</label>
+                                <div class="input-group">
+                                    <input type="file" class="form-control" id="fileInput" name="file" accept=".bin" required>
+                                    <label class="input-group-text" for="fileInput">
+                                        <i class="fas fa-file-upload"></i>
+                                    </label>
+                                </div>
+                                <div class="form-text">Select your IQ recording in .bin format</div>
+                            </div>
+
+                            <!-- Parameters -->
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="centerFreq" class="form-label">Center Frequency (MHz)</label>
+                                        <input type="number" class="form-control" id="centerFreq" name="center_freq" 
+                                               step="0.001" placeholder="433.0" value="433.0" required>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label for="bandwidth" class="form-label">Bandwidth (MHz)</label>
+                                        <input type="number" class="form-control" id="bandwidth" name="bandwidth" 
+                                               step="0.001" placeholder="1.0" value="1.0" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="sampleRate" class="form-label">Sample Rate (MHz)</label>
+                                <input type="number" class="form-control" id="sampleRate" name="sample_rate" 
+                                       step="0.001" placeholder="2.0" value="2.0" required>
+                            </div>
+
+                            <button type="submit" class="btn btn-success w-100" id="processBtn">
+                                <i class="fas fa-cogs me-2"></i>Process File
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Processing Status -->
+                <div class="card shadow-sm mb-4" id="statusCard" style="display: none;">
+                    <div class="card-header bg-info text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-spinner fa-spin me-2"></i>Processing Status
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-2">
+                            <div class="progress">
+                                <div class="progress-bar progress-bar-striped progress-bar-animated" 
+                                     id="progressBar" role="progressbar" style="width: 0%">
+                                    <span id="progressText">0%</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="text-muted small" id="statusMessage">Initializing...</div>
+                        <div class="mt-2">
+                            <span class="badge bg-secondary" id="jobId"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Jobs -->
+                <div class="card shadow-sm">
+                    <div class="card-header bg-secondary text-white">
+                        <h6 class="card-title mb-0">
+                            <i class="fas fa-history me-2"></i>Recent Jobs
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div id="recentJobs">
+                            <div class="text-muted text-center">
+                                <i class="fas fa-clock me-2"></i>No recent jobs
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel - Results -->
+            <div class="col-lg-8">
+                <!-- Results Section -->
+                <div class="card shadow-sm mb-4" id="resultsCard" style="display: none;">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="card-title mb-0">
+                            <i class="fas fa-chart-line me-2"></i>Processing Results
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Audio Player -->
+                        <div class="mb-4" id="audioSection" style="display: none;">
+                            <h6><i class="fas fa-volume-up me-2"></i>Decoded Audio</h6>
+                            <div class="border rounded p-3 bg-light">
+                                <audio controls class="w-100" id="audioPlayer">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <div class="mt-2">
+                                    <a href="#" class="btn btn-sm btn-outline-primary" id="downloadAudioBtn">
+                                        <i class="fas fa-download me-1"></i>Download Audio
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Spectrogram -->
+                        <div class="mb-4" id="spectrogramSection" style="display: none;">
+                            <h6><i class="fas fa-chart-area me-2"></i>Frequency Spectrogram</h6>
+                            <div class="border rounded p-3 bg-light text-center">
+                                <img id="spectrogramImage" class="img-fluid" style="max-width: 100%; height: auto;">
+                            </div>
+                        </div>
+
+                        <!-- Statistics -->
+                        <div id="statsSection" style="display: none;">
+                            <h6><i class="fas fa-info-circle me-2"></i>Processing Statistics</h6>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h4 class="text-primary" id="numHops">-</h4>
+                                            <small class="text-muted">Detected Hops</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h4 class="text-success" id="centerFreqDisplay">-</h4>
+                                            <small class="text-muted">Center Freq (MHz)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="card bg-light">
+                                        <div class="card-body text-center">
+                                            <h4 class="text-info" id="bandwidthDisplay">-</h4>
+                                            <small class="text-muted">Bandwidth (MHz)</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Welcome Message -->
+                <div class="card shadow-sm" id="welcomeCard">
+                    <div class="card-body text-center">
+                        <i class="fas fa-wave-square fa-3x text-primary mb-3"></i>
+                        <h4>Welcome to Frequency Hopping Decoder</h4>
+                        <p class="text-muted">
+                            Upload your IQ recording (.bin file) and configure the parameters to start processing.
+                            The system will analyze frequency hopping patterns and extract decoded audio.
+                        </p>
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="feature-box">
+                                    <i class="fas fa-upload fa-2x text-info mb-2"></i>
+                                    <h6>Upload Files</h6>
+                                    <small class="text-muted">Support for .bin IQ recordings</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-box">
+                                    <i class="fas fa-chart-line fa-2x text-warning mb-2"></i>
+                                    <h6>Real-time Analysis</h6>
+                                    <small class="text-muted">Live progress tracking via WebSockets</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="feature-box">
+                                    <i class="fas fa-volume-up fa-2x text-success mb-2"></i>
+                                    <h6>Audio Output</h6>
+                                    <small class="text-muted">Decoded audio playback and download</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Modal -->
+    <div class="modal fade" id="errorModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title">
+                        <i class="fas fa-exclamation-triangle me-2"></i>Error
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>
