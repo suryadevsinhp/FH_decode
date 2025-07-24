@@ -10,6 +10,22 @@ Get your Frequency Hopping Decoder running in minutes!
 
 ## Installation (5 minutes)
 
+### Option 1: Fixed Quick Start (Recommended)
+```bash
+# 1. Use the fixed startup script (handles dependencies)
+./start_fixed.sh
+```
+
+### Option 2: Simple Version (No WebSockets)
+```bash
+# 1. Test the core functionality first
+python3 test_simple.py
+
+# 2. Start simple web version
+python3 app_simple.py
+```
+
+### Option 3: Full Setup
 ```bash
 # 1. Run the automated setup
 ./setup.sh
@@ -18,7 +34,7 @@ Get your Frequency Hopping Decoder running in minutes!
 ./generate_test_data.py --duration 5 --output test.bin
 
 # 3. Start the application
-./start.sh
+./start_fixed.sh
 ```
 
 ## Access the Application
