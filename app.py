@@ -4,7 +4,6 @@ import threading
 import time
 from datetime import datetime
 from flask import Flask, render_template, request, jsonify, send_from_directory, url_for
-from flask_socketio import SocketIO, emit
 import numpy as np
 import scipy.signal as signal
 from scipy.io import wavfile
@@ -22,8 +21,8 @@ app.config['UPLOAD_FOLDER'] = 'uploads'
 app.config['OUTPUT_FOLDER'] = 'static/outputs'
 app.config['MAX_CONTENT_LENGTH'] = 500 * 1024 * 1024  # 500MB max file size
 
-# Initialize SocketIO
-socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+# Global variable to store job progress
+job_progress = {}
 
 # MongoDB connection
 try:
@@ -41,17 +40,17 @@ os.makedirs(app.config['OUTPUT_FOLDER'], exist_ok=True)
 os.makedirs('static/plots', exist_ok=True)
 
 class FrequencyHoppingDecoder:
-    def __init__(self, socketio_instance, job_id):
-        self.socketio = socketio_instance
+    def __init__(self, job_id):
         self.job_id = job_id
         
     def emit_progress(self, progress, message):
-        """Emit progress update via WebSocket"""
-        self.socketio.emit('progress_update', {
-            'job_id': self.job_id,
+        """Store progress in global dictionary"""
+        job_progress[self.job_id] = {
             'progress': progress,
-            'message': message
-        })
+            'message': message,
+            'timestamp': time.time()
+        }
+        print(f"Progress {self.job_id}: {progress}% - {message}")
         
     def read_iq_file(self, filepath, sample_rate):
         """Read IQ data from binary file"""
@@ -263,7 +262,7 @@ class FrequencyHoppingDecoder:
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    return render_template('index_working.html')
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
@@ -294,14 +293,11 @@ def upload_file():
         
         # Start processing in background thread
         def process_in_background():
-            decoder = FrequencyHoppingDecoder(socketio, job_id)
+            decoder = FrequencyHoppingDecoder(job_id)
             result = decoder.process_file(filepath, center_freq, bandwidth, sample_rate)
             
-            # Emit completion
-            socketio.emit('processing_complete', {
-                'job_id': job_id,
-                'result': result
-            })
+            # Store final result
+            job_progress[job_id + '_result'] = result
             
             # Clean up uploaded file
             try:
@@ -316,6 +312,28 @@ def upload_file():
         return jsonify({'job_id': job_id, 'message': 'Processing started'})
     
     return jsonify({'error': 'Invalid file format. Please upload a .bin file'}), 400
+
+@app.route('/progress/<job_id>')
+def get_progress(job_id):
+    """Get progress for a specific job"""
+    if job_id in job_progress:
+        return jsonify(job_progress[job_id])
+    else:
+        return jsonify({'progress': 0, 'message': 'Job not found'})
+
+@app.route('/result/<job_id>')
+def get_result(job_id):
+    """Get final result for a job"""
+    result_key = job_id + '_result'
+    if result_key in job_progress:
+        result = job_progress[result_key]
+        # Clean up progress data
+        if job_id in job_progress:
+            del job_progress[job_id]
+        del job_progress[result_key]
+        return jsonify(result)
+    else:
+        return jsonify({'success': False, 'error': 'Result not found'})
 
 @app.route('/download/<filename>')
 def download_file(filename):
@@ -338,16 +356,9 @@ def get_jobs():
     
     return jsonify(jobs)
 
-@socketio.on('connect')
-def handle_connect():
-    print('Client connected')
-    emit('connected', {'data': 'Connected to server'})
-
-@socketio.on('disconnect')
-def handle_disconnect():
-    print('Client disconnected')
-
 if __name__ == '__main__':
-    print("Starting Frequency Hopping Decoder Server...")
-    print("Make sure MongoDB is running on localhost:27017")
-    socketio.run(app, debug=True, host='0.0.0.0', port=5000, allow_unsafe_werkzeug=True)
+    print("🚀 Starting Frequency Hopping Decoder Server...")
+    print("🔗 Access at: http://localhost:5000")
+    print("📁 Make sure MongoDB is running on localhost:27017")
+    print("✅ No SocketIO dependencies - using HTTP polling for updates")
+    app.run(debug=True, host='0.0.0.0', port=5000)
