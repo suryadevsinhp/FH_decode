@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrum and Water fall</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@arction/lcjs@5.2.0/dist/lcjs.iife.js"></script> -->
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
+    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
+    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+
+
+</head>
+
+<style>
+
+        #lcjs-auto-flexbox{
+            background-color: transparent;
+            }
+
+        canvas{
+            background-color: transparent;
+            }
+            
+        body{
+            background-color: transparent;
+            }
+
+    .full-screen-div {
+        position: absolute;
+        color: rgb(0, 0, 0);
+        top: 15px;
+        right: 6px;
+        z-index: 1001;
+        height: 25px;
+        width: 25px;
+
+    }
+
+    #custom_legend_camera {
+        background: transparent;
+        padding: 5px;
+        border-radius: 5px;
+        color: white;
+        /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
+        position: absolute;
+        left: 0px;
+        bottom: 0px;
+        z-index: 1000;
+        height: auto;
+        width: auto;
+    }
+</style>
+
+<body>
+
+    <!-- <div>
+        <div id="3DContainer" style="width: 100%; height: 100vh;"></div>
+    </div> -->
+    <div class="full-screen-div" >
+        <div class="">
+            <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
+                style="color: #ffffff; cursor: pointer;" onclick="full_screen()"><i style='font-size:15px'
+                data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                class='fas fa-expand-arrows-alt'></i></label>
+        </div>
+    </div>
+    <div id="custom_legend_camera">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot"
+            id="screenshot_img"><i class="fa fa-camera" aria-hidden="true"></i>
+        </button>
+        <!-- <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv" id="csv_export"><i class="fa fa-solid fa-file-csv"></i>
+        </button> -->
+        <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
+            title="ChartView" onclick="window.parent.full_screen_chart()"><i id="full_screen_icon"
+                class="fa fa-solid fa-expand"></i>
+        </button>
+    </div>
+
+
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog aria-labelledby="
+        MultipleDeleteTargetModelLabel>
+        <div class="modal-dialog modal-dialog-centered text-center " role="document">
+            <div class="modal-body " style="width:1000px;">
+                <!-- <div class="card" style="border: 1px solid var(--green-custom-color);"> -->
+                <div class="m-0 px-0 py-5" style="background-color:white">
+                    <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
+                </div>
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- --------------------------------- Script ------------------------------ -->
+
+    <script type="text/javascript">
+        var active_port = "{{active_port}}";
+        var active_channel = "{{active_channel}}";
+        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
+        var sample_length =  parseInt(data['fft_points'])
+        var page_theme = "{{theme_mode}}"
+        const page_mode = data['mode']
+        var auto_Y_axis_flag = false
+        const historyMs = 27 * 1000
+        // Sampling rate as samples per second.
+        const sampleRateHz = 35
+        const sampleIntervalMs = 1000 / sampleRateHz
+
+        const rowStep = 1
+        const rows = sample_length
+        var chart3D
+        var data_points = 0
+        var dataVal,cnt = 0 ;
+        var surfaceSeries3D;
+
+        var start_freq = data['start_frequency'] / 1e6
+        var stop_freq = data['stop_frequency'] / 1e6
+        var full_screen_flag = false
+
+        // =================== lc js import ====================
+        const { lightningChart, PalettedFill,
+            LUT, ColorHSV,
+            emptyLine,
+            AxisScrollStrategies,
+            AxisTickStrategies,
+            LegendBoxBuilders, UIElementBuilders, UIOrigins, AutoCursorModes, UIVisibilityModes, UIDraggingModes, SolidLine, SolidFill, ColorHEX,
+            regularColorSteps, synchronizeAxisIntervals, Axis, onMouseDoubleClick, ColorRGBA, setLabel, removeMarker,
+            Themes, axis } = lcjs;
+
+
+         
+
+
+        // ==================== dashboard =========================
+
+        if (page_theme == 'dark') {
+            document.getElementById('full_screen_label').style.color = '#fff'
+
+            const dashboard = lcc.Dashboard({
+                numberOfColumns: 1,
+                numberOfRows: 1,
+                // theme: Themes.darkGold,
+            })
+            chart3D = dashboard
+                .createChart3D({
+                    columnIndex: 0,
+                    rowIndex: 0,
+                    defaultAxisX: {
+                        type: 'linear-highPrecision'
+                    },
+                    defaultAxisZ: {
+                        type: 'linear-highPrecision'
+                    }
+                    // colSpan: 2,
+                    // rowSpan: 2
+
+                })
+                
+                .setTitle('3D Waterfall')
+        }
+
+        else {
+            document.getElementById('full_screen_label').style.color = '#4B5320'
+
+            const dashboard = lcc.Dashboard({
+                numberOfColumns: 1,
+                numberOfRows: 1,
+                theme: Themes.light,
+            })
+            chart3D = dashboard
+                .createChart3D({
+                    columnIndex: 0,
+                    rowIndex: 0,
+                    defaultAxisX: {
+                        type: 'linear-highPrecision'
+                    }
+                    // colSpan: 2,
+                    // rowSpan: 2
+
+                })
+                .setTitle('3D Waterfall')
+
+            document.getElementById('screenshot_img').style.color = '#4B5320'
+            // document.getElementById('csv_export').style.color = '#4B5320'
+            document.getElementById('full_screen_btn').style.color = '#4B5320'
+        }
+        // Define value -> color lookup table.
+        // Define value -> color lookup table.
+        const theme = chart3D.getTheme()
+        var lut = new LUT({
+            // steps: regularColorSteps(-120, -70, theme.examples.spectrogramColorPalette),
+            steps: [
+                { value: -19, color: ColorRGBA(255, 250, 205) },//green
+                { value: -20, color: ColorRGBA(255, 250, 205) },//green
+                { value: -70, color: ColorRGBA(2, 0, 185) },//red
+                { value: -150, color: ColorRGBA(173, 216, 230) },//green
+
+            ],
+            units: 'dBm',
+            interpolate: true,
+        })
+        var paletteFill = new PalettedFill({ lut, lookUpProperty: 'value' })
+
+        chart3D
+            .getDefaultAxisX()
+            .setTitle('Frequency (MHz)').setDefaultInterval((state) => ({start: start_freq , end: stop_freq , stopAxisAfter: false})).setAnimationsEnabled(false)
+           
+
+        chart3D.getDefaultAxisY()
+            .setTitle('Intensity (dB)')
+            .setDefaultInterval({ end: -20, start: -140 })
+
+
+        chart3D.getDefaultAxisZ().setTickStrategy(AxisTickStrategies.Time)
+            // .setScrollStrategy(AxisScrollStrategies.progressive)
+            .setScrollStrategy(AxisScrollStrategies.progressive)
+            .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
+           
+
+        
+
+
+        auto_axis_btn = window.parent.document.getElementById('auto_y_axis')
+        if (auto_axis_btn.checked) {
+            auto_Y_axis_flag = true
+        }
+        
+
+        // const surfaceSeries3D = chart3D.addSurfaceScrollingGridSeries({
+        //     scrollDimension: 'columns',
+        //     columns: 100,
+        //     rows: sample_length,rows: sample_length,
+        // })
+        //     .setStep({ x: sampleIntervalMs, z: 10 })
+        //     .setFillStyle(new PalettedFill({ lut, lookUpProperty: 'y' }))
+        //     .setWireframeStyle(emptyLine)
+
+        // ----------------------------------- ScreenShot Btn ------------------------------------
+
+        document.getElementById('screenshot_img').onclick = function () {
+            chart3D.saveToFile('Spectrum_screenshot')
+        }
+
+        window.parent.document.addEventListener('fullscreenchange', exitHandler);
+        window.parent.document.addEventListener('webkitfullscreenchange', exitHandler);
+        window.parent.document.addEventListener('mozfullscreenchange', exitHandler);
+        window.parent.document.addEventListener('MSFullscreenChange', exitHandler);
+
+
+        function exitHandler() {
+            if (!window.parent.document.fullscreenElement && !window.parent.document.webkitIsFullScreen && !window.parent.document.mozFullScreen && !window.parent.document.msFullscreenElement) {
+                if (!parent.table_full) {
+                    document.getElementById('full_screen_icon').classList.remove('fa-compress')
+                    document.getElementById('full_screen_icon').classList.add('fa-expand')
+                    parent.full_iframe = false;
+                }
+
+            }
+            else {
+                if (!parent.table_full) {
+                    document.getElementById('full_screen_icon').classList.remove('fa-expand')
+                    document.getElementById('full_screen_icon').classList.add('fa-compress')
+                    parent.full_iframe = true;
+                }
+            }
+        }
+
+        var legendBuilder,legend_backgrd;
+        if(page_theme =='light'){
+            legendBuilder = LegendBoxBuilders.HorizontalLegendBox.styleEntries((entry) => entry
+            .setTextFillStyle(new SolidFill({ color: ColorHEX('#000000') }))
+            .setLUTLength(200)
+            )
+            legend_backgrd = "#ffffffcf"
+
+        }
+        else{
+            legendBuilder = LegendBoxBuilders.HorizontalLegendBox.styleEntries((entry) => entry
+            .setTextFillStyle(new SolidFill({ color: ColorHEX('#FFFFFF') }))
+            .setLUTLength(200)
+            )
+            legend_backgrd = "#00000061"
+
+        }
+
+
+        var legend2 = chart3D
+            .addLegendBox(legendBuilder)
+            .setTitle(false)
+            .setPosition({ x: 88, y: 2 })
+
+        legend2.setBackground((background) => background
+            .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
+            .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
+        )
+        // legend2.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+        legend2.setDraggingMode(0)
+
+        function set_min_max_amp(min, max) {
+
+            chart3D.getDefaultAxisY().setInterval({ start: min, end: max }).setDefaultInterval({ start: min, end: max })
+
+        }
+
+        function reconfig_lut(){
+            array = dataVal.y
+            var total = 0
+            for(var i = 0; i < dataVal.y.length; i++) {
+                total += dataVal.y[i];
+            }
+            var avg = total / dataVal.y.length;
+            min_step_avg = parseInt(dataVal.y.reduce((a, b) => a + b) / dataVal.y.length);
+            mid_step_avg = min_step_avg + 10
+            max_step_avg = min_step_avg + 20
+            // console.log("Start",avg,min_step_avg)
+            if(((parent.document.getElementById('waterfall_theme').value).slice(0,-2)) == "preset"){
+                // console.log("preset")
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0 , color: ColorHEX("#00000000") },//green
+                        { value: parseInt(parent.document.getElementById('min_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color3").value) },//green
+                        { value: parseInt(parent.document.getElementById('mid_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color2").value) },//red
+                        { value: parseInt(parent.document.getElementById('max_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color1").value) },//green
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+            else if(parent.document.getElementById('waterfall_theme').value == "theme_1" || parent.document.getElementById('waterfall_theme').value == "theme_3"){
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0, color: ColorHEX("#00000000") },
+                        { value: min_step_avg + 25, color: ColorHEX(parent.max_step) },
+                        { value: min_step_avg + 15, color: ColorHEX(parent.mid_step1) },
+                        { value: min_step_avg + 10 , color: ColorHEX(parent.mid_step2) },
+                        { value: min_step_avg , color: ColorHEX(parent.min_step) },
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+           else if(parent.document.getElementById('waterfall_theme').value == "theme_2"){
+
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0, color: ColorHEX("#00000000") },//blue
+                        { value: max_step_avg, color: ColorHEX(parent.max_step) },//green
+                        { value: mid_step_avg, color: ColorHEX(parent.mid_step1) },//red
+                        { value: min_step_avg, color: ColorHEX(parent.min_step) },//green
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+            else {
+
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0, color: ColorHEX("#00000000") },//blue
+                        { value: parseInt(parent.max_step_val), color: ColorHEX(parent.max_step) },//green
+                        { value: parseInt(parent.mid_step_val), color: ColorHEX(parent.mid_step1) },//red
+                        { value: parseInt(parent.min_step_val), color: ColorHEX(parent.min_step) },//green
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+            
+            paletteFill = new PalettedFill({ lut, lookUpProperty: 'y' })
+            surfaceSeries3D
+            .setFillStyle(paletteFill)
+
+            if(legend2){
+                legend2.dispose()
+            }
+            legend2 = chart3D
+                .addLegendBox(legendBuilder)
+                .setTitle(false)
+                .setPosition({ x: 88, y: 2 })
+                
+
+            legend2.setBackground((background) => background
+                .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
+                .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
+            )
+            legend2.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+            legend2.setDraggingMode(0)
+            // console.log("End")
+            
+        }
+        // =================================   WEBSOCKET RECV DATA  ===========================================
+
+        var wf_init = true;
+        function websocket_data(evt) {
+            // console.log('in ws recived')
+
+             dataVal = evt
+             // cnt+=1
+            // console.log(cnt)
+            if(wf_init && dataVal.x.length > 0){
+
+                wf_init = false
+
+              console.log("updated the sample")
+                sample_length = dataVal.x.length
+
+
+                surfaceSeries3D = chart3D.addSurfaceScrollingGridSeries({
+                    scrollDimension: 'rows',
+                    dataOrder:'rows',
+                    columns:  sample_length,
+                    rows : Math.ceil(historyMs / sampleIntervalMs)  ,
+                })
+                .setStep({ x: (stop_freq-start_freq)/(sample_length-1), z: sampleIntervalMs })
+                .setFillStyle(new PalettedFill({ lut, lookUpProperty: 'y' }))
+                .setWireframeStyle(emptyLine)
+                .setStart({ x: start_freq,z:0})
+
+                console.log("=======================")
+
+
+
+            // legend2.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+
+            reconfig_lut()
+
+
+             surfaceSeries3D.setDataCleaning({ minDataPointCount: 1 })
+             // surfaceSeries3D.setMaxSampleCount({ mode: 'auto', max: 10_000_000 })
+            
+             
+
+
+
+            }
+            // else{
+
+            if (auto_Y_axis_flag == true) {
+                    chart3D.getDefaultAxisY().setInterval({ start: -140, end: -20 }).setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
+                }
+                else {
+
+                    start_y = parseInt(window.parent.document.getElementById('minY').value)
+                    stop_y = parseInt(window.parent.document.getElementById('maxY').value)
+                    set_min_max_amp(start_y, stop_y)
+
+                }
+
+            // spectrum
+            y_array = dataVal.y
+            x_array = dataVal.x
+            let pushedDataCount = 0
+                // const sampleRateHz = 100
+                const streamData = () => {
+                    // const tNow = window.performance.now()
+                    // const shouldBeDataPointsCount = Math.floor((sampleRateHz * (tNow - tStart)) / 1000)
+                    const newDataPointsCount = 1 // Add max 100 samples per frame into a series. This prevents massive performance spikes when switching tabs for long times
+                    if (newDataPointsCount > 0) {
+                        // console.log(dataVal.y.length)
+                        const newDataPoints = []
+                        const newDataPointsX = []
+                        for (let iDp = 0; iDp < newDataPointsCount; iDp++) {
+                            // const iData = (pushedDataCount + iDp) % sample_length
+                            // const sample = dataVal.y
+                            newDataPoints.push(dataVal.y)
+                            newDataPointsX.push(dataVal.x)
+                        }
+                        // console.log(surfaceSeries3D)
+                        surfaceSeries3D.addValues({  yValues: newDataPoints})
+
+                    }
+                    pushedDataCount += newDataPointsCount
+                }   
+                requestAnimationFrame(streamData)
+
+            // }
+
+
+        }
+
+
+        function open_loader() {
+            $('#websocket_loader').modal('show')
+        }
+
+
+        function close_loader() {
+            $('#websocket_loader').modal('hide')
+        }
+
+
+        // $(document).ready(function () {
+        //     open_loader()
+        //     setTimeout(function () {
+        //         window.parent.iq_data()
+        //     }, 500)
+        // });
+
+        if(page_mode == "sweep"){
+            document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+            window.parent.document.getElementById("table_div").style.display = "none"
+            window.parent.document.getElementById("iframe_div").className = "col-12"
+            window.parent.document.getElementById("table_col_div").style.display = "none"
+            window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+            full_screen_flag = true
+
+        }
+
+        function full_screen() {
+            var checkBox_full_screen = document.getElementById("full_screen");
+            if (full_screen_flag == false) {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+                //window.parent.document.getElementById("table_col").style.display = "none"
+                    window.parent.document.getElementById("table_div").style.display = "none"
+                    //window.parent.document.getElementById("table_col_div").style.display = "none"
+                    window.parent.document.getElementById("iframe_div").className = "col-12"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+
+                
+               
+                //window.parent.document.getElementById("iframe_col").className = "col-12"
+                //window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+              // console.log('in full screen function')
+                full_screen_flag = true
+
+            }
+            else {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-expand-arrows-alt'></i>`
+                //window.parent.document.getElementById("table_col").style.display = "block"
+                    window.parent.document.getElementById("table_div").style.display = "block"
+                    //window.parent.document.getElementById("table_col_div").style.display = "block"
+                    window.parent.document.getElementById("iframe_div").className = "col-8"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "5px"
+                
+                
+                //window.parent.document.getElementById("iframe_col").className = "col-8"
+                //window.parent.document.getElementById("iframe_div").style.paddingRight = "7px"
+                full_screen_flag = false
+
+            }
+        }
+
+         $(document).ready(function () {
+            // open_loader()
+            setTimeout(function () {
+                window.parent.iq_data()
+
+            }, 500)
+        });
+
+
+        
+    </script>
+</body>
+
+</html>

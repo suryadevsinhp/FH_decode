@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrum and Water fall</title>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@arction/lcjs@5.2.0/dist/lcjs.iife.js"></script> -->
+
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
+
+
+    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
+    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <style>
+
+        #lcjs-auto-flexbox{
+            background-color: transparent;
+            }
+
+        canvas{
+            background-color: transparent;
+            }
+            
+        body{
+            background-color: transparent;
+            }
+
+        .full-screen-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 1px;
+            right: 0px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+
+
+        }
+
+        #custom_legend_camera {
+            background: transparent;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            z-index: 1000;
+            height: auto;
+            width: auto;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog aria-labelledby="
+        MultipleDeleteTargetModelLabel>
+        <div class="modal-dialog modal-dialog-centered text-center " role="document">
+            <div class="modal-body ">
+                <!-- <div class="card" style="border: 1px solid var(--green-custom-color);"> -->
+                <div class="m-0 px-0 py-5" style="background-color:white">
+                    <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
+                </div>
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+
+    <!-- <div id="chartContainer" style="width: 100%; height: 100vh;"></div> -->
+    <div class="full-screen-div">
+        <div class="">
+            <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
+                style="color: #ffffff; cursor: pointer;" onclick="full_screen()"><i style='font-size:15px'
+                data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                class='fas fa-expand-arrows-alt'></i></label>
+        </div>
+    </div>
+
+    <div id="custom_legend_camera">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot"
+            id="screenshot_img"><i class="fa fa-camera" aria-hidden="true"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
+            title="ChartView" onclick="window.parent.full_screen_chart()"><i id="full_screen_icon"
+                class="fa fa-solid fa-expand"></i>
+        </button>
+        <!-- <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv" id="csv_export"><i class="fa fa-solid fa-file-csv"></i>
+        </button> -->
+    </div>
+
+    <script type="text/javascript">
+        var active_port = "{{active_port}}";
+        var peak_port = "{{peak_port}}"
+        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
+        var page_theme = "{{theme_mode}}"
+
+        var freq = data['freq']
+        var start_freq = data['start_frequency']
+        var stop_freq = data['stop_frequency']
+        var start_WF_freq = data['start_frequency']
+        var stop_WF_freq = data['stop_frequency']
+        var sample_length = data['sample_points']
+        var dataSampleSize = sample_length
+        var marker_color, theme_color, threshold_color;
+        var full_screen_flag = false
+        let tPrev = 1
+        const tFirst = performance.now()
+        const dataArrayTimeDomain = new Array(dataSampleSize)
+
+        // const bufferLength = analyser.frequencyBinCount
+
+        let x_array = []
+        let y_array = []
+
+        var dataVal;
+
+
+        // =================== lc js import ====================
+        const { lightningChart, PalettedFill,
+            LUT, ColorHSV,
+            emptyLine,
+            AxisScrollStrategies,
+            AxisTickStrategies,
+            LegendBoxBuilders, UIElementBuilders, PointShape, UIOrigins, AutoCursorModes, emptyFill, UIVisibilityModes, UIDraggingModes, SolidLine, SolidFill, ColorHEX,
+            regularColorSteps, synchronizeAxisIntervals, Axis, onMouseDoubleClick, ColorRGBA, setLabel, removeMarker,
+            Themes, axis } = lcjs;
+
+
+         
+
+
+        if (page_theme == 'dark') {
+            document.getElementById('full_screen_label').style.color = '#fff'
+
+            const dashboard = lcc.Dashboard({
+                numberOfColumns: 1,
+                numberOfRows: 2,
+                // theme: Themes.darkGold,
+            })
+
+            chartWaveform = dashboard.createChartXY({
+                // container: 'chartContainer',
+                columnIndex: 0,
+                rowIndex: 0,
+                colSpan: 2,
+                rowSpan: 2
+            }).setTitle('Oscillioscope')
+                .setMouseInteractions(true)
+                .setPadding(10)
+
+        }
+        else {
+            document.getElementById('full_screen_label').style.color = '#4B5320'
+
+            const dashboard = lcc.Dashboard({
+                numberOfColumns: 1,
+                numberOfRows: 2,
+                theme: Themes.light,
+            })
+
+
+            chartWaveform = dashboard.createChartXY({
+                // container: 'chartContainer',
+                columnIndex: 0,
+                rowIndex: 0,
+                colSpan: 2,
+                rowSpan: 2
+            }).setTitle('Oscillioscope')
+                .setMouseInteractions(true)
+                .setPadding(10)
+
+        }
+
+
+        // const chartWaveform = lcc
+        //     .ChartXY({
+        //         theme: Themes.darkGold,
+        //     })
+        //     .setTitle('Oscillioscope')
+        //     .setMouseInteractions(true)
+        //     .setPadding(10)
+
+
+        const lut = new LUT({
+            // steps: regularColorSteps(-120, -70, theme.examples.spectrogramColorPalette),
+            steps: [
+                { value: -20, color: ColorRGBA(255, 250, 205) },//green
+                { value: -70, color: ColorRGBA(2, 0, 185) },//red
+                { value: -150, color: ColorRGBA(173, 216, 230) },//green
+            ],
+            units: 'dBm',
+            interpolate: true,
+        })
+        const paletteFill = new PalettedFill({ lut, lookUpProperty: 'value' })
+
+
+        const seriesWaveform = chartWaveform
+            .addPointLineAreaSeries({
+                dataPattern: 'ProgressiveX',
+                allowInputModification: false,
+            })
+            .setStrokeStyle((stroke) => stroke.setThickness(-1))
+            .setMaxSampleCount(1000000)
+            .setPointFillStyle(emptyFill)
+            .setAreaFillStyle(emptyFill)
+            .setCursorEnabled(false)
+
+        chartWaveform
+            .getDefaultAxisX()
+            .setScrollStrategy(AxisScrollStrategies.progressive)
+            .setTickStrategy(AxisTickStrategies.Time)
+            .setDefaultInterval((state) => ({
+                start: (state.dataMax ?? 0),
+                end: state.dataMax,
+                stopAxisAfter: false,
+            }))
+            .fit(false)
+
+
+        chartWaveform.getDefaultAxisY().setAnimationScroll(true).setChartInteractionZoomByWheel(true)
+        // chartWaveform.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Empty)
+        chartWaveform.getDefaultAxisX().setTickStrategy(AxisTickStrategies.Time)
+        // chartWaveform.setChartInteractionZoomByWheel(true)
+
+        const fillYellow = new SolidFill({ color: ColorHEX('#FFFF00') })
+        const fillNavyBlue = new SolidFill({ color: ColorHEX('#00008B') })
+
+
+        if (page_theme == 'light') {
+            seriesWaveform.setStrokeStyle((stroke) => stroke.setFillStyle(fillNavyBlue))
+
+            chartWaveform
+                .setBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundStrokeStyle(new SolidLine({ thickness: 2, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
+            chartWaveform.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+
+                )
+            )
+            chartWaveform.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+                )
+            )
+
+            marker_color = '#FF13F0'
+            theme_color = "#000000"
+            threshold_color = '#000000'
+
+        }
+        else {
+            seriesWaveform.setStrokeStyle((stroke) => stroke.setFillStyle(fillYellow))
+            marker_color = '#FF13F0'
+            theme_color = '#808080'
+            threshold_color = '#FFFFFF'
+
+        }
+
+
+
+        function full_screen() {
+            var checkBox_full_screen = document.getElementById("full_screen");
+            if (full_screen_flag == false) {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+                window.parent.document.getElementById("table_col").style.display = "none"
+                window.parent.document.getElementById("close-bar").style.display = "none"
+                window.parent.document.getElementById("iframe_col").className = "col-12"
+                full_screen_flag = true
+
+            }
+            else {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-expand-arrows-alt'></i>`
+                window.parent.document.getElementById("table_col").style.display = "block"
+                window.parent.document.getElementById("close-bar").style.display = "block"
+                window.parent.document.getElementById("iframe_col").className = "col-8"
+                full_screen_flag = false
+
+            }
+        }
+
+
+        //  ============ WS data recive  ==================
+
+
+        function open_loader() {
+            // $('#websocket_loader').modal({backdrop : 'static'})
+            $('#websocket_loader').modal('show')
+        }
+
+        function close_loader() {
+            $('#websocket_loader').modal('hide')
+        }
+
+        // $(document).ready(function () {
+        //     open_loader()
+        //     setTimeout(function () {
+        //         window.parent.iq_data()
+
+        //     }, 500)
+        // });
+
+
+        // =================================   WEBSOCKET RECV DATA  ===========================================
+
+        function websocket_data(evt) {
+            dataVal = evt;
+            if (dataVal.hasOwnProperty('message') === true) {
+                if (dataVal['message'] == "connect") {
+                    // $(window.parent.document).find('#websocket_loader').modal({backdrop : 'static'})
+                    //  $(window.parent.document).find('#websocket_loader').modal('show')
+                }
+                if (dataVal['message'] == "connected") {
+                    // setTimeout(function(){
+                    //     $(window.parent.document).find('#websocket_loader').modal('hide')
+                    // },1000)
+
+                }
+            } else {
+                // let framesCount = 0
+                const frame = () => {
+                    const tNow = performance.now()
+                    if (tPrev) {
+
+                        const waveformTimestamps = new Array(1024)
+                            .fill(0)
+                            .map((_, i, arr) => tPrev + ((tNow - tPrev) * (i + 1)) / arr.length)
+
+                        // for (let i = 0; i < 1024; i++) {
+                        seriesWaveform.appendSamples({
+                            xValues: waveformTimestamps,
+                            yValues: dataVal.time_domain,
+                            // yValues: dataVal.y
+
+                        })
+                        // chartWaveform.getDefaultAxisX()
+                        // const fps = 1 / ((tNow - tFirst) / framesCount)
+
+                        // }
+                        // requestAnimationFrame(frame)
+                        tPrev = tNow
+                        // framesCount += 1
+                    }
+                }
+                frame()
+            }
+        }
+
+        // ----------------------------------- ScreenShot Btn ------------------------------------
+
+        document.getElementById('screenshot_img').onclick = function () {
+            chartWaveform.saveToFile('Spectrum_screenshot')
+        }
+
+        // init_data()
+
+        window.parent.document.addEventListener('fullscreenchange', exitHandler);
+        window.parent.document.addEventListener('webkitfullscreenchange', exitHandler);
+        window.parent.document.addEventListener('mozfullscreenchange', exitHandler);
+        window.parent.document.addEventListener('MSFullscreenChange', exitHandler);
+
+
+        function exitHandler() {
+            if (!window.parent.document.fullscreenElement && !window.parent.document.webkitIsFullScreen && !window.parent.document.mozFullScreen && !window.parent.document.msFullscreenElement) {
+                if (!parent.table_full) {
+                    document.getElementById('full_screen_icon').classList.remove('fa-compress')
+                    document.getElementById('full_screen_icon').classList.add('fa-expand')
+                    parent.full_iframe = false;
+                }
+
+            }
+            else {
+                if (!parent.table_full) {
+                    document.getElementById('full_screen_icon').classList.remove('fa-expand')
+                    document.getElementById('full_screen_icon').classList.add('fa-compress')
+                    parent.full_iframe = true;
+                }
+            }
+        }
+
+    </script>
+</body>
+
+</html>

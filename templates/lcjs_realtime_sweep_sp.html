@@ -1,0 +1,2377 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrum and Water fall</title>
+
+
+    <!-- =================== bootstrap cdn ================== -->
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
+    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
+    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+
+
+
+    <style>
+
+        #lcjs-auto-flexbox{
+            background-color: transparent;
+            }
+
+        canvas{
+            background-color: transparent;
+            }
+            
+        body{
+            background-color: transparent;
+            }
+
+        .full-screen-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 29px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+
+        }
+
+        .screen-shot-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 42px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+        }
+
+        #trace_dwn {
+
+            position: absolute;
+
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+
+
+        }
+
+        #trace_up {
+
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+
+
+        }
+
+        #outer_trace {
+            padding-top: 2px;
+        }
+
+        /* #tracemenu{
+    padding: 5px 5px 0px 5px;  
+    } */
+        #custom-legend {
+            background:rgb(0, 0, 0, 38%);
+            padding: 10px;
+            border: 1px solid #FFFFFF;
+            /* border-radius: 5px; */
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 22px;
+            right: 30px;
+            z-index: 1000;
+            height: 210px;
+            width: 116px;
+            transition:
+                width 2s,
+                height 2s,
+                background-color 2s,
+        }
+
+        #custom_legend_camera {
+            background: transparent;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            z-index: 1000;
+            height: auto;
+            width: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: small;
+        }
+
+        .legend-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            outline: none;
+            cursor: pointer;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .legend-checkbox:checked::after {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d79c3c;
+            position: absolute;
+            /* top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); */
+        }
+
+
+        table th,
+        tr,
+        td {
+            background-color: transparent;
+            /* background-image: radial-gradient(circle, #272727, #141414, #000000); */
+            color: #cece4c;
+            border: revert;
+            border: 1px solid #333 !important;
+
+        }
+
+        .table td,
+        .table th {
+            padding: 5px !important;
+
+        }
+
+        .tbl {
+            border: 1px solid #111 !important;
+            background-image: radial-gradient(circle, #272727, #141414, #000000);
+        }
+
+        .table {
+            border: 1px solid #111 !important;
+            background-image: radial-gradient(circle, #272727, #141414, #000000);
+        }
+
+        .table thead th {
+            vertical-align: bottom;
+            border-bottom: revert;
+            border-top: revert;
+            border-top: 0 !important;
+            border-bottom: 2px solid #333;
+            padding: revert;
+            padding: 5px !important;
+        }
+
+        .table tbody td {
+            padding: revert;
+            padding: 0px !important;
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog aria-labelledby="
+        MultipleDeleteTargetModelLabel>
+        <div class="modal-dialog modal-dialog-centered text-center " role="document">
+            <div class="modal-body ">
+                <!-- <div class="card" style="border: 1px solid var(--green-custom-color);"> -->
+                <div class="m-0 px-0 py-5" style="background-color:white">
+                    <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
+                </div>
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+
+
+    <!-- <div style="display: flex;flex-direction: row-reverse;"> -->
+    <div id="chartContainer" style="width: 100%; height: 100%;"></div>
+    <div id="other" class="tbl px-2" style="width: 100%; height: 0%;overflow-y: hidden;" hidden>
+        <table class="tbl text-center w-100 px-2" id="peak_table">
+            <thead class="text-white">
+                <tr style="font-weight: bolder">
+                    <th class="ml-2" style="text-align:left !important;width:auto;">&nbsp;&nbsp;Peaks</th>
+                    <th class="align-middle">P1</th>
+                    <th class="align-middle">P2</th>
+                    <th class="align-middle">P3</th>
+                    <th class="align-middle">P4</th>
+                    <th class="align-middle">P5</th>
+                </tr>
+            </thead>
+            <tbody id="marker_band_body">
+                <tr>
+                    <th class="ml-2" style="text-align:left !important; width:auto;">&nbsp;&nbsp;Frequency</th>
+                    <td class="align-middle" id="freq_0">-</td>
+                    <td class="align-middle" id="freq_1">-</td>
+                    <td class="align-middle" id="freq_2">-</td>
+                    <td class="align-middle" id="freq_3">-</td>
+                    <td class="align-middle" id="freq_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important; width:auto;">&nbsp;&nbsp;Power</th>
+                    <td class="align-middle" id="pow_0">-</td>
+                    <td class="align-middle" id="pow_1">-</td>
+                    <td class="align-middle" id="pow_2">-</td>
+                    <td class="align-middle" id="pow_3">-</td>
+                    <td class="align-middle" id="pow_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important; width:auto;">&nbsp;&nbsp;Label</th>
+                    <td class="align-middle" id="label_0">-</td>
+                    <td class="align-middle" id="label_1">-</td>
+                    <td class="align-middle" id="label_2">-</td>
+                    <td class="align-middle" id="label_3">-</td>
+                    <td class="align-middle" id="label_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important;width:auto;">&nbsp;&nbsp;bandwidth_3dBm</th>
+                    <td class="align-middle" id="bandwidth_3dBm_0">-</td>
+                    <td class="align-middle" id="bandwidth_3dBm_1">-</td>
+                    <td class="align-middle" id="bandwidth_3dBm_2">-</td>
+                    <td class="align-middle" id="bandwidth_3dBm_3">-</td>
+                    <td class="align-middle" id="bandwidth_3dBm_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important; width:auto;">&nbsp;&nbsp;occupied_bandwidth</th>
+                    <td class="align-middle" id="occupied_bandwidth_0">-</td>
+                    <td class="align-middle" id="occupied_bandwidth_1">-</td>
+                    <td class="align-middle" id="occupied_bandwidth_2">-</td>
+                    <td class="align-middle" id="occupied_bandwidth_3">-</td>
+                    <td class="align-middle" id="occupied_bandwidth_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important;width:auto;">&nbsp;&nbsp;SNR</th>
+                    <td class="align-middle" id="SNR_0">-</td>
+                    <td class="align-middle" id="SNR_1">-</td>
+                    <td class="align-middle" id="SNR_2">-</td>
+                    <td class="align-middle" id="SNR_3">-</td>
+                    <td class="align-middle" id="SNR_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important; width:auto;">&nbsp;&nbsp;SINAD</th>
+                    <td class="align-middle" id="SINAD_0">-</td>
+                    <td class="align-middle" id="SINAD_1">-</td>
+                    <td class="align-middle" id="SINAD_2">-</td>
+                    <td class="align-middle" id="SINAD_3">-</td>
+                    <td class="align-middle" id="SINAD_4">-</td>
+                </tr>
+                <tr>
+                    <th class="ml-2" style="text-align:left !important;width:auto;">&nbsp;&nbsp;THD</th>
+                    <td class="align-middle" id="THD_0">-</td>
+                    <td class="align-middle" id="THD_1">-</td>
+                    <td class="align-middle" id="THD_2">-</td>
+                    <td class="align-middle" id="THD_3">-</td>
+                    <td class="align-middle" id="THD_4">-</td>
+                </tr>
+            </tbody>
+
+        </table>
+    </div>
+
+    </div>
+    <div class="full-screen-div ml-1">
+        <div class="">
+            <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
+                style="color: #ffffff; cursor: pointer;" onclick="full_screen()"><i style='font-size:15px'
+                    data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                    class='fas fa-expand-arrows-alt'></i></label>
+        </div>
+    </div>
+
+
+    <div id="custom-legend">
+        <div id="outer_trace">
+            <label for="" id="traces_label">Traces</label>
+
+            <i class="fa fa-caret-down" id="trace_dwn" style="display: block;" onclick="collapse_trace('dwn')"></i>
+            <i class="fa fa-caret-up" id="trace_up" style="display:none ;" onclick="collapse_trace('up')"></i>
+
+            <div id="tracemenu" style="display:none ;">
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="main_curve"  onclick="show_main_curve()">
+                    <label for="main_curve" class="main_curve" style="color: green;" id="main_curve_label">Main-Curve</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="avg_hold" checked onclick="show_traces_avg()">
+                    <label for="avg_hold" class="avg_hold" id="avg_hold_label" >Avg-hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="max_hold" onclick="show_traces_max()">
+                    <label for="max_hold" class="max_hold" style="color: #8300c4;">Max-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="min_hold" onclick="show_traces_min()">
+                    <label for="min_hold" class="min_hold" style="color: #37a6de">Min-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="persistence_data_btn" checked
+                        onclick="show_traces_persis()">
+                    <label for="persistence_data_btn" class="peak_data_btn" style="color: red;">Persistence</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="peak_data_btn" checked
+                        onclick="show_peak_data()">
+                    <label for="peak_data_btn" class="peak_data_btn" style="color: #66cc35;">Peaks</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="mark_data_btn" checked
+                        onclick="show_mark_data()">
+                    <label for="mark_data_btn" id="marker_color_label" class="mark_data_btn"
+                        style="color:#d7d6db">Markers</label>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom_legend_camera">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot"
+            id="screenshot_img"><i class="fa fa-camera" aria-hidden="true"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv"
+            id="csv_export"><i class="fa fa-solid fa-file-csv"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
+            title="ChartView" onclick="window.parent.full_screen_chart()"><i id="full_screen_icon"
+                class="fa fa-solid fa-expand"></i>
+        </button>
+    </div>
+
+
+
+
+
+
+
+
+
+    <!-- --------------------------------- Script ------------------------------ -->
+
+    <script type="text/javascript">
+        var active_port = "{{active_port}}";
+        var peak_port = "{{peak_port}}"
+        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
+        var page_mode = data['mode']
+        var page_theme = "{{theme_mode}}"
+        var active_mode = data['mode']
+
+        var button_click_main = false
+        var button_click_max = false
+        var button_click_min = false
+        var button_click_avg = false
+        var auto_Y_axis_flag = false
+        var auto_threshold_flag = false
+        var peak_data_flag = false
+        var button_click_persistence = false
+
+        var mark_data_flag = true
+        var clicks = 0;
+        var addMarkerData = new Array();
+
+        // Length of single data sample.
+        var sample_length = data['fft_points']
+
+        let dataSampleSize = sample_length
+        // Sampling rate as samples per second (only required for example purposes).
+        const sampleRateHz = 500
+        // Minimum time step that can be displayed by the heatmap. In this example, set to half of average interval between samples. In normal applications you can set this to some comfortably small value.
+        // Smaller value means more precision but more RAM and GPU memory usage.
+        const heatmapMinTimeStepMs = 0.5
+        // Time axis view at start
+        const viewMs = 50
+
+        var spectrum_x_axis_start;
+        var spectrum_x_axis_stop;
+        // var Max_cycles;
+        var chart, dataGrid;
+        var marker_color, theme_color, threshold_color;
+
+        var start_point_Y = -140
+        var stop_point_Y = -20
+        var full_screen_flag = false
+        var dataVal;
+        let Max_cycles = 5;
+        var avg_max_cycle = 15;
+
+        let cycleData = [];
+
+        var chartMarker = [];
+        var counter = 0
+
+        var local_store, pos_x = [5], new_pos = [5]
+        let rightMbPress
+        const dataValpeak = { 'data': [{ 'x': 123, 'y': -43, 'label': 'DMR', 'bandwidth_3dBm': '23', 'occupied_bandwidth': '45', 'SNR': 'SNR1', 'SINAD': 'SINAD1', 'THD': 'THD1' }, { 'x': 123, 'y': -43, 'label': 'DMR', 'bandwidth_3dBm': '23', 'occupied_bandwidth': '45', 'SNR': 'SNR2', 'SINAD': 'SINAD2', 'THD': 'THD2' }, { 'x': 123, 'y': -43, 'label': 'DMR', 'bandwidth_3dBm': '23', 'occupied_bandwidth': '45', 'SNR': 'SNR3', 'SINAD': 'SINAD3', 'THD': 'THD3' }, { 'x': 123, 'y': -43, 'label': 'DMR', 'bandwidth_3dBm': '23', 'occupied_bandwidth': '45', 'SNR': 'SNR4', 'SINAD': 'SINAD4', 'THD': 'THD4' }, { 'x': 123, 'y': -43, 'label': 'DMR', 'bandwidth_3dBm': '23', 'occupied_bandwidth': '45', 'SNR': 'SNR5', 'SINAD': 'SINAD5', 'THD': 'THD5' }] }
+        var insert_table = '';
+
+        function collapse_trace(event) {
+            if (event == "dwn") {
+                document.getElementById("trace_dwn").style.display = "none"
+                document.getElementById("trace_up").style.display = "block"
+                document.getElementById("custom-legend").style.height = "205px"
+                document.getElementById("tracemenu").style.display = "block"
+                document.getElementById("outer_trace").style.paddingBottom = "0px"
+            } else {
+                document.getElementById("trace_dwn").style.display = "block"
+                document.getElementById("trace_up").style.display = "none"
+                document.getElementById("custom-legend").style.height = "40px"
+                document.getElementById("tracemenu").style.display = "none"
+                document.getElementById("outer_trace").style.paddingBottom = "5px"
+
+                // height: 195px;
+            }
+        }
+
+
+        var active_channel = "{{active_channel}}";
+        var active_mode = "{{active_mode}}";
+
+        // =================== lc js import ====================
+        const { lightningChart, PalettedFill,
+            LUT, ColorHSV,
+            DashedLine,
+            emptyLine,
+            AxisScrollStrategies,
+            AxisTickStrategies,
+            LegendBoxBuilders, UIElementBuilders, PointShape, UIOrigins, AutoCursorModes, UIVisibilityModes, UIDraggingModes, SolidLine, SolidFill, ColorHEX,
+            regularColorSteps, synchronizeAxisIntervals, Axis, onMouseDoubleClick, ColorRGBA, setLabel, removeMarker,
+            Themes, axis } = lcjs;
+
+
+         
+
+
+
+        // =================================================== Spectrum ===================================================
+        if (page_theme == 'dark') {
+
+            // const dashboard = lcc.Dashboard({
+            //     numberOfColumns: 1,
+            //     numberOfRows: 2,
+            //     // theme: Themes.darkGold,
+            // })
+
+            chart = lcc.ChartXY({
+                container: 'chartContainer',
+                columnIndex: 0,
+                rowIndex: 0,
+                // colSpan: 2,
+                // rowSpan: 2
+            });
+
+            // dataGrid = dashboard.createDataGrid({ columnIndex: 0, rowIndex: 1,width:100 })
+            //     .setColumnContent(0, ['Sr No', 'Frequency', 'Power(dBm)', 'Band', '3dBm Bandwidth(KHz)', 'Occupied Bandwidth(KHz)', 'SNR', 'SINAD', 'THD'])
+            //     .setRowContent(0, [ 'Sr. No.','1', '2', '3'])
+            // dataGrid
+            // .setColumnWidth(1,  180 )
+            // .setColumnWidth(2,  180 )
+            // .setColumnWidth(3,  180 )
+            // .setColumnWidth(4,  180 )
+            // .setColumnWidth(5,  180 )
+            // .setColumnWidth(6,  180 )
+            // .setColumnWidth(7,  180 )
+            // .setColumnWidth(8,  180 )
+            // .setColumnWidth(9,  180 )
+
+        }
+        else {
+
+            // const dashboard = lcc.Dashboard({
+            //     numberOfColumns: 1,
+            //     numberOfRows: 1,
+            //     theme: Themes.light,
+            // })
+
+
+            chart = lcc.ChartXY({
+                container: 'chartContainer',
+                columnIndex: 0,
+                rowIndex: 0,
+                theme: Themes.light,
+                // colSpan: 2,
+                // rowSpan: 2
+            });
+
+
+            // dataGrid = dashboard.createDataGrid({ columnIndex: 0, rowIndex: 1 ,width:100 })
+            // .setColoumnContent(0, ['Sr No', 'Frequency', 'Power(dBm)', 'Band', '3dBm Bandwidth(KHz)', 'Occupied Bandwidth(KHz)', 'SNR', 'SINAD', 'THD'])
+
+            // dataGrid.setColumnWidth(0,  50 )
+            // .setColumnWidth(1,  100 )
+            // .setColumnWidth(2,  100 )
+            // .setColumnWidth(3,  50 )
+            // .setColumnWidth(4,  180 )
+            // .setColumnWidth(5,  180  )
+            // .setColumnWidth(6,  100 )
+            // .setColumnWidth(7,  80 )
+            // .setColumnWidth(8,  100 )
+            // .setColumnWidth(9,  50 )
+
+
+
+        }
+
+
+
+        // ====================================== dashboard ===========================================
+
+        // const dashboard = lightningChart().Dashboard({
+        //     numberOfColumns: 1,
+        //     numberOfRows: 1
+        // })
+        // const chart = lc.dashboard.ChartXY({
+        //     columnIndex: 0,
+        //     rowIndex: 0,
+        // })
+
+        // ====================================== screenshot img ===========================================
+
+        //  colour adding to series (spectrum)
+        const fillRed = new SolidFill({ color: ColorRGBA(255, 0, 0, 255) })
+        const fillYellow = new SolidFill({ color: ColorHEX('#FFFF00') })
+        const fillBlue = new SolidFill({ color: ColorHEX('#37a6de') })
+        const fillGreen = new SolidFill({ color: ColorHEX('#008000') })
+        const fillNavyBlue = new SolidFill({ color: ColorHEX('#00008B') })
+        const fillBlack = new SolidFill({ color: ColorHEX('#000000') })
+        const fillQSRGreen = new SolidFill({ color: ColorHEX('#66cc35') })
+        const fillPurple = new SolidFill({ color: ColorHEX('#8300c4') })
+
+
+
+
+        document.getElementById('screenshot_img').onclick = function () {
+            chart.saveToFile('Spectrum_screenshot')
+        }
+
+
+        function load_setting_data() {
+
+
+            json_data = {
+                "mode": "realtime",
+                "channel": active_channel
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/get_reflevel_amp',
+                data: JSON.stringify(json_data),
+                contentType: 'application/json',
+                success: function (data) {
+                    
+                    clear_spectrum_chart()
+                    
+                }
+            });
+
+
+        }
+
+
+        
+        // Add a line series to the chart
+
+        const maxSeries = chart.addLineSeries().setName('Min Hold').setStrokeStyle((stroke) => stroke.setThickness(1))
+        const persistenceSeries = chart.addPointLineAreaSeries({sizes:true}).setStrokeStyle((stroke) => stroke.setThickness(-1)).setPointSize(0).setPointFillStyle(new SolidFill({ color: ColorRGBA(255,0,0,100) })).setName('Persistence Hold')
+
+        const series = chart.addLineSeries().setStrokeStyle((stroke) => stroke.setThickness(-1));
+        const minSeries = chart.addLineSeries().setName('Min Hold').setStrokeStyle((stroke) => stroke.setThickness(-1));
+        const avgSeries = chart.addLineSeries().setName('Avg Hold').setStrokeStyle((stroke) => stroke.setThickness(1));
+
+        const seriespeak = chart.addPointSeries({ pointShape: PointShape.Circle })
+            .setPointSize(12).setAutoScrollingEnabled(false)
+
+        // const avgSeries = chart.addLineSeries();
+
+        // Function to generate data from arrays
+        function generateData(xArray, yArray) {
+            return xArray.map((x, i) => ({ x: x / 1e6, y: yArray[i] }));
+        }
+
+
+        function updateMin(xArray, yArray) {
+            minSeries.clear();
+            minSeries.add(generateData(xArray, yArray));
+
+        }
+
+
+        function updateMax(xArray, yArray) {
+            maxSeries.clear();
+            maxSeries.add(generateData(xArray, yArray));
+        }
+
+
+        function updateAvg(xArray, yArray) {
+            avgSeries.clear();
+            avgSeries.add(generateData(xArray, yArray));
+        }
+
+        function updatePersistence(xArray, yArray) {
+            persistenceSeries.clear();
+            persistenceSeries.add(generateData(xArray, yArray));
+        }
+
+
+        function updateSeriespeak(data) {
+            seriespeak.clear();
+            seriespeak.add(data);
+        }
+
+
+
+        // Customize the chart appearance
+        chart.setTitle(' ');
+        chart.getDefaultAxisX().setTitle('Frequency (MHz)').//setInterval({ start: 138.2, end: 147.8 });
+            chart.getDefaultAxisY().setTitle('Amplitude (dBm)');
+
+
+        // Function to update the series with new data
+        function updateSeries(xArray, yArray) {
+            series.clear();
+            series.add(generateData(xArray, yArray));
+
+        }
+
+        function set_min_max_amp(min, max) {
+            // chart.setInterval
+            chart.getDefaultAxisY().setInterval({ start: min, end: max }).setDefaultInterval({ start: min, end: max })
+            // waterfall_3d.getDefaultAxisY().setInterval({ start: min, end: max }).setDefaultInterval({ start: min, end: max })
+
+        }
+
+        persistenceSeries.setAreaFillStyle(new SolidFill({ color: ColorRGBA(255,0,0,50) }))
+
+        if (page_theme == 'light') {
+            series.setStrokeStyle((stroke) => stroke.setFillStyle(fillGreen))
+            avgSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillNavyBlue))
+
+            chart
+                .setBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundStrokeStyle(new SolidLine({ thickness: 2, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
+            chart.getDefaultAxisY().setTitle('Amplitude (dBm)').setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks
+                    // .setLabelFont(font => font.setSize(12))
+                    // .setTickStyle(ticks => ticks
+                    .setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+                    // )
+                )
+            )
+            chart.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks
+                    // .setLabelFont(font => font.setSize(12))
+                    // .setTickStyle(ticks => ticks
+                    .setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+                    // )
+                )
+            )//.setInterval({ start: 138.2, end: 147.8, stopAxisAfter: true })
+
+            marker_color = '#FF13F0'
+            theme_color = "#000000"
+            threshold_color = '#000000'
+
+            // document.getElementById('main_curve_label').style.color = '#0827F5'
+            document.getElementById('avg_hold_label').style.color = '#0827F5'
+            document.getElementById('trace_dwn').style.color = '#4B5320'
+            document.getElementById('trace_up').style.color = '#4B5320'
+            document.getElementById('traces_label').style.color = '#4B5320'
+            document.getElementById('custom-legend').style.background = '#ffffffcf'
+            document.getElementById('full_screen_label').style.color = '#4B5320'
+            document.getElementById('screenshot_img').style.color = '#4B5320'
+            document.getElementById('csv_export').style.color = '#4B5320'
+            document.getElementById('full_screen_btn').style.color = '#4B5320'
+        }
+        else {
+            series.setStrokeStyle((stroke) => stroke.setFillStyle(fillGreen))
+            avgSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillYellow))
+            marker_color = '#FF13F0'
+            theme_color = '#808080'
+            threshold_color = '#FFFFFF'
+
+
+            document.getElementById('avg_hold_label').style.color = '#FFFF00'
+            document.getElementById('trace_dwn').style.color = threshold_color
+            document.getElementById('trace_up').style.color = threshold_color
+            document.getElementById('traces_label').style.color = threshold_color
+            document.getElementById('full_screen_label').style.color = threshold_color
+
+        }
+
+        maxSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillPurple))
+        minSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillBlue))
+        persistenceSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillRed))
+        seriespeak.setPointFillStyle(fillQSRGreen)
+
+
+        document.getElementById("marker_color_label").style.color = marker_color
+
+
+        // =============================================== Add Band =================================================
+
+
+        // band adding finctions
+
+
+        //  ==================== y axis lock ===================================
+     
+        chart.getDefaultAxisY().setInterval({ start: start_point_Y, end: stop_point_Y, stopAxisAfter: true })
+        // chart.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setInterval({ start: 138.2, end: 147.8, stopAxisAfter: true })
+        chart.getDefaultAxisY().setDefaultInterval({ start: start_point_Y, end: stop_point_Y })
+
+
+
+        // ============================= Threshold for  Spectrum chart ========================================
+        const yAxis = chart.getDefaultAxisY()
+
+        const threshold = yAxis.addConstantLine()
+        threshold.setStrokeStyle(new SolidLine({
+            thickness: 1,
+            fillStyle: new SolidFill({ color: ColorHEX(threshold_color) })
+        }))
+
+        // cursor style
+        chart.setAutoCursor((cursor) => cursor
+            .setGridStrokeXStyle(new DashedLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX(theme_color) }) }))
+            .setGridStrokeYStyle(new DashedLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX(theme_color) }) }))
+            .setGridStrokeXCut(true).setGridStrokeYCut(true)
+        )
+
+        const threshold1 = yAxis
+        .addCustomTick(UIElementBuilders.PointableTextBox)
+        .setMouseInteractions(true)
+        // .setAllocatesAxisSpace(true)
+        .setTickLabelPadding(1)
+        .setTextFormatter(
+        (value) => "Threshold"
+        );
+        threshold1.setGridStrokeStyle(
+            new SolidLine({
+                thickness: 0,
+                fillStyle: new SolidFill({ color: ColorHEX(threshold_color) }),
+                // pattern: StipplePatterns.Dashed,
+                patternScale: 4,
+            }),
+        )
+
+        threshold.onMouseDrag((_,event) => {
+            const locationAxis = chart.translateCoordinate(event,chart.coordsAxis)
+            const displayTimeNew = locationAxis.y;
+            threshold1.setValue(threshold.getValue())
+            parent.document.getElementById('threshold').value = threshold.getValue().toFixed(0)
+        })
+        threshold1.getMarker().onMouseDrag((_,event) => {
+            const locationAxis = chart.translateCoordinate(event,chart.coordsAxis)
+            const displayTimeNew = locationAxis.y;
+            threshold1.setValue(parseInt(displayTimeNew))
+            threshold.setValue(parseInt(displayTimeNew))
+            parent.document.getElementById('threshold').value = threshold.getValue().toFixed(0)
+            
+        })
+
+
+
+        function set_threshold1(upd_threshold) {
+            // threshold.dispose()
+            threshold.setValue(upd_threshold)
+            threshold1.setValue(upd_threshold)
+            window.parent.document.getElementById('threshold').value = (upd_threshold)
+        }
+
+        ele = window.parent.document.getElementById('threshold')
+        parent.get_all_data(ele)
+
+
+        threshold.onMouseDragStop((_, event, Value) => {
+
+            window.parent.document.getElementById('threshold').value = parseInt(threshold.getValue())
+            parent.set_threshold(parseInt(threshold.getValue()))
+            window.parent.update_parameters({ 'threshold': parseInt(threshold.getValue()) })
+        })
+
+        threshold1.getMarker().onMouseDragStop((_, event, Value) => {
+
+            window.parent.document.getElementById('threshold').value = parseInt(threshold.getValue())
+            parent.set_threshold(parseInt(threshold.getValue()))
+            window.parent.update_parameters({ 'threshold': parseInt(threshold.getValue()) })
+        })  
+
+
+        if(page_mode == "sweep"){
+            document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+            window.parent.document.getElementById("table_div").style.display = "none"
+            window.parent.document.getElementById("iframe_div").className = "col-12"
+            window.parent.document.getElementById("table_col_div").style.display = "none"
+            window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+            full_screen_flag = true
+
+        }
+        function full_screen() {
+            var checkBox_full_screen = document.getElementById("full_screen");
+            if (full_screen_flag == false) {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+                //window.parent.document.getElementById("table_col").style.display = "none"
+                //window.parent.document.getElementById("iframe_col").className = "col-12"
+                //window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+              // console.log('in full screen function')
+                if(page_mode == 'sweep'){
+                    window.parent.document.getElementById("table_div").style.display = "none"
+                    //window.parent.document.getElementById("table_col_div").style.display = "none"
+                    window.parent.document.getElementById("iframe_div").className = "col-12"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+                    
+                }
+                else if (page_mode == 'realtime'){
+                    window.parent.document.getElementById("table_col").style.display = "none"
+                    //window.parent.document.getElementById("table_col_div").style.display = "none"
+                    window.parent.document.getElementById("iframe_col").className = "col-12"
+                    window.parent.document.getElementById("iframe_col").style.paddingRight = "25px"
+                }
+
+                full_screen_flag = true
+
+            }
+            else {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-expand-arrows-alt'></i>`
+                //window.parent.document.getElementById("table_col").style.display = "block"
+                //window.parent.document.getElementById("iframe_col").className = "col-8"
+                //window.parent.document.getElementById("iframe_div").style.paddingRight = "7px"
+                if(page_mode == 'sweep'){
+                    window.parent.document.getElementById("table_div").style.display = "block"
+                    window.parent.document.getElementById("table_col_div").style.display = "block"
+                    window.parent.document.getElementById("iframe_div").className = "col-8"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "5px"
+                }
+                else if (page_mode == 'realtime'){
+                    window.parent.document.getElementById("table_col").style.display = "block"
+                   // window.parent.document.getElementById("table_col_div").style.display = "block"
+                    window.parent.document.getElementById("iframe_col").className = "col-8"
+                    window.parent.document.getElementById("iframe_col").style.paddingRight = "15px"
+                }
+                full_screen_flag = false               
+            }
+        }
+
+        function min_hold_change() {
+
+            if(window.parent.document.getElementById("min_hold_value").value == 0 || window.parent.document.getElementById("min_hold_value").value == '' ){
+              window.parent.document.getElementById("min_hold_value").focus()
+              window.parent.document.getElementById("min_hold_value").value= 5
+            }else if(window.parent.document.getElementById("min_hold_value").value <= 300  && window.parent.document.getElementById("min_hold_value").value > 0 ){
+                Minlevel = window.parent.document.getElementById("min_hold_value").value
+                minCircular(Minlevel)
+              
+            }else{
+                window.parent.document.getElementById("min_hold_value").focus()
+                window.parent.document.getElementById("min_hold_value").value= 5
+              // caPersistence = new CircularArray(parseInt(Persistencelevel));
+              // Minlevel = window.parent.document.getElementById("min_hold_value").value
+            }
+        };
+
+        function avg_hold_change() {
+        
+            // console.log("HI hold change")
+            if(window.parent.document.getElementById("avg_input").value == 0 || window.parent.document.getElementById("avg_input").value == '' ){
+                // console.log("HI hold change IF")
+              window.parent.document.getElementById("avg_input").focus()
+              window.parent.document.getElementById("avg_input").value= 5
+            }else if(window.parent.document.getElementById("avg_input").value <= 300  && window.parent.document.getElementById("avg_input").value > 0 ){
+                // console.log("HI hold change ELSE IF")
+                  AverageLevel = window.parent.document.getElementById('avg_input').value;
+              caAverage = new CircularArray(parseInt(AverageLevel));
+              
+            }else{
+                console.log("HI hold change ELse")
+                window.parent.document.getElementById("avg_input").focus()
+                window.parent.document.getElementById("avg_input").value= 5
+              // caPersistence = new CircularArray(parseInt(Persistencelevel));
+              // Minlevel = window.parent.document.getElementById("min_hold_value").value
+            }
+          }
+
+        
+        function Persistence_hold_change() {
+            if(window.parent.document.getElementById("Persistence_hold_value").value == '0' || window.parent.document.getElementById("Persistence_hold_value").value == '' ){
+              window.parent.document.getElementById("Persistence_hold_value").focus()
+              window.parent.document.getElementById("Persistence_hold_value").value= 5
+            }else if(window.parent.document.getElementById("Persistence_hold_value").value <= 300  && window.parent.document.getElementById("Persistence_hold_value").value > 0 ){
+                Persistencelevel = window.parent.document.getElementById("Persistence_hold_value").value
+                PersistenceCircular(Persistencelevel)
+              
+            }else{
+                window.parent.document.getElementById("Persistence_hold_value").focus()
+                window.parent.document.getElementById("Persistence_hold_value").value= 5
+              // caPersistence = new CircularArray(parseInt(Persistencelevel));
+              // Minlevel = window.parent.document.getElementById("min_hold_value").value
+            }
+          };
+
+
+
+
+
+        // ==================================== Ledgend =============================================================
+
+        // const legend = chart
+        //     .addLegendBox()
+        //     .setTitle('Traces')
+        //     .add(chart)
+        //     .setPosition({ x: 98.3, y: 89 })
+
+
+
+        // legend.onDispose(() => {
+        // })
+
+        auto_axis_btn = window.parent.document.getElementById('auto_y_axis')
+        if (auto_axis_btn.checked) {
+            auto_Y_axis_flag = true
+        }
+
+        auto_threshold_btn = window.parent.document.getElementById('auto_threshold')
+        // auto_peak_btn =  window.parent.document.getElementById('auto_peak')
+        if (auto_threshold_btn.checked) {
+            auto_threshold_flag = true
+        }
+
+        peak_btn_parent = window.parent.document.getElementById('hide_peak')
+        if (peak_btn_parent.checked) {
+            peak_data_flag = true
+        }
+
+        
+        dataSampleSize = parseInt(sample_length);
+        // let minValues;
+        // let maxValues;
+        // let avgValues;
+
+        var minValues = new Array(dataSampleSize).fill(Infinity)
+        var maxValues = new Array(dataSampleSize).fill(-Infinity)
+        var avgValues = new Array(dataSampleSize).fill(Infinity)
+        function getAverage(array) {
+            let sum = 0;
+            for (let i = 0; i < array.length; i++) {
+                sum += array[i];
+            }
+            return sum / array.length;
+        }
+
+        //----------------------- data source -------------------------
+
+
+        function open_loader() {
+            // $('#websocket_loader').modal({backdrop : 'static'})
+            $('#websocket_loader').modal('show')
+        }
+
+
+        function close_loader() {
+            $('#websocket_loader').modal('hide')
+        }
+
+
+        // $(document).ready(function () {
+        //     open_loader()
+        //     setTimeout(function () {
+        //         window.parent.iq_data()
+        //     }, 500)
+        // });
+
+
+        // =================================  Series Hold Starts  ===========================================
+       
+        var Persistence_cycles = window.parent.document.getElementById('Persistence_hold_value').value;
+        var avg_max_cycle = window.parent.document.getElementById('avg_input').value;
+        var AverageLevel = window.parent.document.getElementById('avg_input').value;
+
+
+        window.parent.document.getElementById("Persistence_hold_value").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                Persistence_hold_change()
+            }
+        });
+        
+        window.parent.document.getElementById("avg_input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                avg_hold_change()
+            }
+        });
+        
+        window.parent.document.getElementById("min_hold_value").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                min_hold_change()
+            }
+        });
+
+          
+
+
+
+
+
+        //   window.parent.document.getElementById("min_hold_value").oninput = avg_hold_change()
+
+          
+
+        // document.getElementById('set_avg_cycle').onclick= function(){
+          
+        // }
+
+        function CircularArray(PersistenceLength) {
+            this.PersistenceLength = PersistenceLength;
+            // console.log("Persistence length:::::::",this.PersistenceLength)
+          }
+
+          CircularArray.prototype = Object.create(Array.prototype);
+
+          CircularArray.prototype.push = function(element) {
+            Array.prototype.push.call(this, element);
+            while (this.length > this.PersistenceLength) {
+              // console.log("Persistence length:::::::",this.PersistenceLength)
+                this.shift();
+              }
+          }
+
+
+
+          function getCol(matrix, col){
+                var column = [];
+                for(var i=0; i<matrix.length; i++){
+                    column.push(matrix[i][col]);
+                }
+                return column; // return column data..
+          }
+          
+         
+          function PersistenceCircular(number){
+              caPersistence = new CircularArray(number)
+          }
+          function get_Persistence_hold(){
+            
+              var store = [];
+                  
+                  for(var j=0;j<caPersistence[0].length;j++){
+                      var index = getCol(caPersistence, j);
+                      store.push(Math.max(...index));       
+              }
+              return store;
+          }
+          
+
+          function minCircular(number){
+              caMin = new CircularArray(number)
+          }
+
+
+          function get_min_hold(){
+              var store = [];
+                  
+                  for(var j=0;j<caMin[0].length;j++){
+                      var index = getCol(caMin, j);
+                      store.push(Math.min(...index));       
+              }
+              return store;
+          }
+
+          var caAverage = new CircularArray(parseInt(AverageLevel));
+
+
+        //   window.parent.document.getElementById('avg_input').oninput = function() {
+        //     if(window.parent.document.getElementById('avg_input').value>0){
+        //       AverageLevel = window.parent.document.getElementById('avg_input').value;
+        //       caAverage = new CircularArray(parseInt(AverageLevel));
+        //     //   console.log('AverageLevel',AverageLevel)
+        //       // ws.send(JSON.stringify({ status: "setting", average_counter:parseInt(avg_max_cycle)}));
+        //     }
+        //     else{
+        //       window.parent.document.getElementById('avg_input').value = ''
+        //       document.getElementById('avg_input').focus()
+              
+        //     }
+        //   }
+
+          const average = (...args) => args.reduce((a, b) => a + b) / args.length;  
+
+
+
+        function AverageCircular(number){
+            caAverage = new CircularArray(number);
+        }
+
+
+        function get_Average_data(){
+            var store = [];
+                
+                for(var j=0;j<caAverage[0].length;j++){
+                    var index = getCol(caAverage, j);
+                    store.push(average(...index));       
+            }
+            return store;
+        }
+       
+        var caMaincurve = new CircularArray(parseInt(5));
+        function get_maincurve_data(){
+            var store = [];
+                
+                for(var j=0;j<caMaincurve[0].length;j++){
+                    var index = getCol(caMaincurve, j);
+                    store.push(average(...index));       
+            }
+            return store;
+        }
+       
+        function set_y_axis(){
+
+            start_y = parseInt(window.parent.document.getElementById('minY').value)
+            stop_y = parseInt(window.parent.document.getElementById('maxY').value)
+            set_min_max_amp(start_y, stop_y)
+    
+        }
+               
+        // =================================   Series Hold End  ===========================================
+       
+  
+
+
+
+
+
+        // =================================   WEBSOCKET RECV DATA  ===========================================
+        var  cnt = 0;
+        var Persistencelevel =  window.parent.document.getElementById("Persistence_hold_value").value
+        var Minlevel =  window.parent.document.getElementById("min_hold_value").value
+        var caMin = new CircularArray(parseInt(Minlevel));
+        var caPersistence = new CircularArray(parseInt(Persistencelevel));
+        function websocket_data(evt) {
+            dataVal = evt;
+            // caMaincurve.push(dataVal.y)    
+            if (dataVal.hasOwnProperty('message') === true) {
+                if (dataVal['message'] == "connect") {
+                    // $(window.parent.document).find('#websocket_loader').modal({backdrop : 'static'})
+                    //  $(window.parent.document).find('#websocket_loader').modal('show')
+                }
+                if (dataVal['message'] == "connected") {
+                    // setTimeout(function(){
+                    //     $('#websocket_loader').modal('hide')
+                    // },1000)
+
+
+                }
+            } else {
+                cnt += 1
+            // console.log(cnt)
+            if (cnt == 3) {
+                traces_setting()
+                var dataSampleSize = dataVal.x.length;
+                minValues = new Array(dataSampleSize).fill(Infinity);
+                maxValues = new Array(dataSampleSize).fill(-Infinity);
+                avgValues = new Array(dataSampleSize).fill(0);
+            }
+
+                if (auto_threshold_flag == true) {
+
+                    av_int = getAverage(dataVal.y)
+                    set_threshold(Math.round(av_int + 20))
+                }
+
+
+
+                if (peak_data_flag == true) {
+                    updateSeriespeak(dataVal.auto_data);
+                }
+
+                else {
+                    seriespeak.clear()
+                }
+
+
+                if (button_click_main == true) {
+
+                    updateSeries(dataVal.x, dataVal.y);
+
+                }
+
+
+                //  =================== auto y axis =======================
+                if (auto_Y_axis_flag == true) {
+                    chart.getDefaultAxisY().setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) + 10 })
+                }
+
+                // else {
+                //     start_y = parseInt(window.parent.document.getElementById('minY').value)
+                //     stop_y = parseInt(window.parent.document.getElementById('maxY').value)
+                //     chart.getDefaultAxisY().setInterval({ start: start_y, end: stop_y }).setDefaultInterval({ start: start_y, end: stop_y })
+                // }
+
+                //  ================== New Traces              =======================
+
+            if (button_click_max == true ) {
+
+                cycleData.push(dataVal);
+                if (cycleData.length > Max_cycles) {
+                    cycleData.shift()
+
+                    for (const cycle of cycleData) {
+                        for (let i = 0; i < cycle.y.length; i++) {
+                            // minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                            maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                            // avgValues[i] += cycle.y[i] / Max_cycles;
+                        }
+                    }
+                    cycleData = [];
+                
+                // Old Series Plotting
+
+                    updateMax(dataVal.x, maxValues);
+                  }
+
+            // maxValues.fill(0);
+
+            }
+
+
+            if(button_click_min == true){
+                if(caMin){
+                    caMin.push(dataVal.y)
+                }
+                updateMin(dataVal.x, get_min_hold());
+            }
+
+            if(button_click_avg == true){   
+                caAverage.push(dataVal.y)
+                updateAvg(dataVal.x, get_Average_data());
+            }
+
+            if(button_click_persistence == true){
+                if(caPersistence){
+                    caPersistence.push(dataVal.y)
+                }
+                updatePersistence(dataVal.x, get_Persistence_hold());
+            }
+
+            if (button_click_max == false && button_click_min == false && button_click_avg == false) {
+                // minValues.fill(Infinity)
+                // maxValues.fill(-Infinity)
+
+            }
+
+                //  ================== for traces =========================
+                //  all truee 
+                // if (button_click_max == true && button_click_min == true && button_click_avg == true) {
+
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > Max_cycles) {
+                //         cycleData.shift()
+
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                //                 maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                //                 avgValues[i] += cycle.y[i] / Max_cycles;
+                //             }
+                //         }
+                //         cycleData = [];
+
+                //         updateMax(dataVal.x, maxValues);
+                //         updateMin(dataVal.x, minValues);
+                //         updateAvg(dataVal.x, avgValues);
+                //         avgValues.fill(0);
+                //     }
+                // }
+
+                // // if max true 
+                // if (button_click_max == true && button_click_min == false && button_click_avg == false) {
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > Max_cycles) {
+                //         cycleData.shift()
+
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                //             }
+                //         }
+                //         const allOnes = maxValues.every(value => value === 1);
+                //         const allZeros = maxValues.every(value => value === 0);
+                //         if (allOnes || allZeros) {
+
+                //             maxValues.fill(-Infinity)
+                //             maxSeries.clear()
+                //         } else {
+                //             updateMax(dataVal.x, maxValues);
+                //             cycleData = [];
+                //         }
+                //         // cycleData = [];
+                //         // updateMax(dataVal.x, maxValues);
+                //     }
+                // }
+                // //  if max and min true
+                // if (button_click_max == true && button_click_min == true && button_click_avg == false) {
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > Max_cycles) {
+                //         cycleData.shift()
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                //                 maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                //                 minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                //             }
+                //         }
+                //         cycleData = [];
+                //         updateMax(dataVal.x, maxValues);
+                //         updateMin(dataVal.x, minValues);
+                //     }
+                // }
+                // // if min and avg true
+                // if (button_click_max == false && button_click_min == true && button_click_avg == true) {
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > Max_cycles) {
+                //         cycleData.shift()
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                //                 avgValues[i] += cycle.y[i] / Max_cycles;
+                //             }
+                //         }
+                //         cycleData = [];
+                //         updateMin(dataVal.x, minValues);
+                //         updateAvg(dataVal.x, avgValues);
+                //         avgValues.fill(0);
+
+                //     }
+                // }
+                // // if min true
+                // if (button_click_max == false && button_click_min == true && button_click_avg == false) {
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > Max_cycles) {
+                //         cycleData.shift()
+
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                //                 // maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                //                 // avgValues[i] += cycle.y[i] / Max_cycles;
+                //             }
+                //         }
+                //         cycleData = [];
+                //         // avgValues.fill(0);
+
+                //         updateMin(dataVal.x, minValues);
+
+                //     }
+                // }
+                // // if avg true
+                // if (button_click_max == false && button_click_min == false && button_click_avg == true) {
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > avg_max_cycle) {
+                //         cycleData.shift()
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 avgValues[i] += cycle.y[i] / avg_max_cycle;
+                //             }
+                //         }
+                //         cycleData = [];
+                //         updateAvg(dataVal.x, avgValues);
+                //         avgValues.fill(0);
+
+
+                //     }
+                // }
+                // // if max and avg true
+                // if (button_click_max == true && button_click_min == false && button_click_avg == true) {
+                //     cycleData.push(dataVal);
+                //     if (cycleData.length > Max_cycles) {
+                //         cycleData.shift()
+                //         for (const cycle of cycleData) {
+                //             for (let i = 0; i < cycle.y.length; i++) {
+                //                 maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                //                 avgValues[i] += cycle.y[i] / Max_cycles;
+                //             }
+                //         }
+                //         cycleData = [];
+                //         updateAvg(dataVal.x, avgValues);
+                //         updateMax(dataVal.x, maxValues);
+                //         avgValues.fill(0);
+                //     }
+                // }
+
+                // else if (button_click_max == false && button_click_min == false && button_click_avg == false) {
+                //     minValues.fill(Infinity)
+                //     maxValues.fill(-Infinity)
+                //     avgValues.fill(0)
+                // }
+            }
+
+            for (var i = 0; i <= chartMarker.length; i++) {
+
+                if (mark_data_flag == true) {
+                    for (var i = 0; i <= chartMarker.length; i++) {
+                        if (chartMarker[i]) {
+
+                            update_marker(i)
+                        }
+                    }
+                }
+            }
+        }
+
+
+        function onWsClosed() {
+            setTimeout(iq_data, 500);
+        }
+
+
+        function onWsError() {
+            console.error("WebSocket error.");
+        }
+
+
+        function addMarkernew(x, y) {
+            i = counter
+
+            if(document.getElementById("mark_data_btn").checked == true)
+            {
+                if (i <= 4) {
+                var color = '#FFFFFF';
+
+                if (page_theme == 'light') {
+                    color = "#0000FF"
+                }
+
+                if(active_mode == "realtime"){
+                    $.ajax({
+                    type: 'GET',
+                    url: '/set_marker',
+                    contentType: 'application/json',
+                    success: function (res) {
+                        var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                        var marker_data=0
+                        for(var l=0; l< res.length; l++){
+                            var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                            if( (res.findIndex(p => p.frequency == x))==-1){
+                                if (chartMarker[i]) {
+                                    chartMarker[i].dispose()
+                                }
+                                if (window.parent.removed_marker.length > 0) {
+                                    for (var j = 0; j < window.parent.removed_marker.length; j++) {
+                                        i = parseInt(window.parent.removed_marker[j])
+                                        window.parent.removed_marker.splice(j, 1)
+                                        break;
+                                    }
+                                }
+                                else {
+                                    i = counter
+                                }
+                                // console.log('add new marker',(res.findIndex(p => p.frequency == x)))
+                                chartMarker[i] = chart.addChartMarkerXY()
+                                chartMarker[i].setPosition({ x: x, y: y })
+                                chartMarker[i].setMouseInteractions(true)
+                                chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M ${i + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+
+
+                                data = chartMarker[i].getPosition()
+                                var frequency
+                                var power
+                                var marker_name
+                                var data1 = {
+                                    frequency: data.x,
+                                    power: data.y,
+                                    'marker_index': i,
+                                    color: color
+                                }
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "/get_marker_new",
+                                    data: JSON.stringify(data1),
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        parent.marked_positions_table()
+                                        // set_marked_positions()
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.error("Error :", error);
+                                    },
+                                });
+                                counter = counter + 1
+                                break;
+                            }
+                            else{
+                                // console.log('dont add new marker',(res.findIndex(p => p.frequency == x)))
+                                var tr = window.parent.document.getElementById(`table_row_${index}`)
+                                highlight_fn(tr, 3);
+                                break;
+                            }
+                        }
+                    },
+                        error: function (xhr, status, error) {
+                            console.error("Error :", error);
+                        },
+                    });
+                 
+                }
+                else if(active_mode == "sweep"){
+                    $.ajax({
+                    type: 'GET',
+                    url: '/set_marker_sweep',
+                    contentType: 'application/json',
+                    success: function (res) {
+                        var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                        var marker_data=0
+                        for(var l=0; l< res.length; l++){
+                            var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                            if( (res.findIndex(p => p.frequency == x))==-1){
+                                if (chartMarker[i]) {
+                                    chartMarker[i].dispose()
+                                }
+                                if (window.parent.removed_marker.length > 0) {
+                                    for (var j = 0; j < window.parent.removed_marker.length; j++) {
+                                        i = parseInt(window.parent.removed_marker[j])
+                                        window.parent.removed_marker.splice(j, 1)
+                                        break;
+                                    }
+                                }
+                                else {
+                                    i = counter
+                                }
+                                // console.log('add new marker',(res.findIndex(p => p.frequency == x)))
+                                chartMarker[i] = chart.addChartMarkerXY()
+                                chartMarker[i].setPosition({ x: x, y: y })
+                                chartMarker[i].setMouseInteractions(true)
+                                chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M ${i + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+
+
+                                data = chartMarker[i].getPosition()
+                                var frequency
+                                var power
+                                var marker_name
+                                var data1 = {
+                                    frequency: data.x,
+                                    power: data.y,
+                                    'marker_index': i,
+                                    color: color
+                                }
+
+                                $.ajax({
+                                    type: 'POST',
+                                    url: "/get_marker_sweep",
+                                    data: JSON.stringify(data1),
+                                    dataType: 'json',
+                                    success: function (data) {
+                                        parent.marked_positions_table()
+                                        // set_marked_positions()
+                                    },
+                                    error: function (xhr, status, error) {
+                                        console.error("Error :", error);
+                                    },
+                                });
+                                counter = counter + 1
+                                break;
+                            }
+                            else{
+                                // console.log('dont add new marker',(res.findIndex(p => p.frequency == x)))
+                                var tr = window.parent.document.getElementById(`table_row_${index}`)
+                                highlight_fn(tr, 3);
+                                break;
+                            }
+                        }
+                    },
+                        error: function (xhr, status, error) {
+                            console.error("Error :", error);
+                        },
+                    });
+                 
+                }
+                   
+                
+
+
+                
+            }
+            else {
+                counter = 4
+                addMarkerAgain(x, y)
+            }
+        }
+
+
+        }
+
+
+        function highlight_fn(inputElement, times) {
+            for (let i = 0; i < times; i++) {
+                inputElement.style.background = 'red';
+                // inputElement.style.transform = 'scale(1.15)'
+                inputElement.classList.add('transition_cls');
+                setTimeout(() => {
+                inputElement.style.background = '';
+                inputElement.style.transform = 'scale(1)'
+
+                }, 200);
+                setTimeout(() => {
+                inputElement.style.background = 'red';
+                // inputElement.style.transform = 'scale(1.15)'
+                inputElement.classList.add('transition_cls');
+
+
+                }, 400);
+                setTimeout(() => {
+                inputElement.style.background = '';
+                inputElement.style.transform = 'scale(1)'
+
+
+                }, 600);
+                setTimeout(() => {
+                inputElement.style.background = 'red';
+                // inputElement.style.transform = 'scale(1.15)'
+                inputElement.classList.add('transition_cls');
+
+
+                }, 800);
+            }
+            setTimeout(() => {
+                inputElement.style.background = '';
+                inputElement.style.transform = 'scale(1)'
+
+
+            //    inputElement.value = '';
+            }, 1000);
+            inputElement.style.border = 'revert';
+        // inputElement.style.border = 'revert';
+      }
+
+        function addMarkerAgain(x, y) {
+
+            addMarkernew(x, y)
+        }
+
+
+
+        function set_marked_positions() {
+            if (page_mode == 'realtime') {
+                var Freq_number = parseFloat(parent.document.getElementById("Freq_number").value).toFixed(3);
+                var Freq_value = parent.document.getElementById("Freq_value").value
+                var sample_rate_value = parseFloat(parent.document.getElementById("sample_rate_value_text").value) * 1e6;
+                if (Freq_value == "GHz") {
+                  Freq_number = parseInt(Freq_number * 1e9);
+                }
+                else if (Freq_value == "MHz") {
+                  Freq_number = parseInt(Freq_number * 1e6);
+                }
+                else if (Freq_value == "KHz") {
+                  Freq_number = parseInt(Freq_number * 1e3);
+                }
+                else {
+                  Freq_number = parseInt(Freq_number)
+                }
+
+                var start_frequency = Freq_number - parseInt(sample_rate_value / 2);
+                var stop_frequency = Freq_number + parseInt(sample_rate_value / 2);
+                $.ajax({
+                    type: 'GET',
+                    url: '/set_marker',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var marker_data = 0
+                        if (marker_data < 5) {
+                            for (var i = 0; i < data.length; i++) {
+                                if (chartMarker[i]) {
+                                    chartMarker[i].dispose()
+                                }
+                                var j = 0
+                                local_store = data;
+                                if (data[i].frequency != null) {
+                                    counter = data.length - 1
+                                    if (mark_data_flag == true) {
+                                        chartMarker[i] = chart.addChartMarkerXY().setPosition({ x: data[i].frequency, y: data[i].power })
+                                        chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M${data[i].marker_index + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+                                        addMarkerData.push({ x: data[i].frequency, y: data[i].power });
+                                        pos_x[i] = data[i].frequency
+                                        if( data[i].frequency  < start_frequency/1e6 || data[i].frequency  > stop_frequency/1e6){
+                                                parent.remove_marker(`M_${i}`)
+                                                // console.log("Remove marker",i)
+                                            }
+                                    }
+                                    else {
+
+                                        hide_markers(data)
+
+                                    }
+
+                                }
+                                else {
+                                    if (!window.parent.removed_marker.includes(i)) {
+                                        window.parent.removed_marker.push(i)
+                                    }
+
+                                }
+
+
+                                marker_data = marker_data + 1
+                            }
+                        }
+                    }
+                })
+            }
+            else if (page_mode == 'sweep') {
+                $.ajax({
+                    type: 'GET',
+                    url: '/set_marker_sweep',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var marker_data = 0
+                        var start_freq = parseFloat((parent.document.getElementById('Start_number').value));
+                        var stop_freq = parseFloat((parent.document.getElementById('Stop_number').value))
+                        if (marker_data < 5) {
+                            for (var i = 0; i < data.length; i++) {
+                                if (chartMarker[i]) {
+                                    chartMarker[i].dispose()
+                                }
+                                var j = 0
+                                local_store = data;
+                                
+                                if (data[i].frequency != null ) {
+                                    console.log(parseFloat((parent.document.getElementById('Start_number').value)).toFixed(3) , data[i].frequency.toFixed(3) , parseFloat((parent.document.getElementById('Stop_number').value)).toFixed(3))
+                                    if( start_freq > data[i].frequency.toFixed(3) || data[i].frequency.toFixed(3) > stop_freq){
+                                        window.parent.removed_marker.push(i)
+                                        // window.parent.remove_marker(`M_${i}`)
+                                        // console.log('removed',data[i].frequency.toFixed(3))
+                                    }
+                                    else{
+                                        // console.log('added',data[i].frequency.toFixed(3))
+
+                                            counter = data.length - 1
+                                        if (mark_data_flag == true) {
+                                            chartMarker[i] = chart.addChartMarkerXY().setPosition({ x: data[i].frequency, y: data[i].power })
+                                            chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M${data[i].marker_index + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+                                            addMarkerData.push({ x: data[i].frequency, y: data[i].power });
+                                            pos_x[i] = data[i].frequency
+                                        }
+                                        else {
+    
+                                            hide_markers(data)
+    
+                                        }
+                                    }
+
+                                }
+                                else {
+                                    if (!window.parent.removed_marker.includes(i)) {
+                                        window.parent.removed_marker.push(i)
+                                    }
+
+                                }
+
+                                if(i == data.length-1){
+                                    remove_marker_using_list(window.parent.removed_marker)
+                                }
+                                marker_data = marker_data + 1
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+        
+        function remove_marker_using_list(marker_list) {
+            var data = {
+            'index_list': marker_list
+            }
+            $.ajax({
+            type: 'POST',
+            url: '/remove_marker_using_list_sweep',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (data) {
+                parent.marked_positions_table()
+            }
+            });
+        }
+
+        function hide_markers(data) {
+            for (var i = 0; i < data.length; i++) {
+                if(chartMarker[i]){
+                    if (chartMarker[i].getVisible()) {
+                        chartMarker[i].setVisible(false);
+                    }
+                }
+            }
+        }
+
+
+        series.onMouseDown((_, e) => {
+            if (event.button !== 2) return
+            rightMbPress = performance.now()
+        });
+        series.onMouseUp((_, e) => {
+            if (!rightMbPress || performance.now() - rightMbPress > 500) return
+            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
+            var x = locationAxis.x
+            var y = locationAxis.y
+            addMarkernew(x, y)
+        })
+
+        // =============================================== update Markar =================================================
+
+
+
+
+        function update_marker(i) {
+
+            if (chartMarker[i]) {
+                var pos = chartMarker[i].getPosition()
+                pos_in_hz = pos.x * 1e6
+                if (dataVal.x) {
+                    var index = findClosest(dataVal.x, pos_in_hz)
+                    chartMarker[i].setPosition({ x: pos.x, y: dataVal.y[index.index] })
+                    window.parent.update_power(i, dataVal.y[index.index])
+                }
+
+            }
+
+            if (pos_x[i]) {
+                chartMarker[i].getPointMarker().onMouseDragStop(() => {
+                    if (chartMarker[i]) {
+                        // new_pos[i] = new_pos_q
+                        new_pos[i] = chartMarker[i].getPosition().x
+                        if (pos_x[i] != new_pos[i]) {
+                            pos_x[i] = new_pos[i];
+                            data = chartMarker[i].getPosition()
+                            var frequency
+                            var power
+                            var marker_name
+                            var data1 = {
+                                frequency: data.x,
+                                power: data.y,
+                                'marker_index': i,
+                                'color': '#FFFFFF'
+                            }
+
+                            $.ajax({
+                                type: 'POST',
+                                url: "/get_marker_new",
+                                contentType: 'application/json',
+                                data: JSON.stringify(data1),
+                                dataType: 'json',
+                                success: function (data) {
+                                    parent.update_freq(i, chartMarker[i].getPosition().x)
+                                    // set_marked_positions()
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Error :", error);
+                                },
+                            });
+
+
+                        }
+                    }
+
+                });
+
+                chartMarker[i].getTickMarkerX().onMouseDragStop(() => {
+                    if (chartMarker[i]) {
+                        // new_pos[i] = new_pos_q
+                        new_pos[i] = chartMarker[i].getPosition().x
+                        if (pos_x[i] != new_pos[i]) {
+                            pos_x[i] = new_pos[i];
+                            data = chartMarker[i].getPosition()
+                            var frequency
+                            var power
+                            var marker_name
+                            var data1 = {
+                                frequency: data.x,
+                                power: data.y,
+                                'marker_index': i,
+                                'color': '#FFFFFF'
+                            }
+
+                            $.ajax({
+                                type: 'POST',
+                                url: "/get_marker_new",
+                                contentType: 'application/json',
+                                data: JSON.stringify(data1),
+                                dataType: 'json',
+                                success: function (data) {
+                                    parent.update_freq(i, chartMarker[i].getPosition().x)
+                                    // set_marked_positions()
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Error :", error);
+                                },
+                            });
+
+
+
+                        }
+                    }
+
+                });
+
+
+            }
+        }
+
+
+        function findClosest(arr, target) {
+            let n = arr.length;
+            let i = 0, j = n - 1, mid = 0;
+
+            // Corner cases
+            if (target <= arr[0]) {
+                return { "val": arr[0], "index": 0 };
+            }
+            if (target >= arr[n - 1]) {
+                return { "val": arr[n - 1], "index": n - 1 };
+            }
+
+            // Binary search
+            while (i <= j) {
+                mid = Math.floor((i + j) / 2);
+
+                // If target is found, return it immediately
+                if (arr[mid] === target) {
+                    return { "val": arr[mid], "index": mid };
+                }
+
+                // If target is less than arr[mid], search in the left half
+                if (target < arr[mid]) {
+                    j = mid - 1;
+                }
+                // If target is greater than arr[mid], search in the right half
+                else {
+                    i = mid + 1;
+                }
+            }
+
+            // After binary search, i is the first element greater than the target
+            // and j is the last element less than the target.
+            // We compare the closest two values arr[j] and arr[i]
+            if (i < n && arr[i] === target) {
+                return { "val": arr[i], "index": i };
+            }
+            if (j >= 0 && arr[j] === target) {
+                return { "val": arr[j], "index": j };
+            }
+
+            // Now determine the closest value
+            let left = arr[j] !== undefined ? arr[j] : Infinity;
+            let right = arr[i] !== undefined ? arr[i] : Infinity;
+
+            if (Math.abs(target - left) <= Math.abs(target - right)) {
+                return { "val": left, "index": j };
+            } else {
+                return { "val": right, "index": i };
+            }
+        }
+
+
+
+        function show_traces_max() {
+
+            var checkBox_max = document.getElementById("max_hold");
+            if (checkBox_max.checked == true) {
+                button_click_max = true
+                update_traces_settings()
+
+            } else {
+                button_click_max = false
+                maxValues.fill(-Infinity)
+                maxSeries.clear()
+                update_traces_settings()
+            }
+        }
+
+
+        function show_traces_min() {
+
+            var checkBox_min = document.getElementById("min_hold");
+            if (checkBox_min.checked == true) {
+                button_click_min = true
+                update_traces_settings()
+
+            }
+            else {
+                button_click_min = false
+                minValues.fill(Infinity)
+                minSeries.clear()
+                update_traces_settings()
+            }
+        }
+
+
+        function show_traces_avg() {
+
+            var checkBox_avg = document.getElementById("avg_hold");
+            if (checkBox_avg.checked == true) {
+                button_click_avg = true
+                update_traces_settings()
+
+            }
+            else {
+
+                button_click_avg = false
+                avgValues.fill(0)
+                avgSeries.clear()
+                update_traces_settings()
+
+            }
+
+        }
+
+
+        function show_traces() {
+            checkBox_Showtraces = document.getElementById('show_traces')
+            if (checkBox_Showtraces.checked == true) {
+                button_click_showtraces = true
+            }
+            else {
+                button_click_showtraces = false
+                maxValues.fill(-Infinity)
+                maxSeries.clear()
+                minValues.fill(Infinity)
+                minSeries.clear()
+                avgValues.fill(0)
+                avgSeries.clear()
+            }
+        }
+
+
+        function show_peak_data() {
+            var checkBox_peak = document.getElementById("peak_data_btn");
+            if (checkBox_peak.checked == false) {
+                peak_data_flag = false
+                update_traces_settings()
+            }
+            else {
+                peak_data_flag = true
+                seriespeak.clear()
+                update_traces_settings()
+            }
+
+        }
+
+
+        function show_mark_data() {
+            var checkBox_mark = document.getElementById("mark_data_btn");
+            if (checkBox_mark.checked) {
+                mark_data_flag = true
+                set_marked_positions()
+                update_traces_settings()
+
+            }
+            else {
+                mark_data_flag = false
+                set_marked_positions()
+                update_traces_settings()
+            }
+        }
+
+
+        function show_main_curve() {
+            var checkBox_main = document.getElementById("main_curve");
+            if (checkBox_main.checked == true) {
+                button_click_main = true
+                update_traces_settings()
+
+            }
+            else {
+                button_click_main = false
+                series.clear()
+                update_traces_settings()
+            }
+        }
+
+
+        function show_traces_persis() {
+            var checkBox_persis = document.getElementById("persistence_data_btn");
+            if (checkBox_persis.checked == true) {
+                button_click_persistence = true
+                update_traces_settings()
+
+            } else {
+                persistenceSeries.clear()
+                button_click_persistence = false
+                update_traces_settings()
+            }
+        }
+
+        function update_traces_settings() {
+            traces_json = { active_channel : active_channel,active_mode : active_mode,"button_click_max": button_click_max, "button_click_min": button_click_min, "button_click_avg": button_click_avg, "button_click_main": button_click_main,"enable_marker" : mark_data_flag ,"enable_peak" : peak_data_flag,"persistence_trace":button_click_persistence,"enable_band":true }
+            $.ajax({
+                type: 'POST',
+                url: '/update_show_traces_settings',
+                data: JSON.stringify(traces_json),
+                contentType: 'application/json',
+                success: function (data) {
+                    traces_setting()
+                }
+            })
+        }
+
+
+        function traces_setting() {
+
+            $.ajax({
+                type: 'POST',
+                url: '/get_show_traces_settings',
+                data: JSON.stringify({ active_channel : active_channel,active_mode : active_mode }),
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data)
+                    button_click_max = data['button_click_max']
+                    button_click_min = data['button_click_min']
+                    button_click_avg = data['button_click_avg']
+                    button_click_main = data['button_click_main']
+                    mark_data_flag = data['enable_marker']
+                    peak_data_flag = data["enable_peak"]
+                    button_click_persistence = data['persistence_trace']
+
+                    if (button_click_max == true) {
+                        document.getElementById("max_hold").checked = true
+                    }
+                    else {
+
+                        document.getElementById("max_hold").checked = false
+                    }
+
+                    if (button_click_min == true) {
+                        document.getElementById("min_hold").checked = true
+                    }
+                    else {
+
+                        document.getElementById("min_hold").checked = false
+                    }
+
+                    if (button_click_avg == true) {
+                        document.getElementById("avg_hold").checked = true
+                    }
+                    else {
+
+                        document.getElementById("avg_hold").checked = false
+                    }
+
+                    if (button_click_main == true) {
+                        document.getElementById("main_curve").checked = true
+                    }
+                    else {
+
+                        document.getElementById("main_curve").checked = false
+                    }
+                    if (mark_data_flag == true) {
+                        document.getElementById("mark_data_btn").checked = true
+                        set_marked_positions()
+                    }
+                    else {
+
+                        document.getElementById("mark_data_btn").checked = false
+                    }
+                    if (peak_data_flag == true) {
+                        document.getElementById("peak_data_btn").checked = true
+                
+                    }
+                    else {
+
+                        document.getElementById("peak_data_btn").checked = false
+                    }
+
+                     if (button_click_persistence == true) {
+                        document.getElementById("persistence_data_btn").checked = true
+                        
+                    }
+                    else {
+
+                        document.getElementById("persistence_data_btn").checked = false
+                    }
+                }
+            });
+        }   
+
+
+        // function show_all_traces() {
+        //     checkBox_Showtraces = document.getElementById('show_all_traces')
+        //     if (checkBox_Showtraces.checked == true) {
+        //         button_click_showtraces = true
+        //     }
+        //     else {
+        //         button_click_showtraces = false
+        //         // maxValues.fill(-Infinity)
+        //         maxSeries.clear()
+        //         // minValues.fill(Infinity)
+        //         minSeries.clear()
+        //         // avgValues.fill(0)
+        //         avgSeries.clear()
+        //     }
+        // }
+
+        // iq_data();
+
+       
+        for (let i = 0; i < dataValpeak.data.length; i++) {
+
+
+            document.getElementById(`freq_${i}`).innerText = dataValpeak.data[i].x
+            document.getElementById(`pow_${i}`).innerText = dataValpeak.data[i].y
+            document.getElementById(`label_${i}`).innerHTML = `<button class="btn btn-sm bg-warning" >${dataValpeak.data[i].label}</button>`
+            document.getElementById(`bandwidth_3dBm_${i}`).innerText = dataValpeak.data[i].bandwidth_3dBm
+            document.getElementById(`occupied_bandwidth_${i}`).innerText = dataValpeak.data[i].occupied_bandwidth
+            document.getElementById(`SNR_${i}`).innerText = dataValpeak.data[i].SNR
+            document.getElementById(`SINAD_${i}`).innerText = dataValpeak.data[i].SINAD
+            document.getElementById(`THD_${i}`).innerText = dataValpeak.data[i].THD
+
+            // document.getElementById(`label_${i}`).onclick = 
+
+        }
+
+
+        //  ============ peakdata ==================
+        function onWsRecvpeak(evt) {
+            const dataValpeak = JSON.parse(evt.data);
+            dataValpeak.auto_data['x'] = dataValpeak.auto_data['x'] * 1e6
+
+            // spectrumpeak
+            if (peak_data_flag == true) {
+                updateSeriespeak(dataValpeak.auto_data);
+            }
+
+            else {
+                seriespeak.clear()
+            }
+
+            handleIncomingData(time_counter, dataValpeak.y)
+            time_counter = time_counter + 1;
+
+        }
+
+        // function onWsClosedpeak() {
+        //     setTimeout(peak_data, 500);
+        // }
+
+        // function peak_data() {
+        //     const ws = new WebSocket("ws://" + document.domain + ":" + peak_port);
+        //     // const ws = new WebSocket("ws://0.0.0.0:8006");
+
+        //     ws.onopen = onWsOpened;
+        //     ws.onmessage = onWsRecvpeak;
+        //     ws.onclose = onWsClosedpeak;
+        //     ws.onerror = onWsError;
+        //     ws.binaryType = "arraybuffer";
+
+        //     window.onbeforeunload = () => {
+        //         ws.onclose = () => { };
+        //         ws.close();
+        //     };
+        // }
+        // peak_data()
+
+
+        document.getElementById('csv_export').onclick = function () {
+            var rows = [
+                [
+                    "Frequency(MHz)",
+                    "Power(dBm)"
+                ],
+                ...dataVal.x.map((x, i) => ([(dataVal.x[i] * 1e-6).toFixed(3), dataVal.y[i].toFixed(1)]))]
+                .map(e => e.join(","))
+                .join("\n");
+            let csvContent = "data:text/csv;charset=utf-8,"
+                + rows;
+            var encodedUri = encodeURI(csvContent);
+            window.open(encodedUri);
+        }
+
+
+
+        window.parent.document.addEventListener('fullscreenchange', exitHandler);
+        window.parent.document.addEventListener('webkitfullscreenchange', exitHandler);
+        window.parent.document.addEventListener('mozfullscreenchange', exitHandler);
+        window.parent.document.addEventListener('MSFullscreenChange', exitHandler);
+
+
+
+        function exitHandler() {
+            if (!window.parent.document.fullscreenElement && !window.parent.document.webkitIsFullScreen && !window.parent.document.mozFullScreen && !window.parent.document.msFullscreenElement) {
+                if (!parent.table_full) {
+                    document.getElementById('full_screen_icon').classList.remove('fa-compress')
+                    document.getElementById('full_screen_icon').classList.add('fa-expand')
+                    parent.full_iframe = false;
+                }
+
+            }
+            else {
+                if (!parent.table_full) {
+                    document.getElementById('full_screen_icon').classList.remove('fa-expand')
+                    document.getElementById('full_screen_icon').classList.add('fa-compress')
+                    parent.full_iframe = true;
+                }
+            }
+        }
+
+
+
+function clear_spectrum_chart(){
+        
+        series.clear()
+        avgValues.fill(0)
+        avgSeries.clear()
+        minValues.fill(Infinity)
+        minSeries.clear()
+        var checkBox_persis = document.getElementById("persistence_data_btn");
+        if (checkBox_persis.checked == true) {
+            setTimeout(function(){
+                maxValues.fill(-Infinity)
+                maxSeries.clear()
+            },2000)
+        }else{
+            setTimeout(function(){
+                maxValues.fill(-Infinity)
+                maxSeries.clear()
+            },1000)
+        }
+      }
+
+
+
+        collapse_trace("dwn")
+        set_threshold1(data['threshold'])
+        traces_setting()
+        // set_marked_positions();
+
+    </script>
+</body>
+
+</html>
