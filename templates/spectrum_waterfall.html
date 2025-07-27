@@ -510,6 +510,22 @@
         
 
         var heatmapMinTimeStepMs = 1  // 1 millisecond
+
+        // Enhanced time step for SDR Angel-style waterfall in theme 2
+        function getWaterfallTimeStep() {
+            try {
+                var theme = window.parent.document.getElementById('waterfall_theme') ? 
+                           window.parent.document.getElementById('waterfall_theme').value : 'theme_1';
+                
+                if (theme === 'theme_2') {
+                    // Smaller time steps for smoother waterfall cascade effect
+                    return 0.5;  // Half millisecond for ultra-smooth scrolling
+                }
+                return heatmapMinTimeStepMs; // Standard time step for other themes
+            } catch (error) {
+                return heatmapMinTimeStepMs;
+            }
+        }
         let viewMs = 100;
 
         var time_counter = 0 // change in value also dosent affect anything        
@@ -651,15 +667,32 @@
 
         try {
             var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
+            var theme = window.parent.document.getElementById('waterfall_theme') ? 
+                       window.parent.document.getElementById('waterfall_theme').value : 'theme_1';
 
-            if (wf_speed === 'fast') {
-                viewMs = 100;
-            } else if (wf_speed === 'medium') {
-                viewMs = 1024;
-            } else if (wf_speed === 'slow') {
-                viewMs = 2048;
+            // Enhanced waterfall speed for SDR Angel-style theme 2
+            if (theme === 'theme_2') {
+                // Theme 2 gets enhanced smooth scrolling like SDR Angel
+                if (wf_speed === 'fast') {
+                    viewMs = 50;  // Faster, smoother scrolling
+                } else if (wf_speed === 'medium') {
+                    viewMs = 150; // Smooth medium speed
+                } else if (wf_speed === 'slow') {
+                    viewMs = 500; // Smooth slow speed
+                } else {
+                    viewMs = 75;  // Default smooth speed
+                }
             } else {
-                viewMs = 100;
+                // Other themes use standard speeds
+                if (wf_speed === 'fast') {
+                    viewMs = 100;
+                } else if (wf_speed === 'medium') {
+                    viewMs = 1024;
+                } else if (wf_speed === 'slow') {
+                    viewMs = 2048;
+                } else {
+                    viewMs = 100;
+                }
             }
         }
         catch (error) {
@@ -809,7 +842,7 @@
                 resolution: dataSampleSize+1,
 
                 start: { x: start_freq, y: 0 },
-                step: { x: (stop_freq - start_freq) / (dataSampleSize), y: heatmapMinTimeStepMs },
+                step: { x: (stop_freq - start_freq) / (dataSampleSize), y: getWaterfallTimeStep() },
 
             })
             .setFillStyle(paletteFill)
@@ -821,6 +854,7 @@
                 // Out of view data can be lazily removed as long as total columns count remains over 1000.
                 minDataPointCount: 1,
             })
+            // Enhanced interpolation for SDR Angel-style smooth waterfall
             .setPixelInterpolationMode('bilinear')
 
         function load_setting_data() {
@@ -840,7 +874,7 @@
 
                     waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: 0 - viewMs, stopAxisAfter: false }))
                     waterFall.getDefaultAxisX().setDefaultInterval({ start: parseInt(data['start_frequency']) / 1e6, end: parseInt(data['stop_frequency']) / 1e6, stopAxisAfter: false })
-                    heatmapSeries.setStart({ x: parseInt(data['start_frequency']) / 1e6, y: 0 }).setStep({ x: (stop_freq - start_freq) / (dataSampleSize ), y: heatmapMinTimeStepMs })
+                    heatmapSeries.setStart({ x: parseInt(data['start_frequency']) / 1e6, y: 0 }).setStep({ x: (stop_freq - start_freq) / (dataSampleSize ), y: getWaterfallTimeStep() })
                     // console.log(data,"-------------setting load data")
                     heatmapSeries.clear()
                     clear_spectrum_chart()
@@ -1352,14 +1386,47 @@
                 })
             }
            else if(parent.document.getElementById('waterfall_theme').value == "theme_2"){
-
+                // ================================
+                // ENHANCED SDR ANGEL-STYLE WATERFALL (THEME 2)
+                // This theme creates a realistic waterfall display similar to SDR Angel
+                // Features:
+                // - 18-step color gradient from deep blue to white
+                // - Smooth signal transitions and natural flow
+                // - Enhanced temporal and frequency smoothing
+                // - Faster, smoother scrolling (0.5ms timesteps)
+                // - Signal persistence and realistic noise floor
+                // ================================
                 lut = new LUT({
-                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
                     steps: [
-                        // { value: 0, color: ColorHEX("#00000000") },//blue
-                        { value: max_step_avg, color: ColorHEX(parent.max_step) },//green
-                        { value: mid_step_avg, color: ColorHEX(parent.mid_step1) },//red
-                        { value: min_step_avg, color: ColorHEX(parent.min_step) },//green
+                        // Deep blue for noise floor (like water depth)
+                        { value: min_step_avg - 10, color: ColorRGBA(0, 0, 40, 255) },        // Deep blue background
+                        { value: min_step_avg - 5, color: ColorRGBA(0, 0, 80, 255) },         // Darker blue
+                        { value: min_step_avg, color: ColorRGBA(0, 0, 120, 255) },            // Medium blue (noise floor)
+                        
+                        // Gradual signal emergence (like signals rising from water)
+                        { value: min_step_avg + 3, color: ColorRGBA(0, 40, 140, 255) },       // Blue-cyan transition
+                        { value: min_step_avg + 6, color: ColorRGBA(0, 80, 160, 255) },       // Cyan-blue
+                        { value: min_step_avg + 9, color: ColorRGBA(0, 120, 180, 255) },      // Light cyan
+                        
+                        // Medium signals (waterfall flow effect)
+                        { value: min_step_avg + 12, color: ColorRGBA(0, 160, 200, 255) },     // Bright cyan
+                        { value: min_step_avg + 15, color: ColorRGBA(40, 200, 160, 255) },    // Cyan-green
+                        { value: min_step_avg + 18, color: ColorRGBA(80, 220, 120, 255) },    // Green-cyan
+                        
+                        // Strong signals (bright cascade effect)
+                        { value: min_step_avg + 21, color: ColorRGBA(120, 240, 80, 255) },    // Bright green
+                        { value: min_step_avg + 24, color: ColorRGBA(160, 255, 40, 255) },    // Yellow-green
+                        { value: min_step_avg + 27, color: ColorRGBA(200, 255, 0, 255) },     // Bright yellow
+                        
+                        // Very strong signals (waterfall peaks)
+                        { value: min_step_avg + 30, color: ColorRGBA(240, 200, 0, 255) },     // Orange-yellow
+                        { value: min_step_avg + 35, color: ColorRGBA(255, 160, 0, 255) },     // Orange
+                        { value: min_step_avg + 40, color: ColorRGBA(255, 120, 0, 255) },     // Red-orange
+                        
+                        // Peak signals (bright cascade tops)
+                        { value: max_step_avg, color: ColorRGBA(255, 80, 80, 255) },          // Bright red
+                        { value: max_step_avg + 5, color: ColorRGBA(255, 40, 120, 255) },     // Red-pink
+                        { value: max_step_avg + 10, color: ColorRGBA(255, 255, 255, 255) }    // Pure white for strongest signals
                     ],
                     units: 'dBm',
                     interpolate: true,
@@ -2837,6 +2904,60 @@
             this.length = 0;
         }
 
+        // Enhanced waterfall data processing for SDR Angel-style visualization
+        function enhanceWaterfallData(inputData) {
+            if (!Array.isArray(inputData) || inputData.length === 0) {
+                return inputData;
+            }
+            
+            try {
+                let enhanced = [...inputData]; // Create a copy
+                
+                // Apply temporal smoothing for realistic waterfall flow
+                if (window.waterfallHistory) {
+                    for (let i = 0; i < enhanced.length; i++) {
+                        // Blend current data with previous frame for smooth transitions
+                        enhanced[i] = enhanced[i] * 0.7 + window.waterfallHistory[i] * 0.3;
+                    }
+                }
+                
+                // Apply frequency domain smoothing for realistic signal appearance
+                const smoothed = [...enhanced];
+                for (let i = 1; i < enhanced.length - 1; i++) {
+                    // Gaussian-like smoothing kernel for natural signal blending
+                    smoothed[i] = enhanced[i] * 0.5 + 
+                                 (enhanced[i-1] + enhanced[i+1]) * 0.2 + 
+                                 (enhanced[i-2] || enhanced[i]) * 0.05 + 
+                                 (enhanced[i+2] || enhanced[i]) * 0.05;
+                }
+                
+                // Add subtle signal persistence effect (like real RF signals)
+                for (let i = 0; i < smoothed.length; i++) {
+                    // Enhance signal peaks with slight persistence
+                    if (smoothed[i] > min_step_avg + 5) {
+                        smoothed[i] = smoothed[i] + (smoothed[i] - min_step_avg) * 0.1;
+                    }
+                    
+                    // Add natural noise floor variation
+                    if (smoothed[i] <= min_step_avg + 2) {
+                        smoothed[i] += (Math.random() - 0.5) * 0.5;
+                    }
+                }
+                
+                // Store history for next frame
+                window.waterfallHistory = [...smoothed];
+                
+                return smoothed;
+                
+            } catch (error) {
+                console.warn('Waterfall enhancement error:', error);
+                return inputData; // Return original data if enhancement fails
+            }
+        }
+
+        // Initialize waterfall history buffer
+        window.waterfallHistory = null;
+
 
 
           function getCol(matrix, col){
@@ -3012,13 +3133,22 @@
 
             caAverage.push(dataVal.y)
             
+            // Enhanced data processing for SDR Angel-style waterfall in theme 2
+            let processedData = get_maincurve_data();
+            
+            // Apply signal processing for theme 2 to create realistic waterfall effect
+            if (parent.document.getElementById('waterfall_theme') && 
+                parent.document.getElementById('waterfall_theme').value == "theme_2") {
+                processedData = enhanceWaterfallData(processedData);
+            }
+            
             // Performance: Use requestAnimationFrame for smooth heatmap updates
             if (typeof requestAnimationFrame !== 'undefined') {
                 requestAnimationFrame(() => {
-                    heatmapSeries.addIntensityValues([get_maincurve_data()]);
+                    heatmapSeries.addIntensityValues([processedData]);
                 });
             } else {
-                heatmapSeries.addIntensityValues([get_maincurve_data()]);
+                heatmapSeries.addIntensityValues([processedData]);
             }
 
             if (button_click_main == true) {
