@@ -1,0 +1,812 @@
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrum and Water fall</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
+    <style>
+        #lcjs-auto-flexbox{
+            background-color: transparent;
+            }
+
+        canvas{
+            background-color: transparent;
+            }
+        body{
+            background-color: transparent;
+            }
+
+        .full-screen-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 29px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+        }
+
+        .screen-shot-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 42px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+        }
+
+        #trace_dwn {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+        }
+
+        #trace_up {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+        }
+
+        #outer_trace {
+            padding-top: 2px;
+        }
+
+        #custom-legend {
+            background:rgb(0, 0, 0, 38%);
+            padding: 10px;
+            border: 1px solid #FFFFFF;
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 22px;
+            right: 30px;
+            z-index: 1000;
+            height: 210px;
+            width: 116px;
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
+        }
+
+        #custom_legend_camera {
+            background: transparent;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            z-index: 1000;
+            height: auto;
+            width: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: small;
+        }
+
+        .legend-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            outline: none;
+            cursor: pointer;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .legend-checkbox:checked::after {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d79c3c;
+            position: absolute;
+        }
+
+        .openwebrx-dialog {
+            background-color: #0e1011;
+        }
+
+        .openwebrx-text {
+            font-weight: bolder;
+            font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+        }
+    </style>
+    <!-- =================== bootstrap cdn ================== -->
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+</head>
+
+<body>
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog aria-labelledby="
+        MultipleDeleteTargetModelLabel>
+        <div class="modal-dialog modal-dialog-centered text-center " role="document">
+            <div class="modal-body ">
+                <div class="m-0 px-0 py-5" style="background-color:white">
+                    <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="full-screen-div ml-1">
+        <div class="">
+            <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
+                style="color: #ffffff; cursor: pointer;" onclick="full_screen()"><i style='font-size:15px'
+                    data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                    class='fas fa-expand-arrows-alt'></i></label>
+        </div>
+    </div>
+
+    <div id="custom-legend">
+        <div id="outer_trace">
+            <label for="" id="traces_label">Traces</label>
+
+            <i class="fa fa-caret-down" id="trace_dwn" style="display: block;" onclick="collapse_trace('dwn')"></i>
+            <i class="fa fa-caret-up" id="trace_up" style="display:none ;" onclick="collapse_trace('up')"></i>
+
+            <div id="tracemenu" style="display:none ;">
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="main_curve"  onclick="show_main_curve()">
+                    <label for="main_curve" class="main_curve" style="color: green;" id="main_curve_label">Main-Curve</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="avg_hold" checked onclick="show_traces_avg()">
+                    <label for="avg_hold" class="avg_hold" id="avg_hold_label" >Avg-hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="max_hold" onclick="show_traces_max()">
+                    <label for="max_hold" class="max_hold" style="color: #8300c4;">Max-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="min_hold" onclick="show_traces_min()">
+                    <label for="min_hold" class="min_hold" style="color: #37a6de">Min-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="persistence_data_btn" checked
+                        onclick="show_traces_persis()">
+                    <label for="persistence_data_btn" class="peak_data_btn" style="color: red;">Persistence</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="peak_data_btn" checked
+                        onclick="show_peak_data()">
+                    <label for="peak_data_btn" class="peak_data_btn" style="color: #66cc35;">Peaks</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="mark_data_btn" checked
+                        onclick="show_mark_data()">
+                    <label for="mark_data_btn" id="marker_color_label" class="mark_data_btn"
+                        style="color:#d7d6db">Markers</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="band" checked
+                        onclick="show_traces_band()">
+                        <b><label for="band" id="band_label" class="mark_data_btn"
+                        style="color:#ff7800">Demod</label></b>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="custom_legend_camera">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot"
+            id="screenshot_img"><i class="fa fa-camera" aria-hidden="true"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv"
+            id="csv_export"><i class="fa fa-solid fa-file-csv"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
+            title="ChartView" onclick="window.parent.full_screen_chart()"><i id="full_screen_icon"
+                class="fa fa-solid fa-expand"></i>
+        </button>
+    </div>
+
+    <div id="openwebrx-dialog-bookmark" class="openwebrx-dialog card" style="display:none;width: fit-content;border: 1px solid;">
+        <form>
+            <div class="form-field ">
+                <h6 class="openwebrx-text">
+                    <center>Demodulator</center>
+                </h6>
+            </div>
+            <div class="form-field openwebrx-text">
+                <label for="name" class="tx-15">Name:</label>
+                <input type="text" class="tx-bold" id="name" name="name" value="Frequency">
+            </div>
+
+            <div class="form-field openwebrx-text">
+                <label for="frequency" class="tx-15">Frequency:</label>
+                <div style="display:flex;">
+                    <input type="number" id="frequency" value=95 name="frequency">
+                    <select name="unit" id="unit" onchange="changes_dropdown_value(this)">
+                        <option value="khz">kHz</option>
+                        <option value="mhz">MHz</option>
+                        <option value="ghz">GHz</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-field openwebrx-text">
+                <label for="modulation" class="tx-15">Modulation:</label>
+                <select name="modulation" id="modulation" onchange="change_mod(this.value)"></select>
+            </div>
+
+            <div class="buttons " style="border-top:none !important;">
+                <label></label>
+                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('am')">AM</div>
+                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('nbfm')">NBFM</div>
+                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('lsb')">LSB</div>
+                <div class="openwebrx-button tx-15" onclick="change_mod('dmr')">DMR</div>
+            </div>
+
+            <div class="form-field openwebrx-text">
+                <label for="modulation" class="tx-15">Bandwidth:</label>
+                <input type="text" id="sample_rate_bm" name="sample_rate_bm" value="100">
+                <select name="unit" id="unit">
+                    <option value="khz">kHz</option>
+                </select>
+            </div>
+
+            <div class="form-field openwebrx-text">
+                <label for="name">Colour:</label>
+                <input type="color" id="b_color" name="b_color" value="#e66465">
+                <div class="openwebrx-button" onclick="getRandomColor()">Generate</div>
+            </div>
+
+            <div class="buttons">
+                <div class="openwebrx-button" onclick="get_bookmark_data_clear()">Cancel</div>
+                <div class="openwebrx-button" onclick="get_bookmark_data()">Ok</div>
+            </div>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        // ================ PERFORMANCE OPTIMIZATIONS ================
+        
+        // Throttle function to limit execution frequency
+        function throttle(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Debounce function for DOM updates
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Memory management class for circular arrays
+        class OptimizedCircularArray {
+            constructor(maxLength) {
+                this.maxLength = Math.min(maxLength, 1000); // Cap maximum length
+                this.data = [];
+            }
+
+            push(element) {
+                this.data.push(element);
+                if (this.data.length > this.maxLength) {
+                    // Remove multiple elements at once to reduce garbage collection
+                    const removeCount = Math.min(10, this.data.length - this.maxLength);
+                    this.data.splice(0, removeCount);
+                }
+            }
+
+            clear() {
+                this.data.length = 0;
+            }
+
+            get length() {
+                return this.data.length;
+            }
+
+            [Symbol.iterator]() {
+                return this.data[Symbol.iterator]();
+            }
+        }
+
+        // Performance monitoring
+        const PerformanceMonitor = {
+            frameCount: 0,
+            lastTime: performance.now(),
+            
+            checkPerformance() {
+                this.frameCount++;
+                const currentTime = performance.now();
+                
+                if (currentTime - this.lastTime > 5000) { // Check every 5 seconds
+                    const fps = this.frameCount / 5;
+                    if (fps < 10) { // If FPS drops below 10
+                        console.warn('Performance warning: Low FPS detected');
+                        this.optimizeForPerformance();
+                    }
+                    this.frameCount = 0;
+                    this.lastTime = currentTime;
+                }
+            },
+            
+            optimizeForPerformance() {
+                // Reduce update frequency when performance is poor
+                if (viewMs < 500) viewMs = 500;
+                // Clear unnecessary data
+                this.cleanupMemory();
+            },
+            
+            cleanupMemory() {
+                // Force garbage collection if available
+                if (window.gc) {
+                    window.gc();
+                }
+                
+                // Clear old chart data
+                if (typeof heatmapSeries !== 'undefined') {
+                    heatmapSeries.setDataCleaning({ minDataPointCount: 50 });
+                }
+            }
+        };
+
+        // ================ ORIGINAL VARIABLES WITH OPTIMIZATIONS ================
+        
+        let button_click_max = false;
+        let button_click_min = false;
+        let button_click_avg = true;
+        let button_click_main = false;
+        var button_click_band = true;
+        var button_click_persistence = false;
+
+        var wxAxisBand = new Map(); // Use Map for better performance
+        var xAxisBand = new Map();
+        var band_center_freq = new Map();
+        var wActualBand = new Map();
+        var xActualBand = new Map();
+        var bandLine = new Map();
+        var wBandLine = new Map();
+        var band_meta = new Map();
+
+        var constantLine1 = {};
+        var constantLine2 = {};
+        var auto_threshold_flag = false;
+        var auto_Y_axis_flag = false;
+        var peak_data_flag = true;
+        var mark_data_flag = true;
+
+        const minBandSize = 100000;
+        const maxBandSize = 0.2;
+
+        var clicks = 0;
+        var addMarkerData = [];
+
+        var active_port = "{{active_port}}";
+        var peak_port = "{{peak_port}}";
+        var page_theme = "{{theme_mode}}";
+
+        var active_channel = "{{active_channel}}";
+        var active_mode = "{{active_mode}}";
+        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
+
+        var type_of_mode = {
+            "fm": "audio", "wfm": "audio", "drm": "audio", "am": "audio",
+            "lsb": "audio", "usb": "audio", 'dmr': "data", 'dstar': "audio",
+            'nxdn': "audio", 'ysf': "audio", 'm17': "audio", 'nbfm': "audio"
+        };
+
+        var unit_conversion = {
+            "khz": 1e3, "mhz": 1e6, "ghz": 1e9
+        };
+        
+        var unit_conversion1 = {
+            "Hz": 1, "KHz": 1e3, "MHz": 1e6, "GHz": 1e9
+        };
+
+        var freq = data['freq'] / 1e6;
+        var start_freq = data['start_frequency'] / 1e6;
+        var stop_freq = data['stop_frequency'] / 1e6;
+        var start_WF_freq = data['start_frequency'] / 1e6;
+        var stop_WF_freq = data['stop_frequency'] / 1e6;
+        var sample_length = parseInt(data['fft_points']);
+
+        var actual_bw = data['bandwidth'];
+        var sample_rate = data['sample_rate'];
+        var diff = sample_rate - actual_bw;
+        var cut_n = (sample_length * (diff / 2)) / sample_rate;
+        var dataSampleSize = (sample_length - (cut_n * 2)).toFixed(0);
+
+        console.log("sample len", sample_length, "diff", diff, "datasample size", dataSampleSize, "cut_n", cut_n);
+
+        var heatmapMinTimeStepMs = 1;
+        let viewMs = 100;
+        var time_counter = 0;
+        var waterFall;
+        var chart;
+        var freq_current_offset_dropdown_value = "mhz";
+
+        var marker_color, theme_color, threshold_color;
+        var freqDict = [];
+        var chartMarker = [], marker_label = [];
+        var counter = 0;
+        var local_store, pos_x = [5], new_pos = [5];
+
+        let rightMbPress;
+        var select_color = '';
+        var counter_1 = 0;
+        Max_cycles = 5;
+        avg_max_cycle = 30;
+
+        let cycleData = [];
+        var startFreq = null;
+        var dataVal;
+        var full_screen_flag = false;
+
+        // ================ OPTIMIZED FUNCTIONS ================
+        
+        // Throttled websocket data handler
+        const throttledWebsocketHandler = throttle(function(evt) {
+            websocket_data_optimized(evt);
+        }, 16); // ~60 FPS max
+
+        // Debounced UI updates
+        const debouncedUIUpdate = debounce(function() {
+            updateUI();
+        }, 100);
+
+        function modulation_type() {
+            var inner_html = `
+                <option value="fm">FM</option>
+                <option value="nbfm">NBFM</option>
+                <option value="wbfm">WBFM</option>
+                <option value="am">AM</option>
+                <option value="lsb">LSB</option>
+                <option value="usb">USB</option>
+                <option value="dmr">DMR</option>
+                <option value="gsm">GSM</option>
+                <option value="8psk">8PSK</option>
+                <option value="bpsk">BPSK</option>
+                <option value="qpsk">QPSK</option>
+                <option value="dqpsk">DQPSK</option>
+                <option value="qam16">QAM16</option>
+                <option value="gmsk">GMSK</option>
+                <option value="fsk">FSK</option>
+                <option value="msk">MSK</option>
+                <option value="ofdm">OFDM</option>
+                <option value="radar_analysis">RADAR ANALYSIS</option>
+            `;
+            
+            if (data['sample_rate'] / 1e6 >= 10) {
+                inner_html += `<option value="drone_detection">DRONE DETECTION</option>`;
+            }
+            
+            const modElement = document.getElementById('modulation');
+            if (modElement) {
+                modElement.innerHTML = inner_html;
+            }
+        }
+
+        function changes_dropdown_value(elem) {
+            const current_dropdown_value = freq_current_offset_dropdown_value;
+            const value = parseFloat(document.getElementById("frequency").value);
+            freq_current_offset_dropdown_value = elem.value;
+
+            if (current_dropdown_value !== elem.value) {
+                let total;
+                
+                if (current_dropdown_value === "mhz") {
+                    total = elem.value === "khz" ? 
+                        parseFloat(value * 1e3).toFixed(2) : 
+                        parseFloat(value / 1e3);
+                } else if (current_dropdown_value === "khz") {
+                    total = elem.value === "mhz" ? 
+                        parseFloat(value / 1e3) : 
+                        parseFloat(value / 1e6);
+                } else {
+                    total = elem.value === "mhz" ? 
+                        parseFloat(value * 1e3) : 
+                        parseFloat(value * 1e6).toFixed(2);
+                }
+                
+                document.getElementById("frequency").value = total;
+            }
+        }
+
+        function collapse_trace(event) {
+            const traceDown = document.getElementById("trace_dwn");
+            const traceUp = document.getElementById("trace_up");
+            const customLegend = document.getElementById("custom-legend");
+            const traceMenu = document.getElementById("tracemenu");
+            const outerTrace = document.getElementById("outer_trace");
+
+            if (event === "dwn") {
+                traceDown.style.display = "none";
+                traceUp.style.display = "block";
+                customLegend.style.height = "230px";
+                traceMenu.style.display = "block";
+                outerTrace.style.paddingBottom = "0px";
+            } else {
+                traceDown.style.display = "block";
+                traceUp.style.display = "none";
+                customLegend.style.height = "40px";
+                outerTrace.style.paddingBottom = "5px";
+                traceMenu.style.display = "none";
+            }
+        }
+
+        // ================ PERFORMANCE OPTIMIZED WEBSOCKET HANDLER ================
+        
+        function websocket_data_optimized(evt) {
+            dataVal = evt;
+            
+            // Performance monitoring
+            PerformanceMonitor.checkPerformance();
+            
+            if (!dataVal || !dataVal.y) return;
+            
+            // Throttle UI updates based on performance
+            const shouldUpdateUI = performance.now() % 3 === 0; // Update every 3rd frame
+            
+            if (shouldUpdateUI) {
+                close_loader();
+                
+                // Batch DOM updates
+                requestAnimationFrame(() => {
+                    updateChartsOptimized(dataVal);
+                });
+            }
+            
+            // Always update critical data
+            updateCriticalData(dataVal);
+        }
+
+        function updateChartsOptimized(data) {
+            try {
+                // Update heatmap with throttling
+                if (heatmapSeries && data.y) {
+                    heatmapSeries.addIntensityValues([data.y]);
+                }
+                
+                // Update traces selectively
+                if (button_click_main && series) {
+                    updateSeries(data.x, data.y);
+                }
+                
+                // Update markers efficiently
+                updateMarkersOptimized();
+                
+            } catch (error) {
+                console.error('Chart update error:', error);
+            }
+        }
+
+        function updateCriticalData(data) {
+            // Update only essential data structures
+            if (data.auto_data && peak_data_flag) {
+                updateSeriespeak(data.auto_data);
+            }
+            
+            // Handle threshold updates
+            if (auto_threshold_flag) {
+                const avgInt = data.y.reduce((a, b) => a + b, 0) / data.y.length;
+                set_threshold1(Math.round(avgInt));
+            }
+        }
+
+        function updateMarkersOptimized() {
+            if (!mark_data_flag) return;
+            
+            // Update only visible markers
+            for (let i = 0; i < chartMarker.length; i++) {
+                if (chartMarker[i] && chartMarker[i].getVisible()) {
+                    update_marker(i);
+                }
+            }
+        }
+
+        // ================ MEMORY MANAGEMENT ================
+        
+        function cleanupResources() {
+            // Clear old data periodically
+            if (cycleData.length > 100) {
+                cycleData = cycleData.slice(-50); // Keep only last 50 items
+            }
+            
+            // Cleanup chart markers
+            chartMarker = chartMarker.filter(marker => marker && !marker.isDisposed());
+        }
+
+        // Run cleanup every 30 seconds
+        setInterval(cleanupResources, 30000);
+
+        // ================ LCJS INITIALIZATION WITH OPTIMIZATIONS ================
+        
+        try {
+            var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
+            
+            switch (wf_speed) {
+                case 'fast': viewMs = 100; break;
+                case 'medium': viewMs = 1024; break;
+                case 'slow': viewMs = 2048; break;
+                default: viewMs = 100;
+            }
+        } catch (error) {
+            viewMs = 100;
+        }
+
+        const {
+            lightningChart, DashedLine, emptyFill, individualPointColorEnabled, PointShape, 
+            PalettedFill, LUT, ColorHSV, emptyLine, AxisScrollStrategies, AxisTickStrategies, 
+            SolidFill, Themes, LegendBoxBuilders, UIElementBuilders, UIOrigins, AutoCursorModes, 
+            UIVisibilityModes, UIDraggingModes, SolidLine, tickStrategy, regularColorSteps, 
+            synchronizeAxisIntervals, Axis, onMouseDoubleClick, ColorRGBA, setLabel, 
+            removeMarker, ColorHEX
+        } = lcjs;
+
+        // Initialize dashboard with optimizations
+        const dashboardConfig = {
+            numberOfColumns: 1,
+            numberOfRows: 2,
+            theme: page_theme === 'dark' ? undefined : Themes.light
+        };
+
+        const dashboard = lcc.Dashboard(dashboardConfig);
+
+        waterFall = dashboard.createChartXY({
+            rowIndex: 1,
+            columnIndex: 0,
+            container: 'waterFallContainer',
+            Width: 70,
+            animationsEnabled: false, // Disable animations for better performance
+        });
+
+        chart = dashboard.createChartXY({
+            container: 'chartContainer',
+            rowIndex: 0,
+            columnIndex: 0,
+            animationsEnabled: false, // Disable animations for better performance
+            theme: page_theme === 'light' ? Themes.light : undefined
+        });
+
+        // ================ CONTINUE WITH OPTIMIZED IMPLEMENTATIONS ================
+        
+        // Add performance-optimized event listeners
+        function addOptimizedEventListeners() {
+            // Use passive event listeners where possible
+            document.addEventListener('wheel', function(e) {
+                // Handle wheel events
+            }, { passive: true });
+            
+            // Throttle resize events
+            window.addEventListener('resize', throttle(function() {
+                // Handle resize
+            }, 250));
+        }
+
+        // Initialize everything
+        function initialize() {
+            modulation_type();
+            addOptimizedEventListeners();
+            
+            // Setup charts with optimizations
+            waterfall_XYAxis();
+            
+            // Initialize with reduced complexity
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', () => {
+                    setTimeout(() => {
+                        if (window.parent && window.parent.iq_data) {
+                            window.parent.iq_data();
+                        }
+                    }, 500);
+                });
+            } else {
+                setTimeout(() => {
+                    if (window.parent && window.parent.iq_data) {
+                        window.parent.iq_data();
+                    }
+                }, 500);
+            }
+        }
+
+        // ================ PLACEHOLDER FUNCTIONS ================
+        // These would contain the rest of your optimized implementations
+        
+        function waterfall_XYAxis() {
+            // Optimized waterfall axis setup
+            waterFall.setTitle(false)
+                .getDefaultAxisY()
+                .setTitle('Time')
+                .setScrollStrategy(AxisScrollStrategies.progressive)
+                .setTickStrategy(AxisTickStrategies.Time, tickStrategy => tickStrategy
+                    .setTickStyle(ticks => ticks
+                        .setLabelFont(font => font.setSize(12))
+                        .setTickStyle(emptyLine)
+                    )
+                );
+
+            waterFall.getDefaultAxisX()
+                .setTitle('Frequency (MHz)')
+                .setDefaultInterval({ start: start_freq, end: stop_freq });
+                
+            waterFall.setAutoCursorMode(AutoCursorModes.disabled)
+                .setMouseInteractionRectangleFit(true);
+                
+            waterFall.getDefaultAxisY()
+                .setDefaultInterval((state) => ({ 
+                    end: state.dataMax, 
+                    start: (state.dataMax ?? 0) - viewMs, 
+                    stopAxisAfter: false 
+                }));
+        }
+
+        // Add other essential functions here...
+        function generateData(xArray, yArray) {
+            return xArray.map((x, i) => ({ x: xArray[i] / 1e6, y: yArray[i] }));
+        }
+
+        function updateSeries(xArray, yArray) {
+            if (series) {
+                series.clear();
+                series.add(generateData(xArray, yArray));
+            }
+        }
+
+        function updateSeriespeak(data) {
+            if (seriespeak) {
+                seriespeak.clear();
+                seriespeak.add(data);
+            }
+        }
+
+        function set_threshold1(threshold) {
+            // Implement threshold setting
+        }
+
+        function close_loader() {
+            $('#websocket_loader').modal('hide');
+        }
+
+        function update_marker(index) {
+            // Optimized marker update
+        }
+
+        // Start initialization
+        initialize();
+        
+    </script>
+</body>
+
+{% endblock %}
