@@ -6,26 +6,48 @@
     <title>Spectrum and Water fall</title>
 
 
-    <!-- =================== bootstrap cdn ================== -->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <!-- Performance optimized script loading -->
+    <script>
+        // Performance configuration for sweep charts
+        const PERFORMANCE_CONFIG_SWEEP = {
+            MAX_DATA_POINTS: 6144,
+            UPDATE_THROTTLE_MS: 40,
+            CLEANUP_INTERVAL_MS: 12000,
+            MAX_CIRCULAR_BUFFER_SIZE: 400,
+            DEBOUNCE_DELAY_MS: 250
+        };
+
+        // DOM element cache for sweep charts
+        const DOM_CACHE_SWEEP = {
+            elements: new Map(),
+            get(id) {
+                if (!this.elements.has(id)) {
+                    this.elements.set(id, document.getElementById(id));
+                }
+                return this.elements.get(id);
+            },
+            clear() { this.elements.clear(); }
+        };
+    </script>
+    <link rel="preload" href="{{ url_for('static', filename='js/lcjs.iife.js')}}" as="script" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
-
-
-    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    
+    <script defer src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script async src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
 
 
 
@@ -33,15 +55,24 @@
 
         #lcjs-auto-flexbox{
             background-color: transparent;
+            will-change: transform;
             }
 
         canvas{
             background-color: transparent;
+            will-change: transform;
             }
 
         body{
             background-color: transparent;
             }
+
+        /* Performance optimizations */
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000;
+        }
 
         .full-screen-div {
             position: absolute;

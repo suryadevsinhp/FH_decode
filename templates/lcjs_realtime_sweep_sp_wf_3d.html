@@ -10,28 +10,41 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
-    <!--    <script src="https://cdn.jsdelivr.net/npm/@arction/lcjs@5.2.0/dist/lcjs.iife.js"></script>-->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
-    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
-    <!-- =================== bootstrap cdn ================== -->
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
-    <!-- <link rel="stylesheet" href="/static/css/{{theme_mode}}/theme.css"> -->
-    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
-    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/bracket_epass.css')}}"> -->
-    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css')}}"> -->
-    <!-- <script src="{{ url_for('static', filename='js/jquery-ui.js')}}"></script> -->
-    <!-- <script src="{{ url_for('static', filename='js/openwebrx_realtime.js')}}"></script> -->
-    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <!-- Performance optimized script loading for 3D sweep -->
+    <script>
+        // Performance configuration for 3D sweep charts
+        const PERFORMANCE_CONFIG_3D_SWEEP = {
+            MAX_SURFACE_POINTS: 3072,
+            UPDATE_THROTTLE_MS: 60,
+            CLEANUP_INTERVAL_MS: 20000,
+            MAX_BUFFER_SIZE: 200,
+            DEBOUNCE_DELAY_MS: 400
+        };
+
+        // DOM element cache for 3D sweep charts
+        const DOM_CACHE_3D_SWEEP = {
+            elements: new Map(),
+            get(id) {
+                if (!this.elements.has(id)) {
+                    this.elements.set(id, document.getElementById(id));
+                }
+                return this.elements.get(id);
+            },
+            clear() { this.elements.clear(); }
+        };
+    </script>
+    <script defer src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script async src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
 
     <!-- <script type="text/javascript" src="http://www.gstatic.com/charts/loader.js"></script> -->
     <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/loader.js')}}"></script>
@@ -42,11 +55,20 @@
     <style>
         #lcjs-auto-flexbox{
             background-color: transparent;
+            will-change: transform;
             }
 
         canvas{
             background-color: transparent;
+            will-change: transform;
             }
+            
+        /* Performance optimizations for 3D */
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000;
+        }
             
         body{
             background-color: transparent;

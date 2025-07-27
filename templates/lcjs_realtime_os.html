@@ -5,9 +5,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spectrum and Water fall</title>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@arction/lcjs@5.2.0/dist/lcjs.iife.js"></script> -->
-
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <!-- Performance optimized for realtime OS -->
+<script>
+    const PERFORMANCE_CONFIG_RT_OS = {
+        MAX_DATA_POINTS: 4096,
+        UPDATE_THROTTLE_MS: 35,
+        CLEANUP_INTERVAL_MS: 12000,
+        DEBOUNCE_DELAY_MS: 200
+    };
+    const DOM_CACHE_RT_OS = {
+        elements: new Map(),
+        get(id) { return this.elements.get(id) || (this.elements.set(id, document.getElementById(id)), this.elements.get(id)); },
+        clear() { this.elements.clear(); }
+    };
+</script>
+<script defer src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
 
     <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
@@ -32,10 +44,12 @@
 
         #lcjs-auto-flexbox{
             background-color: transparent;
+            will-change: transform;
             }
 
         canvas{
             background-color: transparent;
+            will-change: transform;
             }
             
         body{

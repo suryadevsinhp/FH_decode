@@ -5,8 +5,8 @@ This document summarizes the performance optimizations applied to the HTML chart
 
 ## Files Optimized
 
-### 1. `lcjs_realtime_sp_wf.html` (3,302 lines → Fully Optimized)
-**Primary optimizations:**
+### 1. `lcjs_realtime_sp_wf.html` (3,302 lines → **FULLY OPTIMIZED**)
+**Comprehensive optimizations:**
 - **Performance Configuration**: Added comprehensive performance constants for throttling, debouncing, and memory management
 - **Script Loading**: Implemented async/defer loading with preload hints for critical resources
 - **DOM Caching**: Created efficient DOM element cache to reduce repeated queries
@@ -15,27 +15,68 @@ This document summarizes the performance optimizations applied to the HTML chart
 - **GPU Acceleration**: Added CSS transforms and `will-change` properties for hardware acceleration
 - **Error Handling**: Enhanced error handling with performance monitoring and adaptive quality
 
-### 2. `spectrum_waterfall.html` (3,298 lines → Partially Optimized)
+### 2. `lcjs_sweep_sp_wf.html` (3,188 lines → **OPTIMIZED**)
 **Applied optimizations:**
-- **CSS Performance**: Added `will-change: transform` for GPU acceleration
-- **Script Loading**: Converted to async/defer loading pattern
-- **Performance Configuration**: Added performance constants and DOM caching
-- **Animation Optimizations**: Added CSS animations with GPU acceleration
+- **Performance Configuration**: Added specialized sweep chart performance constants
+- **Script Loading**: Converted to async/defer loading with preload hints
+- **GPU Acceleration**: Added `will-change: transform` for hardware acceleration
+- **DOM Caching**: Efficient element caching system
 
-### 3. `lcjs_realtime_3d.html` (547 lines → Optimized)
-**3D-specific optimizations:**
+### 3. `lcjs_realtime_sweep_sp_wf_3d.html` (3,135 lines → **OPTIMIZED**)
+**3D sweep-specific optimizations:**
+- **Performance Configuration**: Specialized 3D sweep performance settings
+- **Data Point Limiting**: Reduced surface points for 3D performance (3072 max points)
+- **GPU Acceleration**: Enhanced 3D rendering acceleration
+- **Script Loading**: Optimized async loading pattern
+
+### 4. `lcjs_realtime_sp_wf_os.html` (2,164 lines → **OPTIMIZED**)
+**OS-specific optimizations:**
+- **Performance Configuration**: OS-tailored performance constants
+- **Script Loading**: Async/defer loading with preload hints
+- **GPU Acceleration**: Hardware acceleration for OS charts
+- **DOM Caching**: Efficient element management
+
+### 5. `lcjs_realtime_sweep_sp.html` (2,377 lines → **OPTIMIZED**)
+**Sweep spectrum optimizations:**
+- **GPU Acceleration**: Added hardware acceleration hints
+- **CSS Performance**: Enhanced rendering performance
+- **Visual Optimizations**: Optimized for sweep operations
+
+### 6. `lcjs_realtime_3d.html` (547 lines → **FULLY OPTIMIZED**)
+**Advanced 3D optimizations:**
 - **Data Point Limiting**: Limited surface data points to prevent performance degradation
 - **Frame Skipping**: Implemented intelligent frame skipping when processing falls behind
 - **Throttling**: Specialized throttling for 3D rendering (50ms instead of 33ms)
 - **Memory Management**: Optimized for 3D data structures with smaller buffer sizes
 - **Error Recovery**: Added robust error handling for 3D streaming operations
 
-### 4. `lcjs_realtime_sweep_sp.html` (2,377 lines → Partially Optimized)
-**Applied optimizations:**
-- **CSS Performance**: Added GPU acceleration hints
-- **Visual Optimizations**: Enhanced rendering performance for sweep operations
+### 7. `lcjs_realtime_sweep_wf.html` (27,584 bytes → **OPTIMIZED**)
+**Sweep waterfall optimizations:**
+- **Performance Configuration**: Sweep waterfall specific constants
+- **GPU Acceleration**: Hardware acceleration for waterfall rendering
+- **Script Loading**: Optimized defer loading
 
-### 5. `index.html` (573 lines → Enhanced)
+### 8. `lcjs_sweep_3d.html` (23,835 bytes → **OPTIMIZED**)
+**Static 3D sweep optimizations:**
+- **Performance Configuration**: Static 3D optimized settings
+- **Data Point Limiting**: Reduced to 2048 surface points for static 3D
+- **GPU Acceleration**: 3D hardware acceleration
+- **Slower Throttling**: 80ms throttling for static 3D operations
+
+### 9. `lcjs_realtime_os.html` (16,185 bytes → **OPTIMIZED**)
+**Real-time OS optimizations:**
+- **Performance Configuration**: Real-time OS performance constants
+- **GPU Acceleration**: Hardware acceleration
+- **Compact DOM Caching**: Lightweight element caching
+
+### 10. `spectrum_waterfall.html` (3,298 lines → **PARTIALLY OPTIMIZED**)
+**Applied optimizations:**
+- **CSS Performance**: Added `will-change: transform` for GPU acceleration
+- **Script Loading**: Converted to async/defer loading pattern
+- **Performance Configuration**: Added performance constants and DOM caching
+- **Animation Optimizations**: Added CSS animations with GPU acceleration
+
+### 11. `index.html` (573 lines → **ENHANCED**)
 **Main application optimizations:**
 - **Progress Polling**: Added throttling and exponential backoff for API calls
 - **File Validation**: Implemented debounced file input validation
