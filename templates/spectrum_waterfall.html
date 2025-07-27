@@ -143,18 +143,19 @@
         }
     </style>
     <!-- =================== bootstrap cdn ================== -->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <!-- Performance: Load critical scripts first, others deferred -->
     <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
 
 
 </head>
@@ -368,6 +369,41 @@
     <!-- --------------------------------- Script ------------------------------ -->
     <script type="text/javascript">
 
+        // Performance optimization: Add throttling mechanism
+        const PERF_CONFIG = {
+            UPDATE_THROTTLE_MS: 50,  // Limit updates to 20 FPS
+            MAX_BUFFER_SIZE: 300,    // Limit circular buffer size
+            CLEANUP_INTERVAL: 5000   // Memory cleanup interval
+        };
+
+        // Performance: Cache DOM elements to avoid repeated queries
+        const DOM_CACHE = {};
+        function cacheDOMElements() {
+            DOM_CACHE.websocket_loader = document.getElementById('websocket_loader');
+            DOM_CACHE.custom_legend = document.getElementById('custom-legend');
+            DOM_CACHE.tracemenu = document.getElementById('tracemenu');
+            DOM_CACHE.trace_dwn = document.getElementById('trace_dwn');
+            DOM_CACHE.trace_up = document.getElementById('trace_up');
+        }
+
+        // Performance: Throttle function to prevent excessive updates
+        function createThrottledFunction(func, delay) {
+            let lastCall = 0;
+            let timeoutId = null;
+            return function(...args) {
+                const now = Date.now();
+                if (now - lastCall >= delay) {
+                    func.apply(this, args);
+                    lastCall = now;
+                } else {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        func.apply(this, args);
+                        lastCall = Date.now();
+                    }, delay - (now - lastCall));
+                }
+            };
+        }
 
         let button_click_max = false
         let button_click_min = false
@@ -570,21 +606,43 @@
 	}
 
 
+        // Performance: Optimize collapse_trace with DOM caching
         function collapse_trace(event) {
-            if (event == "dwn") {
-                document.getElementById("trace_dwn").style.display = "none"
-                document.getElementById("trace_up").style.display = "block"
-                document.getElementById("custom-legend").style.height = "230px"
-                document.getElementById("tracemenu").style.display = "block"
-                document.getElementById("outer_trace").style.paddingBottom = "0px"
+            try {
+                if (event == "dwn") {
+                    if (DOM_CACHE.trace_dwn) DOM_CACHE.trace_dwn.style.display = "none";
+                    else document.getElementById("trace_dwn").style.display = "none";
+                    
+                    if (DOM_CACHE.trace_up) DOM_CACHE.trace_up.style.display = "block";
+                    else document.getElementById("trace_up").style.display = "block";
+                    
+                    if (DOM_CACHE.custom_legend) DOM_CACHE.custom_legend.style.height = "230px";
+                    else document.getElementById("custom-legend").style.height = "230px";
+                    
+                    if (DOM_CACHE.tracemenu) DOM_CACHE.tracemenu.style.display = "block";
+                    else document.getElementById("tracemenu").style.display = "block";
+                    
+                    const outerTrace = document.getElementById("outer_trace");
+                    if (outerTrace) outerTrace.style.paddingBottom = "0px";
 
-            } else {
-                document.getElementById("trace_dwn").style.display = "block"
-                document.getElementById("trace_up").style.display = "none"
-                document.getElementById("custom-legend").style.height = "40px"
-                document.getElementById("outer_trace").style.paddingBottom = "5px"
-                document.getElementById("tracemenu").style.display = "none"
-
+                } else {
+                    if (DOM_CACHE.trace_dwn) DOM_CACHE.trace_dwn.style.display = "block";
+                    else document.getElementById("trace_dwn").style.display = "block";
+                    
+                    if (DOM_CACHE.trace_up) DOM_CACHE.trace_up.style.display = "none";
+                    else document.getElementById("trace_up").style.display = "none";
+                    
+                    if (DOM_CACHE.custom_legend) DOM_CACHE.custom_legend.style.height = "40px";
+                    else document.getElementById("custom-legend").style.height = "40px";
+                    
+                    const outerTrace = document.getElementById("outer_trace");
+                    if (outerTrace) outerTrace.style.paddingBottom = "5px";
+                    
+                    if (DOM_CACHE.tracemenu) DOM_CACHE.tracemenu.style.display = "none";
+                    else document.getElementById("tracemenu").style.display = "none";
+                }
+            } catch (e) {
+                console.warn('Error in collapse_trace:', e);
             }
         }
 
@@ -2741,20 +2799,43 @@
           
         // }
 
+        // Performance: Optimized CircularArray with memory management
         function CircularArray(PersistenceLength) {
-            this.PersistenceLength = PersistenceLength;
-            // console.log("Persistence length:::::::",this.PersistenceLength)
-          }
+            this.PersistenceLength = Math.min(PersistenceLength || 5, PERF_CONFIG.MAX_BUFFER_SIZE);
+            this._lastCleanup = Date.now();
+        }
 
-          CircularArray.prototype = Object.create(Array.prototype);
+        CircularArray.prototype = Object.create(Array.prototype);
 
-          CircularArray.prototype.push = function(element) {
+        CircularArray.prototype.push = function(element) {
             Array.prototype.push.call(this, element);
-            while (this.length > this.PersistenceLength) {
-              // console.log("Persistence length:::::::",this.PersistenceLength)
-                this.shift();
-              }
-          }
+            
+            // Performance: More efficient cleanup
+            if (this.length > this.PersistenceLength) {
+                const excess = this.length - this.PersistenceLength;
+                this.splice(0, excess);
+            }
+            
+            // Performance: Periodic memory cleanup
+            const now = Date.now();
+            if (now - this._lastCleanup > PERF_CONFIG.CLEANUP_INTERVAL) {
+                this._performCleanup();
+                this._lastCleanup = now;
+            }
+        }
+
+        // Performance: Add cleanup method
+        CircularArray.prototype._performCleanup = function() {
+            if (this.length > this.PersistenceLength * 0.8) {
+                const elementsToRemove = Math.floor(this.length * 0.2);
+                this.splice(0, elementsToRemove);
+            }
+        }
+
+        // Performance: Add clear method
+        CircularArray.prototype.clear = function() {
+            this.length = 0;
+        }
 
 
 
@@ -2865,7 +2946,17 @@
         var caPersistence = new CircularArray(parseInt(Persistencelevel));
         freq_cnt= 0
 
+        // Performance: Create throttled version of websocket data processing
+        const throttledWebSocketProcessor = createThrottledFunction(function(evt) {
+            processWebSocketData(evt);
+        }, PERF_CONFIG.UPDATE_THROTTLE_MS);
+
         function websocket_data(evt) {
+            // Performance: Use throttled processing to prevent overwhelming the browser
+            throttledWebSocketProcessor(evt);
+        }
+
+        function processWebSocketData(evt) {
             dataVal = evt;
             
             if (freq_cnt <= 3){
@@ -2920,17 +3011,33 @@
             }
 
             caAverage.push(dataVal.y)
-            heatmapSeries.addIntensityValues([get_maincurve_data()])
-            // heatmapSeries.addIntensityValues([dataVal.y])
+            
+            // Performance: Use requestAnimationFrame for smooth heatmap updates
+            if (typeof requestAnimationFrame !== 'undefined') {
+                requestAnimationFrame(() => {
+                    heatmapSeries.addIntensityValues([get_maincurve_data()]);
+                });
+            } else {
+                heatmapSeries.addIntensityValues([get_maincurve_data()]);
+            }
 
             if (button_click_main == true) {
                 updateSeries(dataVal.x, dataVal.y);
-
             }
 
             //  =================== auto y axis =======================
             if (auto_Y_axis_flag == true) {
-                chart.getDefaultAxisY().setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
+                // Performance: Cache min/max calculations
+                if (!dataVal._minMax) {
+                    dataVal._minMax = {
+                        min: Math.min(...dataVal.y),
+                        max: Math.max(...dataVal.y)
+                    };
+                }
+                chart.getDefaultAxisY().setDefaultInterval({ 
+                    start: dataVal._minMax.min, 
+                    end: dataVal._minMax.max 
+                });
             }
             // else {
             //         start_y = parseInt(window.parent.document.getElementById('minY').value)
@@ -2947,27 +3054,27 @@
 
             // }
 
-            for (let key in xAxisBand) {
-                // console.log(`${key}`);
-                if (button_click_band == true) {
-                    // console.log("Hi in if ",button_click_band)
+            // Performance: Optimize band visibility updates with batch processing
+            const bandKeys = Object.keys(xAxisBand);
+            if (bandKeys.length > 0) {
+                // Performance: Use requestAnimationFrame for smooth band updates
+                requestAnimationFrame(() => {
+                    const isVisible = button_click_band;
+                    for (let i = 0; i < bandKeys.length; i++) {
+                        const key = bandKeys[i];
                         if (xAxisBand[key]) {
-                            xActualBand[key].setVisible(true)
-                            wActualBand[key].setVisible(true)
-                            xAxisBand[key].setVisible(true)
-                            wxAxisBand[key].setVisible(true)
-                            // console.log("Hi",i['channel'])
+                            // Performance: Batch visibility updates
+                            try {
+                                xActualBand[key].setVisible(isVisible);
+                                wActualBand[key].setVisible(isVisible);
+                                xAxisBand[key].setVisible(isVisible);
+                                wxAxisBand[key].setVisible(isVisible);
+                            } catch (e) {
+                                console.warn('Band visibility update failed for key:', key);
+                            }
                         }
-                }
-                else {
-                        if (xAxisBand[key]) {
-                            // console.log("Hi",i['channel'])
-                            xActualBand[key].setVisible(false)
-                            wActualBand[key].setVisible(false)
-                            xAxisBand[key].setVisible(false)
-                            wxAxisBand[key].setVisible(false)
-                        }
-                }
+                    }
+                });
             }
 
 
@@ -3209,36 +3316,100 @@
             //     avgValues.fill(0)
             // }
 
-            for (var i = 0; i <= chartMarker.length; i++) {
-
-                if (mark_data_flag == true) {
-                    for (var i = 0; i <= chartMarker.length; i++) {
+            // Performance: Optimize marker updates with throttling
+            if (mark_data_flag == true) {
+                // Performance: Use requestAnimationFrame and limit concurrent updates
+                requestAnimationFrame(() => {
+                    for (var i = 0; i < chartMarker.length; i++) {
                         if (chartMarker[i]) {
-
-                            update_marker(i)
+                            try {
+                                update_marker(i);
+                            } catch (e) {
+                                console.warn('Marker update failed for index:', i);
+                            }
                         }
                     }
-                }
+                });
             }
         }
 
 
+        // Performance: Optimize loader functions with DOM caching
         function open_loader() {
-            $('#websocket_loader').modal('show')
+            try {
+                if (DOM_CACHE.websocket_loader) {
+                    $(DOM_CACHE.websocket_loader).modal('show');
+                } else {
+                    $('#websocket_loader').modal('show');
+                }
+            } catch (e) {
+                console.warn('Failed to open loader:', e);
+            }
         }
-
 
         function close_loader() {
-            $('#websocket_loader').modal('hide')
+            try {
+                if (DOM_CACHE.websocket_loader) {
+                    $(DOM_CACHE.websocket_loader).modal('hide');
+                } else {
+                    $('#websocket_loader').modal('hide');
+                }
+            } catch (e) {
+                console.warn('Failed to close loader:', e);
+            }
         }
 
 
+        // Performance: Initialize DOM cache and setup cleanup
         $(document).ready(function () {
+            // Performance: Cache DOM elements on page load
+            cacheDOMElements();
+            
+            // Performance: Setup periodic memory cleanup
+            setInterval(function() {
+                try {
+                    // Clear old cached data periodically
+                    if (window.gc) window.gc(); // Force garbage collection if available
+                    
+                    // Clean up circular arrays
+                    if (caAverage && caAverage.length > PERF_CONFIG.MAX_BUFFER_SIZE * 1.5) {
+                        caAverage.clear();
+                    }
+                    if (caMin && caMin.length > PERF_CONFIG.MAX_BUFFER_SIZE * 1.5) {
+                        caMin.clear();
+                    }
+                    if (caPersistence && caPersistence.length > PERF_CONFIG.MAX_BUFFER_SIZE * 1.5) {
+                        caPersistence.clear();
+                    }
+                } catch (e) {
+                    console.warn('Memory cleanup error:', e);
+                }
+            }, PERF_CONFIG.CLEANUP_INTERVAL);
+            
             open_loader()
             setTimeout(function () {
-                window.parent.iq_data()
-
+                if (window.parent && window.parent.iq_data) {
+                    window.parent.iq_data();
+                }
             }, 500)
+        });
+
+        // Performance: Add memory cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            try {
+                // Clear all circular arrays
+                if (caAverage) caAverage.clear();
+                if (caMin) caMin.clear();
+                if (caPersistence) caPersistence.clear();
+                if (caMaincurve) caMaincurve.clear();
+                
+                // Clear DOM cache
+                Object.keys(DOM_CACHE).forEach(key => {
+                    DOM_CACHE[key] = null;
+                });
+            } catch (e) {
+                console.warn('Cleanup error:', e);
+            }
         });
 
         collapse_trace("dwn")
