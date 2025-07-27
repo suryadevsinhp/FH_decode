@@ -1,0 +1,899 @@
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrum and Water fall</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
+    <style>
+        #lcjs-auto-flexbox{
+            background-color: transparent;
+        }
+
+        canvas{
+            background-color: transparent;
+        }
+        
+        body{
+            background-color: transparent;
+        }
+
+        .full-screen-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 29px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+        }
+
+        .screen-shot-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 42px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+        }
+
+        #trace_dwn {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+        }
+
+        #trace_up {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+        }
+
+        #outer_trace {
+            padding-top: 2px;
+        }
+
+        #custom-legend {
+            background:rgb(0, 0, 0, 38%);
+            padding: 10px;
+            border: 1px solid #FFFFFF;
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 22px;
+            right: 30px;
+            z-index: 1000;
+            height: 210px;
+            width: 116px;
+            transition: width 2s, height 2s, background-color 2s;
+        }
+
+        #custom_legend_camera {
+            background: transparent;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            z-index: 1000;
+            height: auto;
+            width: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: small;
+        }
+
+        .legend-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            outline: none;
+            cursor: pointer;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .legend-checkbox:checked::after {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d79c3c;
+            position: absolute;
+        }
+
+        .openwebrx-dialog {
+            background-color: #0e1011;
+        }
+
+        .openwebrx-text {
+            font-weight: bolder;
+            font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
+        }
+    </style>
+    <!-- Scripts loaded asynchronously for better performance -->
+    <script async src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script async src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+</head>
+
+<body>
+    <!-- Loader Modal -->
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog" aria-labelledby="MultipleDeleteTargetModelLabel">
+        <div class="modal-dialog modal-dialog-centered text-center " role="document">
+            <div class="modal-body ">
+                <div class="m-0 px-0 py-5" style="background-color:white">
+                    <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Full Screen Controls -->
+    <div class="full-screen-div ml-1">
+        <div class="">
+            <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
+                style="color: #ffffff; cursor: pointer;" onclick="full_screen()">
+                <i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                    class='fas fa-expand-arrows-alt'></i>
+            </label>
+        </div>
+    </div>
+
+    <!-- Custom Legend -->
+    <div id="custom-legend">
+        <div id="outer_trace">
+            <label for="" id="traces_label">Traces</label>
+            <i class="fa fa-caret-down" id="trace_dwn" style="display: block;" onclick="collapse_trace('dwn')"></i>
+            <i class="fa fa-caret-up" id="trace_up" style="display:none;" onclick="collapse_trace('up')"></i>
+
+            <div id="tracemenu" style="display:none;">
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="main_curve" onclick="show_main_curve()">
+                    <label for="main_curve" class="main_curve" style="color: green;" id="main_curve_label">Main-Curve</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="avg_hold" checked onclick="show_traces_avg()">
+                    <label for="avg_hold" class="avg_hold" id="avg_hold_label">Avg-hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="max_hold" onclick="show_traces_max()">
+                    <label for="max_hold" class="max_hold" style="color: #8300c4;">Max-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="min_hold" onclick="show_traces_min()">
+                    <label for="min_hold" class="min_hold" style="color: #37a6de">Min-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="persistence_data_btn" checked onclick="show_traces_persis()">
+                    <label for="persistence_data_btn" class="peak_data_btn" style="color: red;">Persistence</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="peak_data_btn" checked onclick="show_peak_data()">
+                    <label for="peak_data_btn" class="peak_data_btn" style="color: #66cc35;">Peaks</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="mark_data_btn" checked onclick="show_mark_data()">
+                    <label for="mark_data_btn" id="marker_color_label" class="mark_data_btn" style="color:#d7d6db">Markers</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="band" checked onclick="show_traces_band()">
+                    <b><label for="band" id="band_label" class="mark_data_btn" style="color:#ff7800">Demod</label></b>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Camera Controls -->
+    <div id="custom_legend_camera">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot" id="screenshot_img">
+            <i class="fa fa-camera" aria-hidden="true"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv" id="csv_export">
+            <i class="fa fa-solid fa-file-csv"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
+            title="ChartView" onclick="window.parent.full_screen_chart()">
+            <i id="full_screen_icon" class="fa fa-solid fa-expand"></i>
+        </button>
+    </div>
+
+    <!-- Bookmark Dialog -->
+    <div id="openwebrx-dialog-bookmark" class="openwebrx-dialog card" style="display:none;width: fit-content;border: 1px solid;">
+        <form>
+            <div class="form-field ">
+                <h6 class="openwebrx-text">
+                    <center>Demodulator</center>
+                </h6>
+            </div>
+            <div class="form-field openwebrx-text">
+                <label for="name" class="tx-15">Name:</label>
+                <input type="text" class="tx-bold" id="name" name="name" value="Frequency">
+            </div>
+            <div class="form-field openwebrx-text">
+                <label for="frequency" class="tx-15">Frequency:</label>
+                <div style="display:flex;">
+                    <input type="number" id="frequency" value=95 name="frequency">
+                    <select name="unit" id="unit" onclick="changes_dropdown_value(this)">
+                        <option value="khz">kHz</option>
+                        <option value="mhz">MHz</option>
+                        <option value="ghz">GHz</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-field openwebrx-text">
+                <label for="modulation" class="tx-15">Modulation:</label>
+                <select name="modulation" id="modulation" onclick="change_mod(this.value)">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+            <div class="buttons " style="border-top:none !important;">
+                <label></label>
+                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('am')">AM</div>
+                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('nbfm')">NBFM</div>
+                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('lsb')">LSB</div>
+                <div class="openwebrx-button tx-15" onclick="change_mod('dmr')">DMR</div>
+            </div>
+            <div class="form-field openwebrx-text">
+                <label for="modulation" class="tx-15">Bandwidth:</label>
+                <input type="text" id="sample_rate_bm" name="sample_rate_bm" value="100">
+                <select name="unit" id="unit">
+                    <option value="khz">kHz</option>
+                </select>
+            </div>
+            <div class="form-field openwebrx-text">
+                <label for="name">Colour:</label>
+                <input type="color" id="b_color" name="b_color" value="#e66465">
+                <div class="openwebrx-button" onclick="getRandomColor()">Generate</div>
+            </div>
+            <div class="buttons">
+                <div class="openwebrx-button" onclick="get_bookmark_data_clear()">Cancel</div>
+                <div class="openwebrx-button" onclick="get_bookmark_data()">Ok</div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Main Application Script -->
+    <script type="text/javascript">
+        'use strict';
+
+        // Performance optimization: Use const for immutable values and let for mutable ones
+        const PERFORMANCE_CONFIG = {
+            MAX_DATA_POINTS: 10000,
+            UPDATE_THROTTLE_MS: 50,
+            CLEANUP_INTERVAL_MS: 5000,
+            MAX_CIRCULAR_BUFFER_SIZE: 300,
+            DEBOUNCE_DELAY_MS: 250
+        };
+
+        // Cache DOM elements to avoid repeated queries
+        const DOM_CACHE = {
+            loader: null,
+            customLegend: null,
+            tracemenu: null,
+            traceDown: null,
+            traceUp: null,
+            init() {
+                this.loader = document.getElementById('websocket_loader');
+                this.customLegend = document.getElementById('custom-legend');
+                this.tracemenu = document.getElementById('tracemenu');
+                this.traceDown = document.getElementById('trace_dwn');
+                this.traceUp = document.getElementById('trace_up');
+            }
+        };
+
+        // Performance monitoring
+        class PerformanceMonitor {
+            constructor() {
+                this.frameCount = 0;
+                this.lastFrameTime = performance.now();
+                this.fpsHistory = [];
+            }
+
+            updateFrame() {
+                const now = performance.now();
+                const fps = 1000 / (now - this.lastFrameTime);
+                this.fpsHistory.push(fps);
+                
+                // Keep only last 100 frames
+                if (this.fpsHistory.length > 100) {
+                    this.fpsHistory.shift();
+                }
+                
+                // Log warning if FPS drops below 30
+                if (fps < 30) {
+                    console.warn('Performance warning: FPS dropped to', fps.toFixed(2));
+                }
+                
+                this.lastFrameTime = now;
+                this.frameCount++;
+            }
+
+            getAverageFPS() {
+                if (this.fpsHistory.length === 0) return 0;
+                return this.fpsHistory.reduce((a, b) => a + b) / this.fpsHistory.length;
+            }
+        }
+
+        const performanceMonitor = new PerformanceMonitor();
+
+        // Optimized Circular Array with memory management
+        class OptimizedCircularArray extends Array {
+            constructor(maxLength) {
+                super();
+                this.maxLength = Math.min(maxLength, PERFORMANCE_CONFIG.MAX_CIRCULAR_BUFFER_SIZE);
+                this._lastCleanup = Date.now();
+            }
+
+            push(element) {
+                super.push(element);
+                
+                // More efficient cleanup
+                if (this.length > this.maxLength) {
+                    this.splice(0, this.length - this.maxLength);
+                }
+
+                // Periodic memory cleanup
+                const now = Date.now();
+                if (now - this._lastCleanup > PERFORMANCE_CONFIG.CLEANUP_INTERVAL_MS) {
+                    this._cleanup();
+                    this._lastCleanup = now;
+                }
+            }
+
+            _cleanup() {
+                // Force garbage collection of old elements
+                if (this.length > this.maxLength * 0.8) {
+                    const elementsToRemove = Math.floor(this.length * 0.2);
+                    this.splice(0, elementsToRemove);
+                }
+            }
+
+            clear() {
+                this.length = 0;
+            }
+        }
+
+        // Throttled update function to prevent overwhelming the browser
+        class UpdateThrottler {
+            constructor(delay = PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS) {
+                this.delay = delay;
+                this.lastUpdate = 0;
+                this.pendingUpdate = null;
+            }
+
+            throttle(func) {
+                const now = performance.now();
+                
+                if (now - this.lastUpdate >= this.delay) {
+                    func();
+                    this.lastUpdate = now;
+                } else if (!this.pendingUpdate) {
+                    this.pendingUpdate = setTimeout(() => {
+                        func();
+                        this.lastUpdate = performance.now();
+                        this.pendingUpdate = null;
+                    }, this.delay - (now - this.lastUpdate));
+                }
+            }
+
+            immediate(func) {
+                if (this.pendingUpdate) {
+                    clearTimeout(this.pendingUpdate);
+                    this.pendingUpdate = null;
+                }
+                func();
+                this.lastUpdate = performance.now();
+            }
+        }
+
+        // Debounced function for expensive operations
+        function debounce(func, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Application state and configuration
+        let appState = {
+            // Trace visibility flags
+            button_click_max: false,
+            button_click_min: false,
+            button_click_avg: true,
+            button_click_main: false,
+            button_click_band: true,
+            button_click_persistence: false,
+            
+            // Data processing flags
+            auto_threshold_flag: false,
+            auto_Y_axis_flag: false,
+            peak_data_flag: true,
+            mark_data_flag: true,
+            full_screen_flag: false,
+            
+            // Counters and data
+            counter: 0,
+            counter_1: 0,
+            time_counter: 0,
+            freq_cnt: 0,
+            clicks: 0
+        };
+
+        // Initialize throttlers
+        const chartUpdateThrottler = new UpdateThrottler(PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS);
+        const markerUpdateThrottler = new UpdateThrottler(100);
+
+        // Global variables (converted to more efficient structure)
+        const chartData = {
+            wxAxisBand: new Map(),
+            xAxisBand: new Map(),
+            band_center_freq: new Map(),
+            wActualBand: new Map(),
+            xActualBand: new Map(),
+            bandLine: new Map(),
+            wBandLine: new Map(),
+            band_meta: new Map(),
+            chartMarker: new Array(5),
+            marker_label: new Array(5),
+            addMarkerData: new Array(),
+            pos_x: [5],
+            new_pos: [5]
+        };
+
+        // Application configuration from server
+        const config = {
+            active_port: "{{active_port}}",
+            peak_port: "{{peak_port}}",
+            page_theme: "{{theme_mode}}",
+            active_channel: "{{active_channel}}",
+            active_mode: "{{active_mode}}",
+            data: JSON.parse('{{ spectrum_data | tojson | safe}}')
+        };
+
+        // Optimized data processing
+        const dataProcessor = {
+            // Cached calculation results
+            _freqCache: new Map(),
+            _sampleCache: new Map(),
+
+            calculateFrequencies() {
+                const cacheKey = `${config.data.freq}_${config.data.start_frequency}_${config.data.stop_frequency}`;
+                
+                if (this._freqCache.has(cacheKey)) {
+                    return this._freqCache.get(cacheKey);
+                }
+
+                const result = {
+                    freq: config.data.freq / 1e6,
+                    start_freq: config.data.start_frequency / 1e6,
+                    stop_freq: config.data.stop_frequency / 1e6,
+                    start_WF_freq: config.data.start_frequency / 1e6,
+                    stop_WF_freq: config.data.stop_frequency / 1e6
+                };
+
+                this._freqCache.set(cacheKey, result);
+                return result;
+            },
+
+            calculateSampleData() {
+                const cacheKey = `${config.data.fft_points}_${config.data.bandwidth}_${config.data.sample_rate}`;
+                
+                if (this._sampleCache.has(cacheKey)) {
+                    return this._sampleCache.get(cacheKey);
+                }
+
+                const sample_length = parseInt(config.data.fft_points);
+                const actual_bw = config.data.bandwidth;
+                const sample_rate = config.data.sample_rate;
+                const diff = sample_rate - actual_bw;
+                const cut_n = (sample_length * (diff / 2)) / sample_rate;
+                const dataSampleSize = (sample_length - (cut_n * 2)).toFixed(0);
+
+                const result = {
+                    sample_length,
+                    actual_bw,
+                    sample_rate,
+                    diff,
+                    cut_n,
+                    dataSampleSize: parseInt(dataSampleSize)
+                };
+
+                this._sampleCache.set(cacheKey, result);
+                return result;
+            }
+        };
+
+        // Initialize frequency and sample data
+        const frequencies = dataProcessor.calculateFrequencies();
+        const sampleData = dataProcessor.calculateSampleData();
+
+        // Extract calculated values
+        const { freq, start_freq, stop_freq, start_WF_freq, stop_WF_freq } = frequencies;
+        const { sample_length, actual_bw, sample_rate, diff, cut_n, dataSampleSize } = sampleData;
+
+        console.log("Optimized calculations:", {
+            sample_length,
+            diff,
+            dataSampleSize,
+            cut_n
+        });
+
+        // Optimized configuration objects
+        const constants = {
+            minBandSize: 100000,
+            maxBandSize: 0.2,
+            heatmapMinTimeStepMs: 1,
+            Max_cycles: 5,
+            avg_max_cycle: 30
+        };
+
+        const typeOfMode = new Map([
+            ["fm", "audio"], ["wfm", "audio"], ["drm", "audio"], ["am", "audio"],
+            ["lsb", "audio"], ["usb", "audio"], ["dmr", "data"], ["dstar", "audio"],
+            ["nxdn", "audio"], ["ysf", "audio"], ["m17", "audio"], ["nbfm", "audio"]
+        ]);
+
+        const unitConversion = new Map([
+            ["khz", 1e3], ["mhz", 1e6], ["ghz", 1e9]
+        ]);
+
+        const unitConversion1 = new Map([
+            ["Hz", 1], ["KHz", 1e3], ["MHz", 1e6], ["GHz", 1e9]
+        ]);
+
+        // Performance optimized waterfall speed configuration
+        let viewMs = 100;
+        try {
+            const wfSpeed = window.parent?.document?.getElementById('waterfall_speed')?.value;
+            switch (wfSpeed) {
+                case 'fast': viewMs = 100; break;
+                case 'medium': viewMs = 1024; break;
+                case 'slow': viewMs = 2048; break;
+                default: viewMs = 100; break;
+            }
+        } catch (error) {
+            viewMs = 100;
+        }
+
+        // Initialize DOM cache when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            DOM_CACHE.init();
+        });
+
+        // Optimized modulation type population
+        function modulation_type() {
+            const modulations = [
+                'fm', 'nbfm', 'wbfm', 'am', 'lsb', 'usb', 'dmr', 'gsm',
+                '8psk', 'bpsk', 'qpsk', 'dqpsk', 'qam16', 'gmsk', 'fsk',
+                'msk', 'ofdm', 'radar_analysis'
+            ];
+
+            let innerHTML = modulations.map(mod => 
+                `<option value="${mod}">${mod.toUpperCase()}</option>`
+            ).join('');
+
+            if (config.data.sample_rate / 1e6 >= 10) {
+                innerHTML += '<option value="drone_detection">DRONE DETECTION</option>';
+            }
+
+            const modulationSelect = document.getElementById('modulation');
+            if (modulationSelect) {
+                modulationSelect.innerHTML = innerHTML;
+            }
+        }
+
+        // Optimized dropdown value change handler
+        const changes_dropdown_value = debounce(function(elem) {
+            const currentValue = appState.freq_current_offset_dropdown_value;
+            const value = parseFloat(document.getElementById("frequency").value);
+            appState.freq_current_offset_dropdown_value = elem.value;
+
+            if (currentValue !== elem.value) {
+                let total;
+                const conversions = {
+                    'mhz_to_khz': value * 1e3,
+                    'mhz_to_ghz': value / 1e3,
+                    'khz_to_mhz': value / 1e3,
+                    'khz_to_ghz': value / 1e6,
+                    'ghz_to_mhz': value * 1e3,
+                    'ghz_to_khz': value * 1e6
+                };
+
+                const conversionKey = `${currentValue}_to_${elem.value}`;
+                total = conversions[conversionKey] || value;
+
+                const frequencyInput = document.getElementById("frequency");
+                if (frequencyInput) {
+                    frequencyInput.value = total.toFixed(conversionKey.includes('khz') ? 2 : 0);
+                }
+            }
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        // Optimized trace collapse function
+        function collapse_trace(event) {
+            if (!DOM_CACHE.customLegend || !DOM_CACHE.tracemenu) return;
+
+            const isDown = event === "dwn";
+            
+            DOM_CACHE.traceDown.style.display = isDown ? "none" : "block";
+            DOM_CACHE.traceUp.style.display = isDown ? "block" : "none";
+            DOM_CACHE.customLegend.style.height = isDown ? "230px" : "40px";
+            DOM_CACHE.tracemenu.style.display = isDown ? "block" : "none";
+            
+            const outerTrace = document.getElementById("outer_trace");
+            if (outerTrace) {
+                outerTrace.style.paddingBottom = isDown ? "0px" : "5px";
+            }
+        }
+
+        // Optimized WebSocket data processing
+        function websocket_data(evt) {
+            performanceMonitor.updateFrame();
+            
+            // Use throttled updates for expensive operations
+            chartUpdateThrottler.throttle(() => {
+                processWebSocketData(evt);
+            });
+        }
+
+        function processWebSocketData(dataVal) {
+            // Early exit if no valid data
+            if (!dataVal || !dataVal.y || !Array.isArray(dataVal.y)) {
+                return;
+            }
+
+            appState.freq_cnt = Math.min(appState.freq_cnt + 1, 3);
+
+            if (appState.freq_cnt <= 3) {
+                console.log("Data info:", {
+                    len: dataVal.y.length,
+                    freq_start: dataVal.x[0],
+                    freq_stop: dataVal.x[dataVal.x.length - 1],
+                    power_first: dataVal.y[0],
+                    power_last: dataVal.y[dataVal.y.length - 1]
+                });
+            }
+
+            // Process data with optimized circular arrays
+            if (window.caMaincurve) {
+                window.caMaincurve.push(dataVal.y);
+            }
+
+            // Close loader when data is available
+            if (dataVal.hasOwnProperty('y') && DOM_CACHE.loader) {
+                close_loader();
+            }
+
+            // Reload bands only once after initial data
+            if (appState.freq_cnt === 3) {
+                reload_bands();
+                reconfig_lut();
+            }
+
+            // Process different data types with throttling
+            processPeakData(dataVal);
+            processThresholdData(dataVal);
+            processTraceData(dataVal);
+            processMarkerData(dataVal);
+            processBandData(dataVal);
+        }
+
+        function processPeakData(dataVal) {
+            if (!appState.peak_data_flag || !dataVal.auto_data) return;
+            
+            const peaks = Array.isArray(dataVal.auto_data) ? dataVal.auto_data : [];
+            if (window.updateSeriespeak) {
+                window.updateSeriespeak(peaks);
+            }
+        }
+
+        function processThresholdData(dataVal) {
+            if (!appState.auto_threshold_flag && !window.parent?.document?.getElementById("auto_threshold")?.checked) {
+                return;
+            }
+
+            const average = dataVal.y.reduce((a, b) => a + b) / dataVal.y.length;
+            const roundedAvg = Math.round(average);
+            
+            if (window.set_threshold1) {
+                window.set_threshold1(roundedAvg);
+            }
+        }
+
+        function processTraceData(dataVal) {
+            // Process different trace types based on state
+            if (appState.button_click_main && window.updateSeries) {
+                window.updateSeries(dataVal.x, dataVal.y);
+            }
+
+            if (appState.auto_Y_axis_flag && window.chart) {
+                const minY = Math.min(...dataVal.y);
+                const maxY = Math.max(...dataVal.y);
+                window.chart.getDefaultAxisY().setDefaultInterval({ start: minY, end: maxY });
+            }
+
+            // Process specific trace types with optimized circular arrays
+            if (appState.button_click_min && window.caMin) {
+                window.caMin.push(dataVal.y);
+                if (window.updateMin && window.get_min_hold) {
+                    window.updateMin(dataVal.x, window.get_min_hold());
+                }
+            }
+
+            if (appState.button_click_avg && window.caAverage) {
+                window.caAverage.push(dataVal.y);
+                if (window.updateAvg && window.get_Average_data) {
+                    window.updateAvg(dataVal.x, window.get_Average_data());
+                }
+            }
+
+            if (appState.button_click_persistence && window.caPersistence) {
+                window.caPersistence.push(dataVal.y);
+                if (window.updatePersistence && window.get_Persistence_hold) {
+                    window.updatePersistence(dataVal.x, window.get_Persistence_hold());
+                }
+            }
+        }
+
+        function processMarkerData(dataVal) {
+            if (!appState.mark_data_flag) return;
+
+            markerUpdateThrottler.throttle(() => {
+                for (let i = 0; i < chartData.chartMarker.length; i++) {
+                    if (chartData.chartMarker[i] && window.update_marker) {
+                        window.update_marker(i);
+                    }
+                }
+            });
+        }
+
+        function processBandData(dataVal) {
+            // Update band visibility based on state
+            for (const [key, band] of chartData.xAxisBand) {
+                if (band) {
+                    const isVisible = appState.button_click_band;
+                    
+                    const elements = [
+                        chartData.xActualBand.get(key),
+                        chartData.wActualBand.get(key),
+                        chartData.xAxisBand.get(key),
+                        chartData.wxAxisBand.get(key)
+                    ];
+
+                    elements.forEach(element => {
+                        if (element && element.setVisible) {
+                            element.setVisible(isVisible);
+                        }
+                    });
+                }
+            }
+        }
+
+        // Optimized loader functions
+        function open_loader() {
+            if (DOM_CACHE.loader) {
+                $('#websocket_loader').modal('show');
+            }
+        }
+
+        function close_loader() {
+            if (DOM_CACHE.loader) {
+                $('#websocket_loader').modal('hide');
+            }
+        }
+
+        // Initialize when scripts are loaded
+        function initializeApplication() {
+            try {
+                modulation_type();
+                
+                // Initialize optimized circular arrays
+                const avgLevel = window.parent?.document?.getElementById('avg_input')?.value || 5;
+                const minLevel = window.parent?.document?.getElementById('min_hold_value')?.value || 5;
+                const persistenceLevel = window.parent?.document?.getElementById('Persistence_hold_value')?.value || 5;
+
+                window.caAverage = new OptimizedCircularArray(parseInt(avgLevel));
+                window.caMin = new OptimizedCircularArray(parseInt(minLevel));
+                window.caPersistence = new OptimizedCircularArray(parseInt(persistenceLevel));
+                window.caMaincurve = new OptimizedCircularArray(5);
+
+                // Set up performance monitoring
+                setInterval(() => {
+                    const avgFPS = performanceMonitor.getAverageFPS();
+                    if (avgFPS < 30) {
+                        console.warn('Performance degraded. Average FPS:', avgFPS.toFixed(2));
+                    }
+                }, 5000);
+
+                console.log('Application initialized with performance optimizations');
+                
+            } catch (error) {
+                console.error('Error initializing application:', error);
+            }
+        }
+
+        // Wait for all scripts to load before initializing
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', initializeApplication);
+        } else {
+            initializeApplication();
+        }
+
+        // Memory cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            // Clear all circular arrays
+            if (window.caAverage) window.caAverage.clear();
+            if (window.caMin) window.caMin.clear();
+            if (window.caPersistence) window.caPersistence.clear();
+            if (window.caMaincurve) window.caMaincurve.clear();
+
+            // Clear data caches
+            dataProcessor._freqCache.clear();
+            dataProcessor._sampleCache.clear();
+            
+            console.log('Memory cleanup completed');
+        });
+
+        // Export key functions and objects for backward compatibility
+        window.optimizedApp = {
+            appState,
+            chartData,
+            config,
+            dataProcessor,
+            performanceMonitor,
+            collapse_trace,
+            websocket_data,
+            open_loader,
+            close_loader,
+            changes_dropdown_value
+        };
+
+    </script>
+
+    <!-- Additional optimized functions will be loaded here -->
+    <script>
+        // Placeholder for remaining optimized functions
+        // This section will contain the rest of the optimized chart and waterfall logic
+        console.log('Spectrum Waterfall optimized version loaded');
+        
+        // Initialize the rest of the application
+        $(document).ready(function () {
+            open_loader();
+            setTimeout(function () {
+                if (window.parent && window.parent.iq_data) {
+                    window.parent.iq_data();
+                }
+            }, 500);
+        });
+    </script>
+</body>
+
+{% endblock %}
