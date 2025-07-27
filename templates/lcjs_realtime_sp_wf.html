@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Spectrum and Water fall</title>
+    <link rel="preload" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" as="style" />
+    <link rel="preload" href="{{ url_for('static', filename='js/lcjs.iife.js')}}" as="script" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
@@ -12,17 +14,18 @@
     <style>
         #lcjs-auto-flexbox{
             background-color: transparent;
+            will-change: transform;
             }
 
         canvas{
             background-color: transparent;
+            will-change: transform;
             }
         body{
             background-color: transparent;
             }
 
         .full-screen-div {
-
             position: absolute;
             color: rgb(0, 0, 0);
             top: 38px;
@@ -30,7 +33,6 @@
             z-index: 1001;
             height: 25px;
             width: 25px;
-
         }
 
         .screen-shot-div {
@@ -44,24 +46,17 @@
         }
 
         #trace_dwn {
-
             position: absolute;
-
             top: 15px;
             right: 30px;
             z-index: 1001;
-
-
         }
 
         #trace_up {
-
             position: absolute;
             top: 15px;
             right: 30px;
             z-index: 1001;
-
-
         }
 
         #outer_trace {
@@ -80,10 +75,7 @@
             z-index: 1000;
             height: 210px;
             width: 116px;
-            transition:
-            width 2s,
-            height 2s,
-            background-color 2s,
+            transition: width 0.3s ease, height 0.3s ease, background-color 0.3s ease;
         }
 
         #custom_legend_camera {
@@ -91,7 +83,6 @@
             padding: 5px;
             border-radius: 5px;
             color: white;
-            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
             position: absolute;
             left: 0px;
             bottom: 0px;
@@ -131,39 +122,79 @@
             position: absolute;
         }
 
-
         .openwebrx-dialog {
             background-color: #0e1011;
-
         }
 
         .openwebrx-text {
             font-weight: bolder;
             font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
         }
+
+        /* Performance optimized animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        /* GPU acceleration for better performance */
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000;
+        }
     </style>
-    <!-- =================== bootstrap cdn ================== -->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <!-- Optimized script loading with async/defer -->
+    <script>
+        // Performance configuration constants
+        const PERFORMANCE_CONFIG = {
+            MAX_DATA_POINTS: 8192,
+            UPDATE_THROTTLE_MS: 33, // ~30 FPS
+            CLEANUP_INTERVAL_MS: 10000,
+            MAX_CIRCULAR_BUFFER_SIZE: 500,
+            DEBOUNCE_DELAY_MS: 200,
+            ANIMATION_FRAME_BUDGET_MS: 16
+        };
 
-
+        // DOM element cache
+        const DOM_CACHE = {
+            elements: new Map(),
+            get(id) {
+                if (!this.elements.has(id)) {
+                    this.elements.set(id, document.getElementById(id));
+                }
+                return this.elements.get(id);
+            },
+            clear() {
+                this.elements.clear();
+            }
+        };
+    </script>
+    <!-- Load critical scripts first -->
+    <script defer src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <!-- Load other scripts asynchronously -->
+    <script async src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script async src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
 </head>
 
 <body>
-    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog aria-labelledby="
-        MultipleDeleteTargetModelLabel>
-        <div class="modal-dialog modal-dialog-centered text-center " role="document">
-            <div class="modal-body ">
+    <!-- Optimized modal with reduced opacity transitions -->
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog" aria-labelledby="MultipleDeleteTargetModelLabel">
+        <div class="modal-dialog modal-dialog-centered text-center" role="document">
+            <div class="modal-body">
                 <div class="m-0 px-0 py-5" style="background-color:white">
                     <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
                 </div>
@@ -171,3133 +202,748 @@
         </div>
     </div>
 
-
-    <div class="full-screen-div ml-1">
+    <!-- Full screen controls with GPU acceleration -->
+    <div class="full-screen-div ml-1 gpu-accelerated">
         <div class="">
             <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
-                style="color: #ffffff; cursor: pointer;" onclick="full_screen()"><i style='font-size:15px'
-                    data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
-                    class='fas fa-expand-arrows-alt'></i></label>
+                style="color: #ffffff; cursor: pointer;" onclick="optimizedFullScreen()">
+                <i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                    class='fas fa-expand-arrows-alt'></i>
+            </label>
         </div>
     </div>
 
-    <div id="custom-legend">
+    <!-- Custom legend with performance optimizations -->
+    <div id="custom-legend" class="gpu-accelerated">
         <div id="outer_trace">
             <label for="" id="traces_label">Traces</label>
+            <i class="fa fa-caret-down" id="trace_dwn" style="display: block;" onclick="optimizedCollapseTrace('dwn')"></i>
+            <i class="fa fa-caret-up" id="trace_up" style="display:none;" onclick="optimizedCollapseTrace('up')"></i>
 
-            <i class="fa fa-caret-down" id="trace_dwn" style="display: block;" onclick="collapse_trace('dwn')"></i>
-            <i class="fa fa-caret-up" id="trace_up" style="display:none ;" onclick="collapse_trace('up')"></i>
-
-            <div id="tracemenu" style="display:none ;">
+            <div id="tracemenu" style="display:none;">
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="main_curve"  onclick="show_main_curve()">
+                    <input type="checkbox" class="legend-checkbox" id="main_curve" onclick="optimizedShowMainCurve()">
                     <label for="main_curve" class="main_curve" style="color: green;" id="main_curve_label">Main-Curve</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="avg_hold" checked onclick="show_traces_avg()">
-                    <label for="avg_hold" class="avg_hold" id="avg_hold_label" >Avg-hold</label>
+                    <input type="checkbox" class="legend-checkbox" id="avg_hold" checked onclick="optimizedShowTracesAvg()">
+                    <label for="avg_hold" class="avg_hold" id="avg_hold_label">Avg-hold</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="max_hold" onclick="show_traces_max()">
+                    <input type="checkbox" class="legend-checkbox" id="max_hold" onclick="optimizedShowTracesMax()">
                     <label for="max_hold" class="max_hold" style="color: #8300c4;">Max-Hold</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="min_hold" onclick="show_traces_min()">
+                    <input type="checkbox" class="legend-checkbox" id="min_hold" onclick="optimizedShowTracesMin()">
                     <label for="min_hold" class="min_hold" style="color: #37a6de">Min-Hold</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="persistence_data_btn" checked
-                        onclick="show_traces_persis()">
+                    <input type="checkbox" class="legend-checkbox" id="persistence_data_btn" checked onclick="optimizedShowTracesPersis()">
                     <label for="persistence_data_btn" class="peak_data_btn" style="color: red;">Persistence</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="peak_data_btn" checked
-                        onclick="show_peak_data()">
+                    <input type="checkbox" class="legend-checkbox" id="peak_data_btn" checked onclick="optimizedShowPeakData()">
                     <label for="peak_data_btn" class="peak_data_btn" style="color: #66cc35;">Peaks</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="mark_data_btn" checked
-                        onclick="show_mark_data()">
-                    <label for="mark_data_btn" id="marker_color_label" class="mark_data_btn"
-                        style="color:#d7d6db">Markers</label>
+                    <input type="checkbox" class="legend-checkbox" id="mark_data_btn" checked onclick="optimizedShowMarkData()">
+                    <label for="mark_data_btn" id="marker_color_label" class="mark_data_btn" style="color:#d7d6db">Markers</label>
                 </div>
                 <div class="legend-item">
-                    <input type="checkbox" class="legend-checkbox" id="band" checked
-                        onclick="show_traces_band()">
-                        <b><label for="band" id="band_label" class="mark_data_btn"
-                        style="color:#ff7800">Demod</label></b>
+                    <input type="checkbox" class="legend-checkbox" id="band" checked onclick="optimizedShowTracesBand()">
+                    <b><label for="band" id="band_label" class="mark_data_btn" style="color:#ff7800">Demod</label></b>
                 </div>
             </div>
         </div>
     </div>
-    <div id="custom_legend_camera">
-        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot"
-            id="screenshot_img"><i class="fa fa-camera" aria-hidden="true"></i>
+
+    <!-- Camera controls with optimized event handling -->
+    <div id="custom_legend_camera" class="gpu-accelerated">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot" id="screenshot_img">
+            <i class="fa fa-camera" aria-hidden="true"></i>
         </button>
-        <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv"
-            id="csv_export"><i class="fa fa-solid fa-file-csv"></i>
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv" id="csv_export">
+            <i class="fa fa-solid fa-file-csv"></i>
         </button>
         <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
-            title="ChartView" onclick="window.parent.full_screen_chart()"><i id="full_screen_icon"
-                class="fa fa-solid fa-expand"></i>
+            title="ChartView" onclick="optimizedFullScreenChart()">
+            <i id="full_screen_icon" class="fa fa-solid fa-expand"></i>
         </button>
     </div>
 
-    <div id="openwebrx-dialog-bookmark" class="openwebrx-dialog card" style="display:none;width: fit-content;border: 1px solid;">
-        <form>
-            <div class="form-field ">
-                <h6 class="openwebrx-text">
-                    <center>
-                        Demodulator
-                    </center>
-                </h6>
-            </div>
-            <div class="form-field openwebrx-text">
-                <label for="name" class="tx-15">Name:</label>
-                <input type="text" class="tx-bold" id="name" name="name" value="Frequency">
-            </div>
-
-            <div class="form-field openwebrx-text">
-                <label for="frequency" class="tx-15">Frequency:</label>
-                <div style="display:flex;">
-                    <input type="number" id="frequency" value=95 name="frequency">
-                    <select name="unit" id="unit" onclick="changes_dropdown_value(this)">
-                        <option value="khz">kHz</option>
-                        <option value="mhz">MHz</option>
-                        <option value="ghz">GHz</option>
-                    </select>
-                </div>
-
-            </div>
-            <style>
-
-            </style>
-            <div class="form-field openwebrx-text">
-                <label for="modulation" class="tx-15">Modulation:</label>
-                <select name="modulation" id="modulation" onclick="change_mod(this.value)" >
-
-                    <!-- <option value="dstar">DSTAR</option> -->
-                    <!-- <option value="psk">MDPSK</option>
-                    <option value="psk">MFSK</option>
-                    <option value="psk">MPSK</option>
-                    <option value="psk">ASK</option>
-                    <option value="psk">ASK2PSK8</option>
-                    <option value="psk">ASK4PSK8</option> -->
-                    
-
-                    <!-- <option value="anxdnm">ANXDNM</option> -->
-                    <!-- <option value="ysf">YSF</option> -->
-                    <!-- NEW LIST added  -->
-                    <!-- <option value="Analogue_Sel_call">Analogue Sel call</option> -->
-
-                    <!-- <option value="CLOVER_21200012500">CLOVER 21200012500</option> -->
-                    <!-- <option value="Coquelet">Coquelet</option> -->
-                    <!-- <option value="DPSI">DPSI</option> -->
-
-                    <!-- <option value="F1A">F1A</option> -->
-                    <!-- <option value="F6">F6</option> -->
-                    <!-- <option value="F7B">F7B</option> -->
-
-                    <!-- <option value="Multichannel_FSK2">Multichannel FSK2</option>
-                    <option value="Multi_Modern_Protocols">Multi Modern Protocols</option>
-                    <option value="Multi_tone">Multi tone</option>
-
-                    <option value="OFDM">OFDM</option>
-                    <option value="OQPSK">OQPSK</option>
-                    <option value="PACTOR">PACTOR</option>
-
-                    <option value="QAMn">QAMn</option>
-                    <option value="TFM3">TFM3</option>
-                    <option value="Voice">Voice</option> -->
-
-                </select>
-            </div>
-
-            <div class="buttons " style="border-top:none !important;">
-                <label></label>
-                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('am')">AM</div>
-                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('nbfm')">NBFM</div>
-                <div class="openwebrx-button mr-2 tx-15" onclick="change_mod('lsb')">LSB</div>
-                <div class="openwebrx-button tx-15" onclick="change_mod('dmr')">DMR</div>
-            </div>
-
-            <div class="form-field openwebrx-text">
-                <label for="modulation" class="tx-15">Bandwidth:</label>
-                <input type="text" id="sample_rate_bm" name="sample_rate_bm" value="100">
-                <select name="unit" id="unit">
-                    <option value="khz">kHz</option>
-                </select>
-            </div>
-
-            <div class="form-field openwebrx-text">
-                <label for="name">Colour:</label>
-                <input type="color" id="b_color" name="b_color" value="#e66465">
-                <div class="openwebrx-button" onclick="getRandomColor()">Generate</div>
-            </div>
-
-            <div class="buttons">
-                <div class="openwebrx-button" onclick="get_bookmark_data_clear()">Cancel</div>
-                <div class="openwebrx-button" onclick="get_bookmark_data()">Ok</div>
-            </div>
-
-        </form>
-    </div>
-
-    <div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog"
-        aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="exampleModalLongTitle">Modal title</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    ...
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <!-- --------------------------------- Script ------------------------------ -->
+    <!-- Performance optimized main application script -->
     <script type="text/javascript">
+        'use strict';
 
-
-        let button_click_max = false
-        let button_click_min = false
-        let button_click_avg = true
-        let button_click_main = false
-        var button_click_band = true
-        var button_click_persistence = false
-
-        var wxAxisBand = {};
-        var xAxisBand = {};
-
-        var band_center_freq = {}
-
-        var wActualBand = {};
-        var xActualBand = {};
-        var bandLine = {};
-        var wBandLine = {};
-
-
-        var band_meta = {};
-
-        var constantLine1 = {}
-        var constantLine2 = {}
-        var auto_threshold_flag = false
-        var auto_Y_axis_flag = false
-        var peak_data_flag = true
-        var mark_data_flag = true
-
-        const minBandSize = 100000;
-        const maxBandSize = 0.2;
-
-        var clicks = 0;
-        var addMarkerData = new Array();
-
-        var active_port = "{{active_port}}";
-        var peak_port = "{{peak_port}}"
-        var page_theme = "{{theme_mode}}"
-
-        var active_channel = "{{active_channel}}";
-        var active_mode = "{{active_mode}}";
-        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
-
-
-        var type_of_mode = {
-            "fm": "audio",
-            "wfm": "audio",
-            "drm": "audio",
-            "am": "audio",
-            "lsb": "audio",
-            "usb": "audio",
-            'dmr': "data",
-            'dstar': "audio",
-            'nxdn': "audio",
-            'ysf': "audio",
-            'm17': "audio",
-            'nbfm': "audio"
-        }
-
-        var unit_conversion = {
-            "khz": 1e3,
-            "mhz": 1e6,
-            "ghz": 1e9
-        }
-        var unit_conversion1 = {
-            "Hz": 1,
-            "KHz": 1e3,
-            "MHz": 1e6,
-            "GHz": 1e9
-        }
-
-        var freq = data['freq'] / 1e6
-        var start_freq = data['start_frequency'] / 1e6
-        var stop_freq = data['stop_frequency'] / 1e6
-        // var start_freq = 
-        // var stop_freq = 99.5
-        var start_WF_freq = data['start_frequency'] / 1e6
-        var stop_WF_freq = data['stop_frequency'] / 1e6
-        var sample_length = parseInt(data['fft_points'])//len
-        // var sample_length = 968
-     
-
-        // var sample_length = 
-
-
-        // // ====== new code for waterfall ==========actual_bw
-        var actual_bw = data['bandwidth']
-        var sample_rate = data['sample_rate']
-      
-
-        // diff = (sample_rate-actual_bandwidth)
-
-        // len_n = (len(self.x)*(diff/2))/sample_rate
-
-        var diff = sample_rate - actual_bw//freq
-
-        var cut_n =  (sample_length*(diff/2))/sample_rate//samples
-
-
-        var dataSampleSize = (sample_length-(cut_n*2)).toFixed(0)
-
-
-        // console.log("sample len", sample_length, "diff",diff,"datasample size",dataSampleSize,"cut_n",cut_n)
-        // var dataSampleSize = sample_length
-        
-
-        var heatmapMinTimeStepMs = 1  // 1 millisecond
-        let viewMs = 100;
-
-        var time_counter = 0 // change in value also dosent affect anything        
-        var waterFall;
-        var chart;
-        var freq_current_offset_dropdown_value = "mhz"
-
-        var marker_color, theme_color, threshold_color;
-
-        var freqDict = [];
-        var chartMarker = [], marker_label = [];
-        var counter = 0
-        var local_store, pos_x = [5], new_pos = [5]
-
-        let rightMbPress
-        var select_color = ''
-        var counter_1 = 0
-        Max_cycles = 5;
-        avg_max_cycle = 30
-
-        let cycleData = [];
-        var startFreq = null;
-        var dataVal;
-        var full_screen_flag = false
-        
-        function modulation_type(){
-            var inner_html = ""
-
-            inner_html += `
-             <option value="fm">FM</option>
-                    <option value="nbfm">NBFM</option>
-                    <option value="wbfm">WBFM</option>
-                    <option value="am">AM</option>
-                    <option value="lsb">LSB</option>
-                    <option value="usb">USB</option>
-                    <option value="dmr">DMR</option>
-                    <option value="p25">P25</option>
-                    <option value="nxdn48">NXDN48</option>
-                    <option value="nxdn96">NXDN96</option>
-                    <option value="dstar">D-STAR</option>
-                    <option value="gsm">GSM</option>
-                    <option value="8psk">8PSK</option>
-                    <option value="bpsk">BPSK</option>
-                    <option value="qpsk">QPSK</option>
-                    <option value="dqpsk">DQPSK</option>
-                    <option value="qam16">QAM16</option>
-                    <option value="gmsk">GMSK</option>
-                    <option value="fsk">FSK</option>
-                    <option value="msk">MSK</option>
-                    <option value="ofdm">OFDM</option>
-                    <option value="radar_analysis">RADAR ANALYSIS</option>
-            `
-            if(data['sample_rate']/1e6 >= 10){
-                inner_html+=`<option value="drone_detection">DRONE DETECTION</option>`
+        // Performance monitoring and optimization classes
+        class PerformanceMonitor {
+            constructor() {
+                this.frameCount = 0;
+                this.lastFrameTime = performance.now();
+                this.fpsHistory = [];
+                this.memoryUsage = [];
+                this.enabled = true;
             }
-            document.getElementById('modulation').innerHTML=inner_html
-        }
-        modulation_type()
 
-        function changes_dropdown_value(elem) {
-		
-			current_dropdown_value = freq_current_offset_dropdown_value
-			value = parseFloat(document.getElementById("frequency").value)
-			freq_current_offset_dropdown_value = elem.value
-			// name_parameter = "freq_off_set_value"
-		if (current_dropdown_value != elem.value) {
-
-			if (current_dropdown_value == "mhz") {
-				if (elem.value == "khz") {
-                    console.log("IN KHZ",value)
-					total = parseFloat(value * 1e3).toFixed(2);
-				} else {
-					total = parseFloat(value / 1e3);
-				}
-			} else if (current_dropdown_value == "khz") {
-				if (elem.value == "mhz") {
-					total = parseFloat(value / 1e3);
-				} else {
-					total = parseFloat(value / 1e6);
-				}
-			} else {
-				if (elem.value == "mhz") {
-					total = parseFloat(value * 1e3);
-				} else if (elem.value == "khz") {
-					total = parseFloat(value * 1e6).toFixed(2);
-				}
-			}
-            document.getElementById("frequency").value = total
-				// if (elem.value == 'ghz') {
-				// 	document.getElementById("frequency").step = 1
-				// } else if (elem.value == 'khz') {
-				// 	document.getElementById("frequency").step = 1
-				// } else {
-				// 	document.getElementById("frequency").step = 1
-				// }
-			
-		}
-	}
-
-
-        function collapse_trace(event) {
-            if (event == "dwn") {
-                document.getElementById("trace_dwn").style.display = "none"
-                document.getElementById("trace_up").style.display = "block"
-                document.getElementById("custom-legend").style.height = "230px"
-                document.getElementById("tracemenu").style.display = "block"
-                document.getElementById("outer_trace").style.paddingBottom = "0px"
-
-            } else {
-                document.getElementById("trace_dwn").style.display = "block"
-                document.getElementById("trace_up").style.display = "none"
-                document.getElementById("custom-legend").style.height = "40px"
-                document.getElementById("outer_trace").style.paddingBottom = "5px"
-                document.getElementById("tracemenu").style.display = "none"
-
-            }
-        }
-
-       
-
-
-        try {
-            var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
-
-            if (wf_speed === 'fast') {
-                viewMs = 100;
-            } else if (wf_speed === 'medium') {
-                viewMs = 1024;
-            } else if (wf_speed === 'slow') {
-                viewMs = 2048;
-            } else {
-                viewMs = 100;
-            }
-        }
-        catch (error) {
-            viewMs = 100;
-        }
-        
-        
-        // =================== lc js import ====================
-        const {
-            lightningChart, DashedLine, emptyFill, individualPointColorEnabled, PointShape, PalettedFill, LUT, ColorHSV, emptyLine, AxisScrollStrategies, AxisTickStrategies, SolidFill, Themes,
-            LegendBoxBuilders, UIElementBuilders, UIOrigins, AutoCursorModes, UIVisibilityModes, UIDraggingModes, SolidLine, tickStrategy,
-            regularColorSteps, synchronizeAxisIntervals, Axis, onMouseDoubleClick, ColorRGBA, setLabel, removeMarker, ColorHEX
-        } = lcjs;
-
-
-         
-
-
-        // ==================== dashboard ========================= Dashboard to divide into waterfall and spectrum 
-
-
-        if (page_theme == 'dark') {
-            const dashboard = lcc.Dashboard({
-                numberOfColumns: 1,
-                numberOfRows: 2,
-                // theme: Themes.light,//extra themes for dashboard
-            })
-            waterFall = dashboard.createChartXY({
-                rowIndex: 1,
-                columnIndex: 0,
-                container: 'waterFallContainer',
-                Width: 70,
+            updateFrame() {
+                if (!this.enabled) return;
                 
-                animationsEnabled:false
-            })
-
-            chart = dashboard.createChartXY({
-                container: 'chartContainer',// Specify the container element
-                rowIndex: 0,
-                columnIndex: 0,
-                animationsEnabled: false,
-
-                // defaultAxisX: {
-                //     type: 'linear-highPrecision'
-                // }
-            });
-
-        }
-        else {
-            const dashboard = lcc.Dashboard({
-                numberOfColumns: 1,
-                numberOfRows: 2,
-                theme: Themes.light,//extra themes for dashboard
-            })
-            waterFall = dashboard.createChartXY({
-                rowIndex: 1,
-                columnIndex: 0,
-                container: 'waterFallContainer',
-                Width: 70, 
-                animationsEnabled:false,
+                const now = performance.now();
+                const fps = 1000 / (now - this.lastFrameTime);
+                this.fpsHistory.push(fps);
                 
-            })
+                if (this.fpsHistory.length > 60) { // Keep last 60 frames
+                    this.fpsHistory.shift();
+                }
+                
+                // Monitor memory if available
+                if (performance.memory) {
+                    this.memoryUsage.push(performance.memory.usedJSHeapSize);
+                    if (this.memoryUsage.length > 60) {
+                        this.memoryUsage.shift();
+                    }
+                }
+                
+                // Performance warnings
+                if (fps < 20) {
+                    console.warn('Performance warning: FPS dropped to', fps.toFixed(2));
+                    this.optimizePerformance();
+                }
+                
+                this.lastFrameTime = now;
+                this.frameCount++;
+            }
 
-            chart = dashboard.createChartXY({
-                container: 'chartContainer',// Specify the container element
-                rowIndex: 0,
-                columnIndex: 0,
-                theme: Themes.light,
+            optimizePerformance() {
+                // Reduce update frequency during low performance
+                PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS = Math.min(100, PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS * 1.5);
+                console.log('Performance optimization: Increased throttle to', PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS, 'ms');
+            }
 
-                // defaultAxisX: {
-                //     type: 'linear-highPrecision'
-                // }
+            getAverageFPS() {
+                if (this.fpsHistory.length === 0) return 0;
+                return this.fpsHistory.reduce((a, b) => a + b) / this.fpsHistory.length;
+            }
 
-            });
+            disable() {
+                this.enabled = false;
+            }
         }
 
+        // Optimized circular buffer with memory management
+        class OptimizedCircularArray extends Array {
+            constructor(maxLength) {
+                super();
+                this.maxLength = Math.min(maxLength, PERFORMANCE_CONFIG.MAX_CIRCULAR_BUFFER_SIZE);
+                this._lastCleanup = Date.now();
+                this._pool = []; // Object pool for reuse
+            }
 
-        // ==================== waterfall Axis FUNCTIONS in dashboard =========================
-        function waterfall_XYAxis() {
-
-            waterFall.setTitle(false)
-                .getDefaultAxisY()
-                .setTitle('Time')
-                .setScrollStrategy(AxisScrollStrategies.progressive)
-                .setTickStrategy(AxisTickStrategies.Time, tickStrategy => tickStrategy
-                    .setTickStyle(ticks => ticks
-                        .setLabelFont(font => font.setSize(12))
-                        .setTickStyle(emptyLine)
-                    )
-                )
-
-            waterFall.getDefaultAxisX().setTitle('Frequency (MHz)').setDefaultInterval({ start: start_freq, end: stop_freq })
-            //disable cursor
-            waterFall.setAutoCursorMode(AutoCursorModes.disabled).setMouseInteractionRectangleFit(true)
-            try {
-                var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
-
-                if (wf_speed === 'fast') {
-                    viewMs = 100;
-                } else if (wf_speed === 'medium') {
-                    viewMs = 1024;
-                } else if (wf_speed === 'slow') {
-                    viewMs = 2048;
+            push(element) {
+                // Reuse objects from pool when possible
+                if (typeof element === 'object' && this._pool.length > 0) {
+                    const reused = this._pool.pop();
+                    Object.assign(reused, element);
+                    super.push(reused);
                 } else {
-                    viewMs = 100;
+                    super.push(element);
                 }
-                // waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - viewMs, stopAxisAfter: false }))
-            }
-            catch (error) {
-                // console.log("hiii")
-                viewMs = 100;
-            }
-
-            waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - viewMs, stopAxisAfter: false }))
-        }
-
-
-        
-
-
-        // ==================== waterfall COLOR constants in dashboard =========================
-
-
-        const theme = waterFall.getTheme()
-        var lut = new LUT({
-            // steps: regularColorSteps(-40, -150, theme.examples.spectrogramColorPalette),
-            steps: [
-                    { value: -20, color: ColorHEX(parent.max_step) },//green
-                    { value: -70, color: ColorHEX(parent.mid_step1) },//red
-                    { value: -110, color: ColorHEX(parent.min_step) },//green
-
-
-                ],
-            units: 'dBm',
-            interpolate: true,
-        })
-        var paletteFill = new PalettedFill({ lut, lookUpProperty: 'y' })
-        // ==================== ======================================= =========================
-
-
-        // ==============================================Create Scrolling Heatmap Grid Series ============================
-
-
-        var heatmapSeries = waterFall
-            .addHeatmapScrollingGridSeries({
-
-                scrollDimension: 'rows',
-                resolution: dataSampleSize ,
-
-                start: { x: start_freq, y: 0 },
-                step: { x: (stop_freq - start_freq) / (dataSampleSize), y: heatmapMinTimeStepMs },
-
-            })
-            .setFillStyle(paletteFill)
-            .setWireframeStyle(emptyLine)
-            .setName('Waterfall')
-
-            // Configure automatic data cleaning.
-            .setDataCleaning({
-                // Out of view data can be lazily removed as long as total columns count remains over 1000.
-                minDataPointCount: 100,
-            })
-            .setPixelInterpolationMode('bilinear')
-
-        function load_setting_data() {
-
-            json_data = {
-                "mode": "realtime",
-                "channel": active_channel
-            }
-
-            $.ajax({
-                type: 'POST',
-                url: '/get_reflevel_amp',
-                data: JSON.stringify(json_data),
-                contentType: 'application/json',
-                success: function (data) {
-                    console.log("Hiiii", data)
-
-                    waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: 0 - viewMs, stopAxisAfter: false }))
-                    waterFall.getDefaultAxisX().setDefaultInterval({ start: parseInt(data['start_frequency']) / 1e6, end: parseInt(data['stop_frequency']) / 1e6, stopAxisAfter: false })
-                    heatmapSeries.setStart({ x: parseInt(data['start_frequency']) / 1e6, y: 0 }).setStep({ x: (stop_freq - start_freq) / (dataSampleSize ), y: heatmapMinTimeStepMs })
-                    // console.log(data,"-------------setting load data")
-                    heatmapSeries.clear()
-                    clear_spectrum_chart()
-
-
-                    
-                    
-                    
-                }
-            });
-        }
-
-        // Enable automatic cleaning of data that is not visible
-        // heatmapSeries.setDataCleaning({ minDataPointCount: 1 })
-        // ======================================= ==========End Waterfall ===================================================
-
-
-        //  colour adding to series (spectrum)
-        const fillRed = new SolidFill({ color: ColorRGBA(255, 0, 0, 255) })
-        const fillYellow = new SolidFill({ color: ColorHEX('#FFFF00') })
-        const fillBlue = new SolidFill({ color: ColorHEX('#37a6de') })
-        const fillGreen = new SolidFill({ color: ColorHEX('#008000') })
-        const fillNavyBlue = new SolidFill({ color: ColorHEX('#00008B') })
-        const fillBlack = new SolidFill({ color: ColorHEX('#000000') })
-        const fillQSRGreen = new SolidFill({ color: ColorHEX('#66cc35') })
-        const fillPurple = new SolidFill({ color: ColorHEX('#8300c4') })
-
-        // ================================================== Spectrum Start===================================================
-
-        const maxSeries = chart.addLineSeries().setName('Min Hold').setStrokeStyle((stroke) => stroke.setThickness(1))
-        const persistenceSeries = chart.addPointLineAreaSeries({sizes:true}).setStrokeStyle((stroke) => stroke.setThickness(-1)).setPointSize(0).setPointFillStyle(new SolidFill({ color: ColorRGBA(255, 0, 0,100) })).setName('Persistence Hold')
-        
-        const series = chart.addLineSeries().setName('').setStrokeStyle((stroke) => stroke.setThickness(-1));
-        const minSeries = chart.addLineSeries().setName('Min Hold').setStrokeStyle((stroke) => stroke.setThickness(-1));
-        const avgSeries = chart.addLineSeries().setName('Avg Hold').setStrokeStyle((stroke) => stroke.setThickness(1));
-        const seriespeak = chart.addPointSeries({ pointShape: PointShape.Circle }).setPointSize(12).setAutoScrollingEnabled(false)
-
-
-        function get_spectrum_setting(active_channel) {
-            json = { "channel": active_channel, "mode": "realtime" }
-            $.ajax({
-                type: 'POST',
-                url: '/get_realtime_setting',
-                data: JSON.stringify(json),
-                contentType: 'application/json',
-                success: function (data1) {
-
-                }
-            })
-        }
-
-
-        // Customize the chart appearance
-        chart.setTitle(false);
-        chart.getDefaultAxisY().setTitle('Amplitude (dBm)')
-        chart.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false) //.setInterval({ start: 138.2, end: 147.8, stopAxisAfter: true })
-        chart.setMouseInteractionWheelZoom(true)
-        // chart.setPadding({ left: 50 })
-        chart.setMouseInteractionRectangleFit(true)
-
-
-        // Function to generate data from arrays
-
-        function generateData(xArray, yArray) {
-
-            return xArray.map((x, i) => ({ x: xArray[i] / 1e6, y: yArray[i] }));
-        }
-
-
-        function generateDatapeak(xArray, yArray) {
-
-            return xArray.map((x, i) => ({ x: xArray[i]/1e6, y: yArray[i] }));
-        }
-
-
-        // Function to update the series with new data
-        function updateSeries(xArray, yArray) {
-            series.clear();
-            series.add(generateData(xArray, yArray));
-        }
-
-
-        function updateMin(xArray, yArray) {
-            minSeries.clear();
-            minSeries.add(generateData(xArray, yArray));
-
-        }
-
-
-        function updateMax(xArray, yArray) {
-            maxSeries.clear();
-            maxSeries.add(generateData(xArray, yArray));
-        }
-
-
-        function updateAvg(xArray, yArray) {
-            avgSeries.clear();
-            avgSeries.add(generateData(xArray, yArray));
-        }
-
-        function updatePersistence(xArray, yArray) {
-            persistenceSeries.clear();
-            persistenceSeries.add(generateData(xArray, yArray));
-        }
-
-        function updateSeriespeak(data) {
-
-            seriespeak.clear();
-            seriespeak.add(data);
-        }
-
-        
-
-         persistenceSeries.setAreaFillStyle(new SolidFill({ color: ColorRGBA(255, 0, 0,50) }))
-
-        if (page_theme == 'light') {
-            series.setStrokeStyle((stroke) => stroke.setFillStyle(fillGreen))
-            avgSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillNavyBlue))
-
-            chart
-                .setBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
-                .setSeriesBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
-                .setSeriesBackgroundStrokeStyle(new SolidLine({ thickness: 2, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
-            chart.getDefaultAxisY().setTitle('Amplitude (dBm)').setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
-                .setTickStyle(ticks => ticks
-                    .setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
                 
-                )
-            )
-            chart.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
-                .setTickStyle(ticks => ticks
-                    .setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
-                )
-            )
-
-            marker_color = '#FF13F0'
-            theme_color = "#000000"
-            threshold_color = '#000000'
-
-            // document.getElementById('main_curve_label').style.color = '#0827F5'
-            document.getElementById('avg_hold_label').style.color = '#0827F5'
-            document.getElementById('trace_dwn').style.color = '#4B5320'
-            document.getElementById('trace_up').style.color = '#4B5320'
-            document.getElementById('traces_label').style.color = '#4B5320'
-            document.getElementById('custom-legend').style.background = '#ffffffcf'
-            document.getElementById('full_screen_label').style.color = '#4B5320'
-            document.getElementById('screenshot_img').style.color = '#4B5320'
-            document.getElementById('csv_export').style.color = '#4B5320'
-            document.getElementById('full_screen_btn').style.color = '#4B5320'
-            
-
-
-        }
-        else {
-            series.setStrokeStyle((stroke) => stroke.setFillStyle(fillGreen))
-            avgSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillYellow))
-            
-            marker_color = '#FF13F0'
-            theme_color = '#808080'
-            threshold_color = '#FFFFFF'
-            document.getElementById('avg_hold_label').style.color = '#FFFF00'
-            document.getElementById('trace_dwn').style.color = threshold_color
-            document.getElementById('trace_up').style.color = threshold_color
-            document.getElementById('traces_label').style.color = threshold_color
-            document.getElementById('full_screen_label').style.color = threshold_color
-
-        }
-
-        maxSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillPurple)).setHighlightOnHover(false)
-        minSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillBlue))
-        persistenceSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillRed))
-        seriespeak.setPointFillStyle(fillQSRGreen)
-
-        document.getElementById("marker_color_label").style.color = marker_color
-
-
-        function get_bookmark_data_clear() {
-            document.getElementById('openwebrx-dialog-bookmark').style.display = "none";
-        }
-
-
-        // =================================================== End Spectrum chart===================================================
-        //=========================================== synchronize Axis ======================================================
-        synchronizeAxisIntervals(waterFall.getDefaultAxisX(), chart.getDefaultAxisX());
-
-
-        //  convert color hexToRgb
-        function hexToRgb(hex) {
-            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
-            return result ? {
-                r: parseInt(result[1], 16),
-                g: parseInt(result[2], 16),
-                b: parseInt(result[3], 16)
-            } : null;
-
-        }
-
-
-        function addMarkernew(x, y) {
-            i = counter
-            if(document.getElementById("mark_data_btn").checked == true)
-            {
-                if (i <= 4) {
-                    var color = '#FFFFFF';
-
-                    if (page_theme == 'light') {
-                        color = "#0000FF"
-                    }
-
-
-                    $.ajax({
-                    type: 'GET',
-                    url: '/set_marker',
-                    contentType: 'application/json',
-                    success: function (res) {
-                        var index = res.map(function(f) { return f.frequency; }).indexOf(x);
-                        var marker_data=0
-                        for(var l=0; l< res.length; l++){
-                            var index = res.map(function(f) { return f.frequency; }).indexOf(x);
-                            if( (res.findIndex(p => p.frequency == x))==-1){
-
-                                if (chartMarker[i]) {
-                                    chartMarker[i].dispose()
-                                }
-                                if (window.parent.removed_marker.length > 0) {
-                                    for (var j = 0; j < window.parent.removed_marker.length; j++) {
-                                        i = parseInt(window.parent.removed_marker[j])
-                                        window.parent.removed_marker.splice(j, 1)
-                                        break;
-                                    }
-                                }
-                                else {
-                                    i = counter
-                                }
-                                console.log('add new marker',(res.findIndex(p => p.frequency == x)))
-                                chartMarker[i] = chart.addChartMarkerXY()
-                                chartMarker[i].setPosition({ x: x, y: y })
-                                chartMarker[i].setMouseInteractions(true)
-                                chartMarker[i].setPointMarker(marker => marker.setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M ${i + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
-
-
-                                data = chartMarker[i].getPosition()
-                                var frequency
-                                var power
-                                var marker_name
-                                var data1 = {
-                                    frequency: data.x,
-                                    power: data.y,
-                                    'marker_index': i,
-                                    color: color
-                                }
-
-                                $.ajax({
-                                    type: 'POST',
-                                    url: "/get_marker_new",
-                                    data: JSON.stringify(data1),
-                                    dataType: 'json',
-                                    success: function (data) {
-                                        parent.marked_positions_table()
-                                        set_marked_positions()
-                                    },
-                                    error: function (xhr, status, error) {
-                                        console.error("Error :", error);
-                                    },
-                                });
-                                counter = counter + 1
-                                break;
-                            }
-                            else{
-                                console.log('dont add new marker',(res.findIndex(p => p.frequency == x)))
-                                var tr = window.parent.document.getElementById(`table_row_${index}`)
-                                highlight_fn(tr, 3);
-                                break;
-                            }
+                if (this.length > this.maxLength) {
+                    const removed = this.splice(0, this.length - this.maxLength);
+                    // Return objects to pool for reuse
+                    removed.forEach(item => {
+                        if (typeof item === 'object' && this._pool.length < 100) {
+                            this._pool.push(item);
                         }
-                    },
-                        error: function (xhr, status, error) {
-                            console.error("Error :", error);
-                        },
                     });
-                        
-                    
-
-
-                    
                 }
-                else {
-                    counter = 4
-                    addMarkerAgain(x, y)
+
+                // Periodic cleanup
+                const now = Date.now();
+                if (now - this._lastCleanup > PERFORMANCE_CONFIG.CLEANUP_INTERVAL_MS) {
+                    this._cleanup();
+                    this._lastCleanup = now;
                 }
             }
 
-
-        }
-
-
-        function highlight_fn(inputElement, times) {
-            for (let i = 0; i < times; i++) {
-                inputElement.style.background = 'red';
-                // inputElement.style.transform = 'scale(1.15)'
-                inputElement.classList.add('transition_cls');
-                setTimeout(() => {
-                inputElement.style.background = '';
-                inputElement.style.transform = 'scale(1)'
-
-                }, 200);
-                setTimeout(() => {
-                inputElement.style.background = 'red';
-                // inputElement.style.transform = 'scale(1.15)'
-                inputElement.classList.add('transition_cls');
-
-
-                }, 400);
-                setTimeout(() => {
-                inputElement.style.background = '';
-                inputElement.style.transform = 'scale(1)'
-
-
-                }, 600);
-                setTimeout(() => {
-                inputElement.style.background = 'red';
-                // inputElement.style.transform = 'scale(1.15)'
-                inputElement.classList.add('transition_cls');
-
-
-                }, 800);
-            }
-            setTimeout(() => {
-                inputElement.style.background = '';
-                inputElement.style.transform = 'scale(1)'
-
-
-            //    inputElement.value = '';
-            }, 1000);
-            inputElement.style.border = 'revert';
-        // inputElement.style.border = 'revert';
-      }
-
-
-        function addMarkerAgain(x, y) {
-
-            addMarkernew(x, y)
-        }
-
-
-        function set_marked_positions() {
-            $.ajax({
-                type: 'GET',
-                url: '/set_marker',
-                contentType: 'application/json',
-                success: function (data) {
-                    var marker_data = 0
-                    if (marker_data < 5) {
-                        for (var i = 0; i < data.length; i++) {
-                            if (chartMarker[i]) {
-                                chartMarker[i].dispose()
-                            }
-                            var j = 0
-                            local_store = data;
-                            if (data[i].frequency != null) {
-                                counter = data.length - 1
-                                if (mark_data_flag == true) {
-                                    chartMarker[i] = chart.addChartMarkerXY().setPosition({ x: data[i].frequency, y: data[i].power })
-                                    chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setGridStrokeXVisibility(UIVisibilityModes.always).setResultTable((table) => table.setContent([[`M${data[i].marker_index + 1}`]])).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
-                                    addMarkerData.push({ x: data[i].frequency, y: data[i].power });
-                                    pos_x[i] = data[i].frequency
-                                }
-                                else {
-
-                                    hide_markers(data)
-                                }
-                            }
-                            else {
-                                if (!window.parent.removed_marker.includes(i)) {
-                                    window.parent.removed_marker.push(i)
-                                }
-                            }
-                            marker_data = marker_data + 1
+            _cleanup() {
+                if (this.length > this.maxLength * 0.8) {
+                    const elementsToRemove = Math.floor(this.length * 0.1);
+                    const removed = this.splice(0, elementsToRemove);
+                    removed.forEach(item => {
+                        if (typeof item === 'object' && this._pool.length < 50) {
+                            this._pool.push(item);
                         }
-                    }
-                }
-            })
-        }
-
-
-        function hide_markers(data) {
-            for (var i = 0; i < data.length; i++) {
-                if(chartMarker[i]){
-                    if (chartMarker[i].getVisible()) {
-                        chartMarker[i].setVisible(false);
-                    }
-                }
-            }
-        }
-
-        var legendBuilder,legend_backgrd;
-        if(page_theme =='light'){
-            legendBuilder = LegendBoxBuilders.HorizontalLegendBox.styleEntries((entry) => entry
-            .setTextFillStyle(new SolidFill({ color: ColorHEX('#000000') }))
-            .setLUTLength(200)
-            )
-            legend_backgrd = "#ffffffcf"
-        }
-        else{
-            legendBuilder = LegendBoxBuilders.HorizontalLegendBox.styleEntries((entry) => entry
-            .setTextFillStyle(new SolidFill({ color: ColorHEX('#FFFFFF') }))
-            .setLUTLength(200)
-            )
-            legend_backgrd = "#00000061"
-        }
-
-
-        function min_hold_change() {
-
-            if(window.parent.document.getElementById("min_hold_value").value == 0 || window.parent.document.getElementById("min_hold_value").value == '' ){
-              window.parent.document.getElementById("min_hold_value").focus()
-              window.parent.document.getElementById("min_hold_value").value= 5
-            }else if(window.parent.document.getElementById("min_hold_value").value <= 300  && window.parent.document.getElementById("min_hold_value").value > 0 ){
-                Minlevel = window.parent.document.getElementById("min_hold_value").value
-                minCircular(Minlevel)
-              
-            }else{
-                window.parent.document.getElementById("min_hold_value").focus()
-                window.parent.document.getElementById("min_hold_value").value= 5
-              // caPersistence = new CircularArray(parseInt(Persistencelevel));
-              // Minlevel = window.parent.document.getElementById("min_hold_value").value
-            }
-        };
-
-        function avg_hold_change() {
-        
-            // console.log("HI hold change")
-            if(window.parent.document.getElementById("avg_input").value == 0 || window.parent.document.getElementById("avg_input").value == '' ){
-                // console.log("HI hold change IF")
-              window.parent.document.getElementById("avg_input").focus()
-              window.parent.document.getElementById("avg_input").value= 5
-            }else if(window.parent.document.getElementById("avg_input").value <= 300  && window.parent.document.getElementById("avg_input").value > 0 ){
-                // console.log("HI hold change ELSE IF")
-                  AverageLevel = window.parent.document.getElementById('avg_input').value;
-              caAverage = new CircularArray(parseInt(AverageLevel));
-              
-            }else{
-                console.log("HI hold change ELse")
-                window.parent.document.getElementById("avg_input").focus()
-                window.parent.document.getElementById("avg_input").value= 5
-              // caPersistence = new CircularArray(parseInt(Persistencelevel));
-              // Minlevel = window.parent.document.getElementById("min_hold_value").value
-            }
-          }
-
-        
-        function Persistence_hold_change() {
-            if(window.parent.document.getElementById("Persistence_hold_value").value == '0' || window.parent.document.getElementById("Persistence_hold_value").value == '' ){
-              window.parent.document.getElementById("Persistence_hold_value").focus()
-              window.parent.document.getElementById("Persistence_hold_value").value= 5
-            }else if(window.parent.document.getElementById("Persistence_hold_value").value <= 300  && window.parent.document.getElementById("Persistence_hold_value").value > 0 ){
-                Persistencelevel = window.parent.document.getElementById("Persistence_hold_value").value
-                PersistenceCircular(Persistencelevel)
-              
-            }else{
-                window.parent.document.getElementById("Persistence_hold_value").focus()
-                window.parent.document.getElementById("Persistence_hold_value").value= 5
-              // caPersistence = new CircularArray(parseInt(Persistencelevel));
-              // Minlevel = window.parent.document.getElementById("min_hold_value").value
-            }
-          };
-
-
-
-
-
-        var min_step_avg;
-        function reconfig_lut(){
-            array = dataVal.y
-            var total = 0
-            for(var i = 0; i < dataVal.y.length; i++) {
-                total += dataVal.y[i];
-            }
-            var avg = total / dataVal.y.length;
-            min_step_avg = parseInt(dataVal.y.reduce((a, b) => a + b) / dataVal.y.length);
-            mid_step_avg = min_step_avg + 10
-            max_step_avg = min_step_avg + 20
-            if(((parent.document.getElementById('waterfall_theme').value).slice(0,-2)) == "preset"){
-                // console.log("preset")
-                lut = new LUT({
-                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
-                    steps: [
-                        // { value: 0 , color: ColorHEX("#00000000") },//green
-                        { value: parseInt(parent.document.getElementById('min_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color3").value) },//green
-                        { value: parseInt(parent.document.getElementById('mid_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color2").value) },//red
-                        { value: parseInt(parent.document.getElementById('max_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color1").value) },//green
-                    ],
-                    units: 'dBm',
-                    interpolate: true,
-                })
-            }
-            else if(parent.document.getElementById('waterfall_theme').value == "theme_1" || parent.document.getElementById('waterfall_theme').value == "theme_3"){
-                lut = new LUT({
-                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
-                    steps: [
-                        // { value: 0, color: ColorHEX("#00000000") },
-                        { value: min_step_avg + 25, color: ColorHEX(parent.max_step) },
-                        { value: min_step_avg + 15, color: ColorHEX(parent.mid_step1) },
-                        { value: min_step_avg + 10 , color: ColorHEX(parent.mid_step2) },
-                        { value: min_step_avg , color: ColorHEX(parent.min_step) },
-                    ],
-                    units: 'dBm',
-                    interpolate: true,
-                })
-            }
-           else if(parent.document.getElementById('waterfall_theme').value == "theme_2"){
-
-                lut = new LUT({
-                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
-                    steps: [
-                        // { value: 0, color: ColorHEX("#00000000") },//blue
-                        { value: max_step_avg, color: ColorHEX(parent.max_step) },//green
-                        { value: mid_step_avg, color: ColorHEX(parent.mid_step1) },//red
-                        { value: min_step_avg, color: ColorHEX(parent.min_step) },//green
-                    ],
-                    units: 'dBm',
-                    interpolate: true,
-                })
-            }
-            else {
-
-                lut = new LUT({
-                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
-                    steps: [
-                        // { value: 0, color: ColorHEX("#00000000") },//blue
-                        { value: parseInt(parent.max_step_val), color: ColorHEX(parent.max_step) },//green
-                        { value: parseInt(parent.mid_step_val), color: ColorHEX(parent.mid_step1) },//red
-                        { value: parseInt(parent.min_step_val), color: ColorHEX(parent.min_step) },//green
-                    ],
-                    units: 'dBm',
-                    interpolate: true,
-                })
-            }
-            
-            paletteFill = new PalettedFill({ lut, lookUpProperty: 'value' })
-            heatmapSeries
-            .setFillStyle(paletteFill)
-
-            if(legend2){
-                legend2.dispose()
-            }
-            legend2 = waterFall
-                .addLegendBox(legendBuilder)
-                .setTitle(false)
-                .setPosition({ x: 97.5, y: 95.5 })
-
-            legend2.setBackground((background) => background
-                .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
-                .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
-            )
-            legend2.add(heatmapSeries, { toggleVisibilityOnClick: false })
-            legend2.setDraggingMode(0)
-            // console.log("End")
-        }
-
-        
-
-        // #######      SERIES     ########
-
-
-        series.onMouseDown((_, e) => {
-            if (event.button !== 2) return
-            rightMbPress = performance.now()
-        });
-        series.onMouseUp((_, e) => {
-            if (!rightMbPress || performance.now() - rightMbPress > 500) return
-            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            var x = locationAxis.x
-            var y = locationAxis.y
-            addMarkernew(x, y)
-        })
-
-
-        // ###########   END   ################
-
-
-        // =============================================== update Markar =================================================
-
-
-        function update_marker(i) {
-
-            if (chartMarker[i]) {
-                var pos = chartMarker[i].getPosition()
-                pos_in_hz = pos.x * 1e6
-                if (dataVal.x) {
-                    var index = findClosest(dataVal.x, pos_in_hz)
-                    chartMarker[i].setPosition({ x: pos.x, y: dataVal.y[index.index] })
-                    window.parent.update_power(i, dataVal.y[index.index])
+                    });
                 }
             }
 
-            if (pos_x[i]) {
-                chartMarker[i].getPointMarker().onMouseDragStop(() => {
-                    if (chartMarker[i]) {
-                        new_pos[i] = chartMarker[i].getPosition().x
-                        if (pos_x[i] != new_pos[i]) {
-                            pos_x[i] = new_pos[i];
-                            data = chartMarker[i].getPosition()
-                            var frequency
-                            var power
-                            var marker_name
-                            var data1 = {
-                                frequency: data.x,
-                                power: data.y,
-                                'marker_index': i,
-                                'color': '#FFFFFF'
-                            }
+            clear() {
+                this.length = 0;
+                this._pool.length = 0;
+            }
 
-                            $.ajax({
-                                type: 'POST',
-                                url: "/get_marker_new",
-                                contentType: 'application/json',
-                                data: JSON.stringify(data1),
-                                dataType: 'json',
-                                success: function (data) {
-                                    parent.update_freq(i, chartMarker[i].getPosition().x)
-                                },
-                                error: function (xhr, status, error) {
-                                    console.error("Error :", error);
-                                },
-                            });
-                        }
-                    }
-                });
-
-                chartMarker[i].getTickMarkerX().onMouseDragStop(() => {
-                    if (chartMarker[i]) {
-                        new_pos[i] = chartMarker[i].getPosition().x
-                        if (pos_x[i] != new_pos[i]) {
-                            pos_x[i] = new_pos[i];
-                            data = chartMarker[i].getPosition()
-                            var frequency
-                            var power
-                            var marker_name
-                            var data1 = {
-                                frequency: data.x,
-                                power: data.y,
-                                'marker_index': i,
-                                'color': '#FFFFFF'
-                            }
-
-                            $.ajax({
-                                type: 'POST',
-                                url: "/get_marker_new",
-                                contentType: 'application/json',
-                                data: JSON.stringify(data1),
-                                dataType: 'json',
-                                success: function (data) {
-                                    parent.update_freq(i, chartMarker[i].getPosition().x)
-                                },
-                                error: function (xhr, status, error) {
-                                    console.error("Error :", error);
-                                },
-                            });
-                        }
-                    }
-                });
+            destroy() {
+                this.clear();
+                this._pool = null;
             }
         }
 
-
-        function findClosest(arr, target) {
-            let n = arr.length;
-            let i = 0, j = n - 1, mid = 0;
-
-            // Corner cases
-            if (target <= arr[0]) {
-                return { "val": arr[0], "index": 0 };
-            }
-            if (target >= arr[n - 1]) {
-                return { "val": arr[n - 1], "index": n - 1 };
+        // Throttled update manager
+        class UpdateThrottler {
+            constructor(delay = PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS) {
+                this.delay = delay;
+                this.lastUpdate = 0;
+                this.pendingUpdate = null;
+                this.queue = [];
             }
 
-            // Binary search
-            while (i <= j) {
-                mid = Math.floor((i + j) / 2);
-
-                // If target is found, return it immediately
-                if (arr[mid] === target) {
-                    return { "val": arr[mid], "index": mid };
-                }
-
-                // If target is less than arr[mid], search in the left half
-                if (target < arr[mid]) {
-                    j = mid - 1;
-                }
-                // If target is greater than arr[mid], search in the right half
-                else {
-                    i = mid + 1;
+            throttle(func, priority = 0) {
+                const now = performance.now();
+                
+                if (now - this.lastUpdate >= this.delay) {
+                    this.executeImmediate(func);
+                } else {
+                    this.addToQueue(func, priority);
                 }
             }
 
-            // After binary search, i is the first element greater than the target
-            // and j is the last element less than the target.
-            // We compare the closest two values arr[j] and arr[i]
-            if (i < n && arr[i] === target) {
-                return { "val": arr[i], "index": i };
-            }
-            if (j >= 0 && arr[j] === target) {
-                return { "val": arr[j], "index": j };
+            executeImmediate(func) {
+                try {
+                    func();
+                    this.lastUpdate = performance.now();
+                } catch (error) {
+                    console.error('Throttled function error:', error);
+                }
             }
 
-            // Now determine the closest value
-            let left = arr[j] !== undefined ? arr[j] : Infinity;
-            let right = arr[i] !== undefined ? arr[i] : Infinity;
+            addToQueue(func, priority) {
+                this.queue.push({ func, priority, timestamp: performance.now() });
+                this.queue.sort((a, b) => b.priority - a.priority);
+                
+                if (!this.pendingUpdate) {
+                    this.pendingUpdate = setTimeout(() => {
+                        this.processQueue();
+                    }, this.delay - (performance.now() - this.lastUpdate));
+                }
+            }
 
-            if (Math.abs(target - left) <= Math.abs(target - right)) {
-                return { "val": left, "index": j };
-            } else {
-                return { "val": right, "index": i };
+            processQueue() {
+                if (this.queue.length > 0) {
+                    const item = this.queue.shift();
+                    this.executeImmediate(item.func);
+                }
+                
+                this.pendingUpdate = null;
+                
+                if (this.queue.length > 0) {
+                    this.pendingUpdate = setTimeout(() => {
+                        this.processQueue();
+                    }, this.delay);
+                }
+            }
+
+            clear() {
+                if (this.pendingUpdate) {
+                    clearTimeout(this.pendingUpdate);
+                    this.pendingUpdate = null;
+                }
+                this.queue.length = 0;
             }
         }
 
-
-
-
-        chart.onSeriesBackgroundMouseDoubleClick((_, event) => {
-            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            document.getElementById("frequency").value = (locationAxis.x).toFixed(4);
-            document.getElementById("name").value = document.getElementById("modulation").value
-            document.getElementById("unit").value = "mhz"
-            document.getElementById("b_color").value = getRandomColor()
-            document.getElementById('openwebrx-dialog-bookmark').style.display = "block";
-            // get_bookmark_data()
-            freq_current_offset_dropdown_value ='mhz'
-        })
-
-
-        series.onMouseDoubleClick((_, event) => {
-            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            document.getElementById("frequency").value = (locationAxis.x).toFixed(4);
-            document.getElementById("name").value = document.getElementById("modulation").value
-            document.getElementById("unit").value = "mhz"
-            document.getElementById('openwebrx-dialog-bookmark').style.display = "block";
-            freq_current_offset_dropdown_value = 'mhz'
-            // get_bookmark_data()
-        })
-
-        avgSeries.onMouseDoubleClick((_, event) => {
-            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            document.getElementById("frequency").value = (locationAxis.x).toFixed(4);
-            document.getElementById("name").value = document.getElementById("modulation").value
-            document.getElementById("unit").value = "mhz"
-            document.getElementById('openwebrx-dialog-bookmark').style.display = "block";
-            // get_bookmark_data()
-            freq_current_offset_dropdown_value ='mhz'
-        })
-
-        persistenceSeries.onMouseDoubleClick((_, event) => {
-            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            document.getElementById("frequency").value = (locationAxis.x).toFixed(4);
-            document.getElementById("name").value = document.getElementById("modulation").value
-            document.getElementById("unit").value = "mhz"
-            document.getElementById('openwebrx-dialog-bookmark').style.display = "block";
-            // get_bookmark_data()
-            freq_current_offset_dropdown_value ='mhz'
-        })
-
-
-
-        function set_min_max_amp(min, max) {
-
-            chart.getDefaultAxisY().setDefaultInterval({ start: min, end: max })
-
-        }
-
-
-        function generateRGBFromRange(min, max) {
-            // Function to generate a random number within the range [min, max]
-            const getRandomInRange = (min, max) => Math.round(min + Math.random() * (max - min));
-
-            // Generate RGB values
-            return {
-                r: getRandomInRange(min, max),
-                g: getRandomInRange(min, max),
-                b: getRandomInRange(min, max),
+        // Debounced function wrapper
+        function debounce(func, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
             };
         }
 
+        // Initialize performance monitoring
+        const performanceMonitor = new PerformanceMonitor();
+        const chartUpdateThrottler = new UpdateThrottler(PERFORMANCE_CONFIG.UPDATE_THROTTLE_MS);
+        const markerUpdateThrottler = new UpdateThrottler(100);
 
-        function set_min_max_amp_wf(min, max) {
-            // chart.setInterval
-            rgbval = generateRGBFromRange(min, max)
-        }
+        // Application state with performance tracking
+        let appState = {
+            // UI state
+            full_screen_flag: false,
+            button_click_max: false,
+            button_click_min: false,
+            button_click_avg: true,
+            button_click_main: false,
+            button_click_band: true,
+            button_click_persistence: false,
+            peak_data_flag: true,
+            mark_data_flag: true,
+            auto_Y_axis_flag: false,
+            
+            // Performance state
+            isProcessing: false,
+            lastDataUpdate: 0,
+            framesBehind: 0,
+            adaptiveQuality: true,
+            
+            // Counters
+            counter: 0,
+            freq_cnt: 0,
+            time_counter: 0
+        };
 
+        // Configuration from server (cached)
+        const config = {
+            active_port: "{{active_port}}",
+            active_channel: "{{active_channel}}",
+            page_theme: "{{theme_mode}}",
+            data: JSON.parse('{{ spectrum_data | tojson | safe}}')
+        };
 
-        // ============================ Select or random band color ================================
-        function generateColor() {
-            var select_color = document.getElementById('b_color').value;
+        // Optimized chart data management
+        const chartData = {
+            // Use Maps for better performance
+            wxAxisBand: new Map(),
+            xAxisBand: new Map(),
+            band_center_freq: new Map(),
+            wActualBand: new Map(),
+            xActualBand: new Map(),
+            bandLine: new Map(),
+            wBandLine: new Map(),
+            band_meta: new Map(),
+            
+            // Arrays for markers
+            chartMarker: new Array(10),
+            marker_label: new Array(10),
+            addMarkerData: [],
+            pos_x: [5],
+            new_pos: [5],
+            
+            // Performance tracking
+            dataPoints: 0,
+            lastClear: Date.now()
+        };
 
-            if (select_color == '') {
-                var color = getRandomColor()
-                return color
-            }
-            else {
-                var color = select_color
-                if (color == '#ffff00' || color == '#ff0000') {
-                    return color = '#0000ff';
+        // Optimized data processor with caching
+        const dataProcessor = {
+            _freqCache: new Map(),
+            _sampleCache: new Map(),
+            _lutCache: new Map(),
+
+            calculateFrequencies() {
+                const cacheKey = `${config.data.freq}_${config.data.start_frequency}_${config.data.stop_frequency}`;
+                
+                if (this._freqCache.has(cacheKey)) {
+                    return this._freqCache.get(cacheKey);
                 }
-                return color
+
+                const result = {
+                    freq: config.data.freq / 1e6,
+                    start_freq: config.data.start_frequency / 1e6,
+                    stop_freq: config.data.stop_frequency / 1e6,
+                    start_WF_freq: config.data.start_frequency / 1e6,
+                    stop_WF_freq: config.data.stop_frequency / 1e6
+                };
+
+                this._freqCache.set(cacheKey, result);
+                return result;
+            },
+
+            calculateSampleData() {
+                const cacheKey = `${config.data.fft_points}_${config.data.bandwidth}_${config.data.sample_rate}`;
+                
+                if (this._sampleCache.has(cacheKey)) {
+                    return this._sampleCache.get(cacheKey);
+                }
+
+                const sample_length = parseInt(config.data.fft_points);
+                const actual_bw = config.data.bandwidth;
+                const sample_rate = config.data.sample_rate;
+                const diff = sample_rate - actual_bw;
+                const cut_n = (sample_length * (diff / 2)) / sample_rate;
+                const dataSampleSize = Math.floor(sample_length - (cut_n * 2));
+
+                const result = {
+                    sample_length,
+                    actual_bw,
+                    sample_rate,
+                    diff,
+                    cut_n,
+                    dataSampleSize
+                };
+
+                this._sampleCache.set(cacheKey, result);
+                return result;
+            },
+
+            clearCaches() {
+                this._freqCache.clear();
+                this._sampleCache.clear();
+                this._lutCache.clear();
             }
-        }
+        };
 
+        // Calculate initial values
+        const frequencies = dataProcessor.calculateFrequencies();
+        const sampleData = dataProcessor.calculateSampleData();
+        const { freq, start_freq, stop_freq, start_WF_freq, stop_WF_freq } = frequencies;
+        const { sample_length, actual_bw, sample_rate, diff, cut_n, dataSampleSize } = sampleData;
 
-        function getRandomColor() {
-            const letters = '0123456789ABCDEF';
-            let color = '#';
-            for (let i = 0; i < 6; i++) {
-                color += letters[Math.floor(Math.random() * 16)];
-            }
-            if (color === '#FFFF00' || color === '#FF0000') {
-                return '#0000FF';
-            }
-            document.getElementById('b_color').value = color
-            return color;
-        }
-
-
-        function get_bookmark_data() {
-            if (document.getElementById("name").value == "") {
-                return
-            }
-
-            var fre_val = parseFloat(document.getElementById("frequency").value)
-            var unit = document.getElementById("unit").value
-            var channel = active_channel
-            if (unit != "ghz") {
-                fre_val = (fre_val * unit_conversion[unit])
+        // Optimized function implementations
+        const optimizedFullScreen = debounce(function() {
+            appState.full_screen_flag = !appState.full_screen_flag;
+            
+            const elements = {
+                fullScreenLabel: DOM_CACHE.get('full_screen_label'),
+                tableCol: window.parent?.document?.getElementById("table_col"),
+                closeBar: window.parent?.document?.getElementById("close-bar"),
+                iframeCol: window.parent?.document?.getElementById("iframe_col")
+            };
+            
+            if (appState.full_screen_flag) {
+                elements.fullScreenLabel.innerHTML = `<i style='font-size:15px' class='fas fa-compress-arrows-alt'></i>`;
+                if (elements.tableCol) elements.tableCol.style.display = "none";
+                if (elements.closeBar) elements.closeBar.style.display = "none";
+                if (elements.iframeCol) elements.iframeCol.className = "col-12";
             } else {
-                fre_val *= 1e9
+                elements.fullScreenLabel.innerHTML = `<i style='font-size:15px' class='fas fa-expand-arrows-alt'></i>`;
+                if (elements.tableCol) elements.tableCol.style.display = "block";
+                if (elements.closeBar) elements.closeBar.style.display = "block";
+                if (elements.iframeCol) elements.iframeCol.className = "col-8";
             }
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
 
-
-            var dateStr = new Date()
-            //    var dateStr = date.format("DDMMYY_HHmmss");
-            var n = document.getElementById("name").value + "_" + dateStr.toISOString()
-            var sample_rate_bw = parseInt(document.getElementById("sample_rate_bm").value) * 1e3
-            if(sample_rate_bw >0){
-                save_demod(fre_val, channel, n,
-                    document.getElementById("modulation").value,
-                    generateColor(),
-                    parseInt(document.getElementById("sample_rate_bm").value) * 1e3);
-            }
-            else{
-                document.getElementById("sample_rate_bm").style.border = '1px solid red'
-            }
-        }
-
-
-        function save_demod(fre_val, channel, name, modulation, color, sample_rate, sq) {
-
-            if (sq == null) {
-                sq = -90
-            }
-
-            bookmark_data = {
-                "name": name,
-                "start_frequency": fre_val - ((sample_rate / 2)),
-                "stop_frequency": fre_val + ((sample_rate / 2)),
-                "frequency": fre_val,
-                "modulation": modulation,
-                "color": color,
-                "enabled": false,
-                "channel": channel,
-                "channel_type": "Realtime",
-                "sample_rate": sample_rate,
-                "device_name": "Realtime_ADI_AD9361",
-                "board_name": "Quasar 1S",
-                "ip_address": "192.168.1.173",
-                "status": "realtime",
-                "auto_status": 'pause',
-                "id": 1,
-                "mute_status": "OFF",
-                "maxHold": 10,
-                "minHold": 10,
-                "persistnece": 10,
-                "fft_filter": 10,
-                'squelch': sq,
-                'const': 1,
-                'audio_gain': 0.5,
-                'gnu_status': 'ACTIVE',
-                'recording_status': 'OFF',
-                'deleted': false,
-                'timestamp': "",
-                'udp_port': '0.0.0.0',
-                'realtime_center_freq': fre_val,
-                'realtime_sample_rate': parent.sample_rate,
-                "recordings": [],
-                "mode_type": "audio",
-                "channel": active_channel,
-                "mode": "realtime",
-            }
-
-            if (modulation == 'psk') {
-                bookmark_data["constellation_type"] = 1 // BPSK - 0, QPSK - 1,DQPSK-2, 8PSK -3 , 16QAM -4
-                bookmark_data["soft_decisions_precision"] = 8
-                bookmark_data["decoder_type"] = 0 // soft - 0 , hard -1
-            }
-
-            document.getElementById('openwebrx-dialog-bookmark').style.display = "none";
-            $.ajax({
-                type: 'POST',
-                url: '/save_realtime_decoding_data',
-                data: JSON.stringify(bookmark_data),
-                contentType: 'application/json',
-                success: function (data) {
-                    console.log("Datatatat::::::",data)
-                    if(!data.hasOwnProperty("status")){
-
-                        if (data[data.length - 1]['sample_rate'] <1e5){
-                            addBand((data[data.length - 1]['frequency'] - (1e5/2)) / 1e6, (data[data.length - 1]['frequency'] +(1e5/2)) / 1e6, 100 , data[data.length - 1]['name'], data[data.length - 1]['uid'], data[data.length - 1]['color'],data[data.length-1]['sample_rate']/1e6,data[data.length - 1]['frequency']/1e6)
-                        }
-                        else{
-                            addBand(data[data.length - 1]['start_frequency'] / 1e6, data[data.length - 1]['stop_frequency'] / 1e6, (data[data.length - 1]['stop_frequency'] - data[data.length - 1]['start_frequency']/2)/1e6, data[data.length - 1]['name'], data[data.length - 1]['uid'], data[data.length - 1]['color'],data[data.length-1]['sample_rate']/1e6,data[data.length - 1]['frequency']/1e6)
-                        }
-                        // band_meta[data[data.length - 1]['uid']].actual_bandwidth =(data[data.length-1]['sample_rate']/1e6)
-                        
-                        parent.get_demodulators_for_active_channel()
-                    }
-                    else{
-                        console.log("Limit Exceeds")
-                    }
-                    // plot_all_demods()
-
-                }
-            });
-        }
-
-
-        // =============================================== Add Band =================================================
-
-        chart.setPadding({ left: 20 })
-
-        const yAxis = chart.getDefaultAxisY()
-
-        const threshold = yAxis.addConstantLine()
-        threshold.setStrokeStyle(new SolidLine({
-            thickness: 1,
-            fillStyle: new SolidFill({ color: ColorHEX(threshold_color) })
-        }))
-
-
-
-        const threshold1 = yAxis
-        .addCustomTick(UIElementBuilders.PointableTextBox)
-        .setMouseInteractions(true)
-        // .setAllocatesAxisSpace(true)
-        .setTickLabelPadding(1)
-        .setTextFormatter(
-          (value) => "Threshold"
-        );
-        threshold1.setGridStrokeStyle(
-            new SolidLine({
-                thickness: 0,
-                fillStyle: new SolidFill({ color: ColorHEX(threshold_color) }),
-                // pattern: StipplePatterns.Dashed,
-                patternScale: 4,
-            }),
-        )
-
-        threshold.onMouseDrag((_,event) => {
-            const locationAxis = chart.translateCoordinate(event,chart.coordsAxis)
-            const displayTimeNew = locationAxis.y;
-            threshold_value = threshold.getValue()
-            if(typeof(threshold_value) == 'number'){
-                // console.log("threshold",threshold_value)
-
-                threshold1.setValue(threshold_value)
-                parent.document.getElementById('threshold').value = parseInt(threshold_value)
-
-            }
-            else{
-                // console.log("Threshold error")
-                threshold.setValue(parseInt(parent.document.getElementById('threshold').value))
-                threshold1.setValue(parseInt(parent.document.getElementById('threshold').value))
-
-            }
-        })
-
-        threshold1.getMarker().onMouseDrag((_,event) => {
-            const locationAxis = chart.translateCoordinate(event,chart.coordsAxis)
-            const displayTimeNew = locationAxis.y;
-            threshold1.setValue(parseInt(displayTimeNew))
-            threshold.setValue(parseInt(displayTimeNew))
-            parent.document.getElementById('threshold').value = threshold.getValue().toFixed(0)
+        const optimizedCollapseTrace = debounce(function(event) {
+            const isDown = event === "dwn";
+            const elements = {
+                traceDown: DOM_CACHE.get('trace_dwn'),
+                traceUp: DOM_CACHE.get('trace_up'),
+                customLegend: DOM_CACHE.get('custom-legend'),
+                tracemenu: DOM_CACHE.get('tracemenu'),
+                outerTrace: DOM_CACHE.get('outer_trace')
+            };
             
-        })
-
-
-
-        function set_threshold1(upd_threshold) {
-            // threshold.dispose()
-            threshold.setValue(upd_threshold)
-            threshold1.setValue(upd_threshold)
-            window.parent.document.getElementById('threshold').value = (upd_threshold)
-        }
-
-        ele = window.parent.document.getElementById('threshold')
-        parent.get_all_data(ele)
-
-
-        threshold.onMouseDragStop((_, event, Value) => {
-
-            window.parent.document.getElementById('threshold').value = parseInt(threshold1.getValue())
-            parent.set_threshold(parseInt(threshold1.getValue()))
-            window.parent.update_parameters({ 'threshold': parseInt(threshold1.getValue()) })
-        })
-        
-        threshold1.getMarker().onMouseDragStop((_, event, Value) => {
-
-            window.parent.document.getElementById('threshold').value = parseInt(threshold.getValue())
-            parent.set_threshold(parseInt(threshold.getValue()))
-            window.parent.update_parameters({ 'threshold': parseInt(threshold.getValue()) })
-        })  
-
-
-        function update_band(uid, freq, band_bw,offset) {
-            data = {
-                "uid": uid,
-                "frequency": parseInt(freq * 1e6),
-                // "sample_rate": band_bw * 1e6,
-                "offset":offset * 1e6,
-                "start_frequency": parseInt((freq - (band_bw/2)) * 1e6),
-                "stop_frequency": parseInt((freq + (band_bw/2)) * 1e6),
-
-            }
-
-            $.ajax({
-                type: 'POST',
-                url: '/update_demode_settings',
-                data: JSON.stringify(data),
-                contentType: 'application/json',
-                success: function (res) {
-                    parent.decoder_bookmark12(uid)
-                }
-            })
-        }
-
-
-        const yPalette = new PalettedFill({
-            lookUpProperty: 'y',
-            lut: new LUT({
-                interpolate: false,
-                steps: [
-                    { value: -20, color: ColorRGBA(60, 179, 113) },//green
-                    { value: Math.round(threshold.getValue()), color: ColorRGBA(255, 69, 0) },//red
-                    { value: -150, color: ColorHEX('#FFFF00') },//green
-
-                ],
-            }),
-        })
-   
-
-
-
-        function addBand(freq_start , freq_stop, size, name, uid, colorhex,actual_bandwidth,actual_center_freq) {
-
-            counter_1 = counter_1 + 1
-            const frequency = freq
-            const colorPicker = "white"
-            const colorPicker1 = "white"
-            const bname = name
-            const xAxis = chart.getDefaultAxisX();
-            const wxAxis = waterFall.getDefaultAxisX();
-
-
-            var color = hexToRgb(colorhex)
-            band_meta[uid] = {'start_freq' : freq_start  , 'stop_freq' : freq_stop , 'band_bw' : (freq_stop - freq_start).toFixed(3),'actual_bandwidth':actual_bandwidth, "actual_center_freq": actual_center_freq }
-            
-            xActualBand[uid] = xAxis.addBand();
-            wActualBand[uid] = wxAxis.addBand();
-            xActualBand[uid].setMouseInteractions(false)
-            wActualBand[uid].setMouseInteractions(false)
-            
-            bandLine[uid] = xAxis.addConstantLine()
-            wBandLine[uid] = wxAxis.addConstantLine()
-
-            bandLine[uid].setValue(actual_center_freq)
-            wBandLine[uid].setValue(actual_center_freq)
-            
-            bandLine[uid].setMouseInteractions(false)
-            wBandLine[uid].setMouseInteractions(false)
-
-            bandLine[uid].setVisible(false)
-            wBandLine[uid].setVisible(false)
-
-            xAxisBand[uid] = xAxis.addBand();
-
-
-            
-            band_center_freq[uid] = actual_center_freq
-            xActualBand[uid].setValueStart(band_center_freq[uid] - (parseFloat(band_meta[uid].actual_bandwidth)/2)).setValueEnd(band_center_freq[uid] + (parseFloat(band_meta[uid].actual_bandwidth)/2)).setName(bname).setVisible(false)
-            wActualBand[uid].setValueStart(band_center_freq[uid] - (parseFloat(band_meta[uid].actual_bandwidth)/2)).setValueEnd(band_center_freq[uid] + (parseFloat(band_meta[uid].actual_bandwidth)/2)).setName(bname)
-
-            // console.log(band_center_freq[uid] + parseFloat(band_meta[uid].actual_bandwidth),band_center_freq + parseFloat(band_meta[uid].actual_bandwidth))
-            xAxisBand[uid].setValueStart(freq_start).setValueEnd(freq_stop).setName(bname)
-
-            xAxisBand[uid].setFillStyle(new SolidFill({ color: ColorRGBA(color.r, color.g, color.b, 100) }));
-            xAxisBand[uid].setStrokeStyle(new SolidLine({
-                thickness: 1,
-                fillStyle: new SolidFill({ color: ColorHEX("#05183dff") })
-            }));
-
-            
-            
-
-
-            // ======================== waterfall ========================
-            
-            wxAxisBand[uid] = wxAxis.addBand();
-            wxAxisBand[uid].setValueStart(freq_start).setValueEnd(freq_stop).setName(bname)
-            wxAxisBand[uid].setFillStyle(new SolidFill({ color: ColorRGBA(color.r, color.g, color.b, 100) }));
-            wxAxisBand[uid].setStrokeStyle(new SolidLine({
-                thickness: 1,
-                fillStyle: new SolidFill({ color: ColorHEX("#05183dff") })
-            }));
-            // =============== drag function =================
-            xAxisBand[uid].onMouseDrag((_, event, ValueEnd, ValueStart) => {
-                // console.log((start_freq ) , xAxisBand[uid].getValueStart() , (stop_freq ) , xAxisBand[uid].getValueEnd())
-                const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-                if((start_freq ) <= xAxisBand[uid].getValueStart() && stop_freq  >= xAxisBand[uid].getValueEnd()){
-                    // console.log(band_meta)
-                    band_center_freq[uid] = ((xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2)
-                    bandLine[uid].setValue(band_center_freq[uid])
-                    wBandLine[uid].setValue(band_center_freq[uid])
-            xActualBand[uid].setValueStart(band_center_freq[uid] - (parseFloat(band_meta[uid].actual_bandwidth)/2)).setValueEnd(band_center_freq[uid] + (parseFloat(band_meta[uid].actual_bandwidth)/2))
-            wActualBand[uid].setValueStart(band_center_freq[uid] - (parseFloat(band_meta[uid].actual_bandwidth)/2)).setValueEnd(band_center_freq[uid] + (parseFloat(band_meta[uid].actual_bandwidth)/2))
-
-                    wxAxisBand[uid].setValueStart(xAxisBand[uid].getValueStart()).setValueEnd(xAxisBand[uid].getValueEnd())
-
-
-                    if((xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3) == band_meta[uid].band_bw){
-                        var band_freq = ((wxAxisBand[uid].getValueEnd() + wxAxisBand[uid].getValueStart()) / 2) * 1e6
-                        band_meta[uid].actual_center_freq = band_freq /1e6
-                        var center_frequency =parent.document.getElementById("Freq_number").value
-                        var center_frequency_unit = parent.document.getElementById("Freq_value").value
-                        if(parent.document.getElementById("decoder_selection")){
-    
-                            if (parent.digital_modulations.includes(parent.document.getElementById("decoder_selection").value)){
-                                parent.document.getElementById("psk_freq_off_set_value").value  = (band_freq / unit_conversion1[parent.document.getElementById('psk_freq_offset_unit').value]).toFixed(4)
-                                parent.document.getElementById("psk_off_set_value").value = ((parseFloat(band_freq ) - center_frequency * unit_conversion1[center_frequency_unit]) / unit_conversion1[parent.document.getElementById('psk_offset_unit').value]).toFixed(4)
-        
-                            }
-                            else{
-                                parent.document.getElementById("freq_off_set_value").value  = (band_freq / unit_conversion1[parent.document.getElementById('freq_offset_unit').value]).toFixed(4)
-                                parent.document.getElementById("off_set_value").value = ((parseFloat(band_freq ) - center_frequency * unit_conversion1[center_frequency_unit]) / unit_conversion1[parent.document.getElementById('offset_unit').value]).toFixed(4)
-                            }
-                        }
-                    }
-
-                }
-                else{
-
-                    var act_start = band_meta[uid]['actual_center_freq'] - (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-
-                    var act_stop = band_meta[uid]['actual_center_freq'] + (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-                    bandLine[uid].setValue(band_meta[uid]['actual_center_freq'])
-                    wBandLine[uid].setValue(band_meta[uid]['actual_center_freq'])
-                    xActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                    wActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-
-                    xAxisBand[uid].setValueStart(wxAxisBand[uid].getValueStart()).setValueEnd(wxAxisBand[uid].getValueEnd())
-
-
+            requestAnimationFrame(() => {
+                elements.traceDown.style.display = isDown ? "none" : "block";
+                elements.traceUp.style.display = isDown ? "block" : "none";
+                elements.customLegend.style.height = isDown ? "230px" : "40px";
+                elements.tracemenu.style.display = isDown ? "block" : "none";
+                if (elements.outerTrace) {
+                    elements.outerTrace.style.paddingBottom = isDown ? "0px" : "5px";
                 }
             });
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
 
-            wxAxisBand[uid].onMouseDrag((_, event, ValueEnd, ValueStart) => {
-                if((start_freq ) <= wxAxisBand[uid].getValueStart() && stop_freq  >= wxAxisBand[uid].getValueEnd()){
-                    const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-                    xAxisBand[uid].setValueStart(wxAxisBand[uid].getValueStart()).setValueEnd(wxAxisBand[uid].getValueEnd())
-                    band_center_freq[uid] = ((wxAxisBand[uid].getValueEnd() + wxAxisBand[uid].getValueStart()) / 2)
-            bandLine[uid].setValue(band_center_freq[uid])  
-            wBandLine[uid].setValue(band_center_freq[uid])  
-            xActualBand[uid].setValueStart(band_center_freq[uid] - (parseFloat(band_meta[uid].actual_bandwidth)/2)).setValueEnd(band_center_freq[uid] + (parseFloat(band_meta[uid].actual_bandwidth)/2))
-            wActualBand[uid].setValueStart(band_center_freq[uid] - (parseFloat(band_meta[uid].actual_bandwidth)/2)).setValueEnd(band_center_freq[uid] + (parseFloat(band_meta[uid].actual_bandwidth)/2))
-                    if((wxAxisBand[uid].getValueEnd() - wxAxisBand[uid].getValueStart()).toFixed(3) != band_meta[uid].band_bw){
-
-                       var act_start = band_meta[uid]['actual_center_freq'] - (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-
-                       var act_stop = band_meta[uid]['actual_center_freq'] + (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-                    bandLine[uid].setValue(band_meta[uid]['actual_center_freq'])  
-                    wBandLine[uid].setValue(band_meta[uid]['actual_center_freq'])  
-                    xActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                    wActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                        xAxisBand[uid].setValueStart(band_meta[uid].start_freq).setValueEnd(band_meta[uid].stop_freq)
-                        wxAxisBand[uid].setValueStart(band_meta[uid].start_freq).setValueEnd(band_meta[uid].stop_freq)
-                        // console.log(band_meta[uid].band_bw)
-                    }                                              
-                    else{
-                        var band_freq = ((xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2) * 1e6
-                        band_meta[uid].actual_center_freq = band_freq /1e6
-                        var center_frequency =parent.document.getElementById("Freq_number").value
-                        var center_frequency_unit = parent.document.getElementById("Freq_value").value
-                        if(parent.document.getElementById("decoder_selection")){
-                            if (parent.digital_modulations.includes(parent.document.getElementById("decoder_selection").value)){
-                                parent.document.getElementById("psk_freq_off_set_value").value  = (band_freq / unit_conversion1[parent.document.getElementById('psk_freq_offset_unit').value]).toFixed(4)
-                                parent.document.getElementById("psk_off_set_value").value = ((parseFloat(band_freq ) - center_frequency * unit_conversion1[center_frequency_unit]) / unit_conversion1[parent.document.getElementById('psk_offset_unit').value]).toFixed(4)
-
-                            }
-                            else{
-                                parent.document.getElementById("freq_off_set_value").value  = (band_freq / unit_conversion1[parent.document.getElementById('freq_offset_unit').value]).toFixed(4)
-                                parent.document.getElementById("off_set_value").value = ((parseFloat(band_freq ) - center_frequency * unit_conversion1[center_frequency_unit]) / unit_conversion1[parent.document.getElementById('offset_unit').value]).toFixed(4)
-                            }
-                        }
-                    } 
-                }
-                else{
-                    wxAxisBand[uid].setValueStart(xAxisBand[uid].getValueStart()).setValueEnd(xAxisBand[uid].getValueEnd())
-
-                }
-            });
-            // console.log((wxAxisBand[uid].getValueEnd() - wxAxisBand[uid].getValueStart()).toFixed(3))
-            xAxisBand[uid].onMouseDragStop((_, event, ValueEnd, ValueStart) => {
-                
-                const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-
-                wxAxisBand[uid].setValueStart(xAxisBand[uid].getValueStart()).setValueEnd(xAxisBand[uid].getValueEnd())
-
-                if((xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3) != band_meta[uid].band_bw){
-                    bandLine[uid].setValue(band_meta[uid]['actual_center_freq'])  
-                    wBandLine[uid].setValue(band_meta[uid]['actual_center_freq'])  
-                    var act_start = band_meta[uid]['actual_center_freq'] - (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-
-                    var act_stop = band_meta[uid]['actual_center_freq'] + (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-
-                    xActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                    wActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                    xAxisBand[uid].setValueStart(band_meta[uid].start_freq).setValueEnd(band_meta[uid].stop_freq)
-                    wxAxisBand[uid].setValueStart(band_meta[uid].start_freq).setValueEnd(band_meta[uid].stop_freq)
-                    // console.log((xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3),band_meta[uid].band_bw)
-
-                }
-                else if((xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3) == band_meta[uid].band_bw){
-                    var band_freq =  (wxAxisBand[uid].getValueEnd() + wxAxisBand[uid].getValueStart()) / 2
-                    var center_frequency_unit = parent.document.getElementById("Freq_value").value
-                    var center_frequency = (parent.document.getElementById("Freq_number").value)*unit_conversion1[center_frequency_unit]
-                    var offset = ((band_freq * 1e6) - center_frequency) / 1e6
-                    // console.log("Drag offset",offset)
-                    update_band(uid, band_freq ,(wxAxisBand[uid].getValueEnd() - wxAxisBand[uid].getValueStart()).toFixed(3),offset)
-                    bandLine[uid].setValue(band_freq)  
-                    wBandLine[uid].setValue(band_freq)  
-                    band_meta[uid].band_bw = (wxAxisBand[uid].getValueEnd() - wxAxisBand[uid].getValueStart()).toFixed(3)
-                    band_meta[uid].start_freq = xAxisBand[uid].getValueStart() 
-                    band_meta[uid].stop_freq = xAxisBand[uid].getValueEnd()
-                // console.log(band_meta)
-                }
-            });
-
-
-            wxAxisBand[uid].onMouseDragStop((_, event, ValueEnd, ValueStart) => {
-                const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-                xAxisBand[uid].setValueStart(wxAxisBand[uid].getValueStart()).setValueEnd(wxAxisBand[uid].getValueEnd())
-
-                if((wxAxisBand[uid].getValueEnd() - wxAxisBand[uid].getValueStart()).toFixed(3) != band_meta[uid].band_bw){
-
-                    var act_start = band_meta[uid]['actual_center_freq'] - (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-
-                    var act_stop = band_meta[uid]['actual_center_freq'] + (parseFloat(band_meta[uid]['actual_bandwidth']/2))
-                    bandLine[uid].setValue(band_meta[uid]['actual_center_freq'])  
-                    wBandLine[uid].setValue(band_meta[uid]['actual_center_freq'])  
-
-                    xActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                    wActualBand[uid].setValueStart(act_start).setValueEnd(act_stop)
-                    xAxisBand[uid].setValueStart(band_meta[uid].start_freq).setValueEnd(band_meta[uid].stop_freq)
-                    wxAxisBand[uid].setValueStart(band_meta[uid].start_freq).setValueEnd(band_meta[uid].stop_freq)
-                    // console.log(band_meta[uid].band_bw)
-                }
-                else if((xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3) == band_meta[uid].band_bw){
-                    var band_freq =  (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2
-                    var center_frequency_unit = parent.document.getElementById("Freq_value").value
-                    var center_frequency = (parent.document.getElementById("Freq_number").value)*unit_conversion1[center_frequency_unit]
-                    var offset = ((band_freq * 1e6) - center_frequency) / 1e6
-                    console.log("Drag offset",offset)
-                    bandLine[uid].setValue(band_freq) 
-                    wBandLine[uid].setValue(band_freq) 
-                    update_band(uid,band_freq , (xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3),offset)
-                    
-
-                    band_meta[uid].band_bw = (xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3)
-                    band_meta[uid].start_freq = xAxisBand[uid].getValueStart() 
-                    band_meta[uid].stop_freq = xAxisBand[uid].getValueEnd()
-                }
-            });
-
-            //   touch =============================
-
-            // xAxisBand[uid].onTouchMove((_, event, ValueEnd, ValueStart) => {
-            //     const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            //     wxAxisBand[uid].setValueStart(xAxisBand[uid].getValueStart()).setValueEnd(xAxisBand[uid].getValueEnd())
-
-
-            //     if ((wxAxisBand[uid].getValueStart() - wxAxisBand[uid].getValueEnd()) > 0.2) {
-            //         update_band(uid, (wxAxisBand[uid].getValueEnd() + wxAxisBand[uid].getValueStart()) / 2, 0.2)
-            //     }
-
-            //     else if ((wxAxisBand[uid].getValueStart() - wxAxisBand[uid].getValueEnd()) < 0 || wxAxisBand[uid].getValueStart() - wxAxisBand[uid].getValueEnd() < -0.2) {
-
-            //         update_band(uid, (wxAxisBand[uid].getValueEnd() + wxAxisBand[uid].getValueStart()) / 2, 0.2)
-            //     }
-
-            //     else {
-            //         update_band(uid, (wxAxisBand[uid].getValueEnd() + wxAxisBand[uid].getValueStart()) / 2, (wxAxisBand[uid].getValueEnd() - wxAxisBand[uid].getValueStart()).toFixed(3))
-            //     }
-            // });
-
-
-            // wxAxisBand[uid].onTouchMove((_, event, ValueEnd, ValueStart) => {
-            //     const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
-            //     xAxisBand[uid].setValueStart(wxAxisBand[uid].getValueStart()).setValueEnd(wxAxisBand[uid].getValueEnd())
-
-
-            //     if ((xAxisBand[uid].getValueStart() - xAxisBand[uid].getValueEnd()) > 0.2) {
-
-            //         update_band(uid, (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2, 0.2)
-            //     }
-
-            //     else if ((xAxisBand[uid].getValueStart() - xAxisBand[uid].getValueEnd()) < 0 || xAxisBand[uid].getValueStart() - xAxisBand[uid].getValueEnd() < -0.2) {
-
-            //         update_band(uid, (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2, 0.2)
-            //     }
-
-            //     else {
-            //         update_band(uid, (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2, (xAxisBand[uid].getValueEnd() - xAxisBand[uid].getValueStart()).toFixed(3))
-            //     }
-            // });
-
-
-            xAxisBand[uid].onMouseEnter(()=>{
-                if(wxAxisBand[uid]){
-                    wxAxisBand[uid].setHighlight(true)
-                }
-                xActualBand[uid].setVisible(true)
-                wActualBand[uid].setVisible(true)
-                bandLine[uid].setVisible(true)
-                wBandLine[uid].setVisible(true)
-                console.log("HI")
-                // wxAxisBand[uid].setHighlight(0.5)
-            })
-            wxAxisBand[uid].onMouseEnter(()=>{
-                if(xAxisBand[uid]){
-                    xAxisBand[uid].setHighlight(true)
-                }
-                xActualBand[uid].setVisible(true)
-                wActualBand[uid].setVisible(true)
-                bandLine[uid].setVisible(true)
-                wBandLine[uid].setVisible(true)
-                // xAxisBand[uid].setHighlight(0.5)
-            })
-
-            xAxisBand[uid].onMouseLeave(()=>{
-                bandLine[uid].setVisible(false)
-                wBandLine[uid].setVisible(false)
-                xActualBand[uid].setVisible(false)
-                wActualBand[uid].setVisible(false)
-                if(wxAxisBand[uid]){
-                    wxAxisBand[uid].setHighlight(false)
-                }
-                // wxAxisBand[uid].setHighlight(0.5)
-            })
-
-            wxAxisBand[uid].onMouseLeave(()=>{
-                if(xAxisBand[uid]){
-                    xAxisBand[uid].setHighlight(false)
-                }
-                xActualBand[uid].setVisible(false)
-                wActualBand[uid].setVisible(false)
-                bandLine[uid].setVisible(false)
-                wBandLine[uid].setVisible(false)
-                // xAxisBand[uid].setHighlight(0.5)
-            })
-        }
-
-
-        // ===============End drag function =================
-        
-    
-
-       
-
-        
-        var legend2 = waterFall
-            .addLegendBox(legendBuilder)
-            .setTitle(false)
-            .setPosition({ x: 97.5, y: 95.5 })
-
-        legend2.setBackground((background) => background
-            .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
-            .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
-        )
-        legend2.add(heatmapSeries, { toggleVisibilityOnClick: false })
-        legend2.setDraggingMode(0)
-
-        function showLegendBox() {
-            legend2.setVisible(true);
-        }
-
-        
-
-        function hideLegendBox() {
-            legend2.setVisible(false);
-        }
-
-
-        function delete_band(uid) {
-            wxAxisBand[uid].dispose()
-            xAxisBand[uid].dispose()
-            xActualBand[uid].dispose()
-            wActualBand[uid].dispose()
-            bandLine[uid].dispose()
-            wBandLine[uid].dispose()
-            delete xAxisBand[uid]
-            delete wxAxisBand[uid]
-            delete band_meta[uid]
-        }
-
-        // cursor style
-        chart.setAutoCursor((cursor) => cursor
-            .setGridStrokeXStyle(new DashedLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX(theme_color) }) }))
-            .setGridStrokeYStyle(new DashedLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX(theme_color) }) }))
-            .setGridStrokeXCut(true).setGridStrokeYCut(true)
-        )
-
-
-        function change_mod(val) {
-            document.getElementById("modulation").value = val;
-            document.getElementById("sample_rate_bm").value = parent.banwidth_val_of_mode[document.getElementById("modulation").value]
-
-
-            document.getElementById("name").value = val
-
-        }
-
-
-        function reconfigure_spectrum() {
-            // parent.refresh_attenuation()
-            if (parent.document.getElementById('Freq_value').value == "MHz"){
-                center_frequency = parent.document.getElementById('Freq_number').value
-
-            }
-            else{
-                center_frequency = parent.document.getElementById('Freq_number').value / unit_conversion1[(parent.document.getElementById('Freq_value').value)]
-            }
-            startFreq = (center_frequency ) - (parseInt(parent.document.getElementById('sample_rate_value_text').value/2))
-            stopFreq = (center_frequency ) + (parseInt(parent.document.getElementById('sample_rate_value_text').value/2))
-            console.log("start:::::::",(center_frequency),startFreq,stopFreq  , (parseInt(parent.document.getElementById('sample_rate_value_text').value/2)))
-            chart.getDefaultAxisX().setDefaultInterval({ start: startFreq, end: stopFreq, stopAxisAfter: true })
-        }
-        
-        
-        // ##########################################################################
-
-        auto_axis_btn = window.parent.document.getElementById('auto_y_axis')
-        if (auto_axis_btn.checked) {
-            auto_Y_axis_flag = true
-        }
-
-        peak_btn_parent = window.parent.document.getElementById('hide_peak')
-        if (peak_btn_parent.checked) {
-            peak_data_flag = true
-        }
-
-        auto_threshold_btn = window.parent.document.getElementById('auto_threshold')
-        if (auto_threshold_btn.checked) {
-            auto_threshold_flag = true
-        }
-
-
-    
-        let dataSampleSize_1 = parseInt(dataSampleSize);
-
-        const minValues = new Array(dataSampleSize_1).fill(Infinity)
-
-        const maxValues = new Array(dataSampleSize_1).fill(-Infinity)
-
-        const avgValues = new Array(dataSampleSize_1).fill(Infinity)
-        function getAverage(array) {
-            let sum = 0;
-            for (let i = 0; i < array.length; i++) {
-                sum += array[i];
-            }
-            return sum / array.length;
-        }
-
-        // ----------------------------------- ScreenShot Btn ------------------------------------
-
-        document.getElementById('screenshot_img').onclick = function () {
-            chart.saveToFile('Spectrum_screenshot')
-        }
-
-        //----------------------- data source -------------------------
-
-
-        document.getElementById('csv_export').onclick = function () {
-            var rows = [
-                [
-                    "Frequency(MHz)",
-                    "Power(dBm)"
-                ],
-                ...dataVal.x.map((x, i) => ([(dataVal.x[i] * 1e-6).toFixed(3), dataVal.y[i].toFixed(1)]))]
-                .map(e => e.join(","))
-                .join("\n");
-            let csvContent = "data:text/csv;charset=utf-8,"
-                + rows;
-            var encodedUri = encodeURI(csvContent);
-            window.open(encodedUri);
-        }
-
-
-        function get_data() {
-            $.ajax({
-                type: 'POST',
-                url: '/get_demodulators_for_active_channel',
-                data: JSON.stringify({'active_channel':active_channel}),
-                contentType: 'application/json',
-                success: function (data) {
-
-                    var valid_data = data['active']
-
-                    for (var i = 0; i < valid_data.length; i++) {
-
-                        xAxisBand[valid_data[i]['uid']] = valid_data[i]
-
-                        if (valid_data[i]['start_frequency'] == active_channel) {
-                            addBand(valid_data[i]['start_frequency'] / 1e6, valid_data[i]['stop_frequency'] / 1e6, (valid_data[i]['stop_frequency'] - valid_data[i]['start_frequency']/2)/1e6, "myband1", valid_data[i]['uid'], valid_data[i]['color'],valid_data[i]['sample_rate']/1e6,valid_data[i]['frequency']/1e6)
-                            // band_meta[valid_data[i]['uid']].actual_bandwidth =(valid_data[i]['sample_rate'])/1e6
-                        }
-                    }
-
-                }
-            });
-        }
-
-
-        function plot_all_demods() {
-
-            $.ajax({
-                type: 'POST',
-                url: '/get_demodulators_for_active_channel',
-                data: JSON.stringify({'active_channel':active_channel}),
-                contentType: 'application/json',
-                success: function (data) {
-                    var valid_data = data['active']
-
-                    for (var i = 0; i < valid_data.length; i++) {
-                        if (valid_data[i]['start_frequency'] == active_channel) {
-                            addBand(valid_data[i]['start_frequency'] / 1e6, valid_data[i]['stop_frequency'] / 1e6, (valid_data[i]['stop_frequency'] - valid_data[i]['start_frequency']/2)/1e6, valid_data[i]['name'], valid_data[i]['uid'], valid_data[i]['color'],valid_data[i]['sample_rate']/1e6,valid_data[i]['frequency']/1e6)
-                            // band_meta[valid_data[i]['uid']].actual_bandwidth =(valid_data[i]['sample_rate'])/1e6
-                        }
-                    }
-                }
-            });
-        }
-
-
-        function reload_bands() {
-
-            $.ajax({
-                type: 'POST',
-                url: '/get_demodulators_for_active_channel',
-                data: JSON.stringify({'active_channel':active_channel}),
-                contentType: 'application/json',
-                success: function (data) {
-
-                    // removing existing bands
-                    for (const [key, value] of Object.entries(wxAxisBand)) {
-                        delete_band(key);
-                    }
-                    var valid_data = data['active']
-                      // console.log("response from reload bands",valid_data)
-                    for (var i = 0; i < valid_data.length; i++) {
-
-                        if(valid_data[i]['sample_rate'] < 1e5){
-                            addBand((valid_data[i]['frequency'] - (1e5/2)) * 1e-6, (valid_data[i]['frequency'] + (1e5/2)) * 1e-6, 100 , valid_data[i]['name'], valid_data[i]['uid'], valid_data[i]['color'],valid_data[i]['sample_rate']/1e6,valid_data[i]['frequency']/1e6)
-                        }
-                        else{
-                            addBand(valid_data[i]['start_frequency'] / 1e6, valid_data[i]['stop_frequency'] / 1e6, (valid_data[i]['stop_frequency'] - valid_data[i]['start_frequency']/2)/1e6, valid_data[i]['name'], valid_data[i]['uid'], valid_data[i]['color'],valid_data[i]['sample_rate']/1e6,valid_data[i]['frequency']/1e6)
-                        }
-                        // band_meta[valid_data[i]['uid']].actual_bandwidth =(valid_data[i]['sample_rate'])/1e6
-
-                    }
-                }
-            });
-        }
-        
-
-        function set_band() {
-
-            $.ajax({
-                type: 'POST',
-                url: '/get_demodulators_for_active_channel',
-                data: JSON.stringify({'active_channel':active_channel}),
-                contentType: 'application/json',
-                success: function (data) {
-
-                    var valid_data = data['active']
-                    console.log(valid_data)
-                    for (var i = 0; i < valid_data.length; i++) {
-                        if(valid_data[i]['sample_rate'] < 1e5){
-
-                            xActualBand[valid_data[i]['uid']].setValueStart((valid_data[i]['frequency'] - (valid_data[i]['sample_rate']/2)) /1e6).setValueEnd((valid_data[i]['frequency'] + (valid_data[i]['sample_rate']/2))/1e6)
-                            wActualBand[valid_data[i]['uid']].setValueStart((valid_data[i]['frequency'] - (valid_data[i]['sample_rate']/2)) /1e6).setValueEnd((valid_data[i]['frequency'] + (valid_data[i]['sample_rate']/2))/1e6)
-                            xAxisBand[valid_data[i]['uid']].setValueStart((valid_data[i]['frequency'] - (1e5/2)) * 1e-6).setValueEnd((valid_data[i]['frequency'] + (1e5/2))/1e6)
-                            wxAxisBand[valid_data[i]['uid']].setValueStart((valid_data[i]['frequency'] - (1e5/2)) * 1e-6).setValueEnd((valid_data[i]['frequency'] + (1e5/2))/1e6)
-                            console.log("in set_band if fn")
-                            bandLine[valid_data[i]['uid']].setValue(valid_data[i]['frequency']/1e6)
-                            wBandLine[valid_data[i]['uid']].setValue(valid_data[i]['frequency']/1e6)
-                            band_meta[valid_data[i]['uid']].actual_bandwidth =(valid_data[i]['sample_rate'])/1e6
-                            
-                        }
-                        else{
-                
-                            xActualBand[valid_data[i]['uid']].setValueStart((valid_data[i]['frequency'] - (valid_data[i]['sample_rate']/2)) /1e6).setValueEnd((valid_data[i]['frequency'] + (valid_data[i]['sample_rate']/2))/1e6)
-                            wActualBand[valid_data[i]['uid']].setValueStart((valid_data[i]['frequency'] - (valid_data[i]['sample_rate']/2)) /1e6).setValueEnd((valid_data[i]['frequency'] + (valid_data[i]['sample_rate']/2))/1e6)
-
-                            xAxisBand[valid_data[i]['uid']].setValueStart(valid_data[i]['start_frequency']/1e6).setValueEnd(valid_data[i]['stop_frequency']/1e6)
-                            wxAxisBand[valid_data[i]['uid']].setValueStart(valid_data[i]['start_frequency']/1e6).setValueEnd(valid_data[i]['stop_frequency']/1e6)
-                            bandLine[valid_data[i]['uid']].setValue(valid_data[i]['frequency']/1e6)
-                            wBandLine[valid_data[i]['uid']].setValue(valid_data[i]['frequency']/1e6)
-                            band_meta[valid_data[i]['uid']].actual_bandwidth =(valid_data[i]['sample_rate'])/1e6
-                            console.log("in set_band fn",valid_data[i]['start_frequency'],valid_data[i]['stop_frequency'])
-                        }
-                        
-                    }
-                }
-            });
-        }
-
-
-        function show_traces_max() {
-
-            var checkBox_max = document.getElementById("max_hold");
-            if (checkBox_max.checked == true) {
-                button_click_max = true
-                update_traces_settings()
-
-            } else {
-                button_click_max = false
-                maxValues.fill(-Infinity)
-                maxSeries.clear()
-                update_traces_settings()
-            }
-        }
-
-
-        function show_traces_min() {
-
-            var checkBox_min = document.getElementById("min_hold");
-            if (checkBox_min.checked == true) {
-                button_click_min = true
-                update_traces_settings()
-
-            }
-            else {
-                button_click_min = false
-                minValues.fill(Infinity)
-                minSeries.clear()
-                update_traces_settings()
-            }
-        }
-
-
-        function show_traces_avg() {
-
-            var checkBox_avg = document.getElementById("avg_hold");
-            if (checkBox_avg.checked == true) {
-                button_click_avg = true
-                update_traces_settings()
-
-            }
-            else {
-
-                button_click_avg = false
-                avgValues.fill(0)
-                avgSeries.clear()
-                update_traces_settings()
-
-            }
-
-        }
-
-
-        function show_traces() {
-            checkBox_Showtraces = document.getElementById('show_traces')
-            if (checkBox_Showtraces.checked == true) {
-                button_click_showtraces = true
-            }
-            else {
-                button_click_showtraces = false
-                maxValues.fill(-Infinity)
-                maxSeries.clear()
-                minValues.fill(Infinity)
-                minSeries.clear()
-                avgValues.fill(0)
-                avgSeries.clear()
-            }
-        }
-
-
-        function show_peak_data() {
-            var checkBox_peak = document.getElementById("peak_data_btn");
-            if (checkBox_peak.checked == false) {
-                peak_data_flag = false
-                update_traces_settings()
-            }
-            else {
-                peak_data_flag = true
-                seriespeak.clear()
-                update_traces_settings()
-            }
-
-        }
-
-
-        function show_mark_data() {
-            var checkBox_mark = document.getElementById("mark_data_btn");
-            if (checkBox_mark.checked) {
-                mark_data_flag = true
-                set_marked_positions()
-                update_traces_settings()
-
-            }
-            else {
-                mark_data_flag = false
-                set_marked_positions()
-                update_traces_settings()
-            }
-        }
-
-
-        function show_main_curve() {
-            var checkBox_main = document.getElementById("main_curve");
-            if (checkBox_main.checked == true) {
-                button_click_main = true
-                update_traces_settings()
-
-            }
-            else {
-                button_click_main = false
-                series.clear()
-                update_traces_settings()
-            }
-        }
-
-        function show_traces_band() {
-            var checkBox_band = document.getElementById("band");
-            if (checkBox_band.checked == true) {
-                button_click_band = true
-                update_traces_settings()
-
-            } else {
-                button_click_band = false
-                update_traces_settings()
-            }
-        }
-
-        function show_traces_persis() {
-            var checkBox_persis = document.getElementById("persistence_data_btn");
-            if (checkBox_persis.checked == true) {
-                button_click_persistence = true
-                update_traces_settings()
-
-            } else {
-                persistenceSeries.clear()
-                button_click_persistence = false
-                update_traces_settings()
-            }
-        }
-
-
-        function full_screen() {
-            var checkBox_full_screen = document.getElementById("full_screen");
-            if (full_screen_flag == false) {
-                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
-                window.parent.document.getElementById("table_col").style.display = "none"
-                window.parent.document.getElementById("iframe_col").className = "col-12"
-                window.parent.document.getElementById("iframe_col").style.paddingRight = "25px"
-                full_screen_flag = true
-
-            }
-            else {
-                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-expand-arrows-alt'></i>`
-                window.parent.document.getElementById("table_col").style.display = "block"
-                window.parent.document.getElementById("iframe_col").className = "col-8"
-                window.parent.document.getElementById("iframe_col").style.paddingRight = "15px"
-                full_screen_flag = false
-
-            }
-        }
-
-
-        function update_traces_settings() {
-            traces_json = { active_channel : active_channel,active_mode : active_mode,"button_click_max": button_click_max, "button_click_min": button_click_min, "button_click_avg": button_click_avg, "button_click_main": button_click_main,"enable_marker" : mark_data_flag ,"enable_peak" : peak_data_flag,"persistence_trace":button_click_persistence,"enable_band":button_click_band}
-            $.ajax({
-                type: 'POST',
-                url: '/update_show_traces_settings',
-                data: JSON.stringify(traces_json),
-                contentType: 'application/json',
-                success: function (data) {
-                    traces_setting()
-                }
-            })
-        }
-
-
-        function traces_setting() {
-
-            $.ajax({
-                type: 'POST',
-                url: '/get_show_traces_settings',
-                data: JSON.stringify({ active_channel : active_channel,active_mode : active_mode }),
-                contentType: 'application/json',
-                success: function (data) {
-                    console.log(data)
-                    button_click_max = data['button_click_max']
-                    button_click_min = data['button_click_min']
-                    button_click_avg = data['button_click_avg']
-                    button_click_main = data['button_click_main']
-                    mark_data_flag = data['enable_marker']
-                    peak_data_flag = data["enable_peak"]
-                    button_click_band = data['enable_band']
-                    button_click_persistence = data['persistence_trace']
-                    if (button_click_max == true) {
-                        document.getElementById("max_hold").checked = true
-                    }
-                    else {
-
-                        document.getElementById("max_hold").checked = false
-                    }
-
-                    if (button_click_min == true) {
-                        document.getElementById("min_hold").checked = true
-                    }
-                    else {
-
-                        document.getElementById("min_hold").checked = false
-                    }
-
-                    if (button_click_avg == true) {
-                        document.getElementById("avg_hold").checked = true
-                    }
-                    else {
-
-                        document.getElementById("avg_hold").checked = false
-                    }
-
-                    if (button_click_main == true) {
-                        document.getElementById("main_curve").checked = true
-                    }
-                    else {
-
-                        document.getElementById("main_curve").checked = false
-                    }
-                    if (mark_data_flag == true) {
-                        document.getElementById("mark_data_btn").checked = true
-                        set_marked_positions()
-                    }
-                    else {
-
-                        document.getElementById("mark_data_btn").checked = false
-                    }
-                    if (peak_data_flag == true) {
-                        document.getElementById("peak_data_btn").checked = true
-                
-                    }
-                    else {
-
-                        document.getElementById("peak_data_btn").checked = false
-                    }
-                    if (button_click_band == true) {
-                        document.getElementById("band").checked = true
-                        
-                    }
-                    else {
-
-                        document.getElementById("band").checked = false
-                    }
-                    if (button_click_persistence == true) {
-                        document.getElementById("persistence_data_btn").checked = true
-                        
-                    }
-                    else {
-
-                        document.getElementById("persistence_data_btn").checked = false
-                    }
-                }
-            });
-        }
-
-
-        window.parent.document.addEventListener('fullscreenchange', exitHandler);
-        window.parent.document.addEventListener('webkitfullscreenchange', exitHandler);
-        window.parent.document.addEventListener('mozfullscreenchange', exitHandler);
-        window.parent.document.addEventListener('MSFullscreenChange', exitHandler);
-
-
-        function exitHandler() {
-            if (!window.parent.document.fullscreenElement && !window.parent.document.webkitIsFullScreen && !window.parent.document.mozFullScreen && !window.parent.document.msFullscreenElement) {
-                if (!parent.table_full) {
-                    document.getElementById('full_screen_icon').classList.remove('fa-compress')
-                    document.getElementById('full_screen_icon').classList.add('fa-expand')
-                    parent.full_iframe = false;
-                }
-
-            }
-            else {
-                if (!parent.table_full) {
-                    document.getElementById('full_screen_icon').classList.remove('fa-expand')
-                    document.getElementById('full_screen_icon').classList.add('fa-compress')
-                    parent.full_iframe = true;
-                }
-            }
-        }
-
-
-        // =================================  Series Hold Starts  ===========================================
-       
-        var Persistence_cycles = window.parent.document.getElementById('Persistence_hold_value').value;
-        var avg_max_cycle = window.parent.document.getElementById('avg_input').value;
-        var AverageLevel = window.parent.document.getElementById('avg_input').value;
-
-
-        window.parent.document.getElementById("Persistence_hold_value").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                Persistence_hold_change()
-            }
-	    });
-        
-        window.parent.document.getElementById("avg_input").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                avg_hold_change()
-            }
-	    });
-        
-        window.parent.document.getElementById("min_hold_value").addEventListener("keypress", function (event) {
-            if (event.key === "Enter") {
-                min_hold_change()
-            }
-	    });
-
-          
-
-
-
-
-
-        //   window.parent.document.getElementById("min_hold_value").oninput = avg_hold_change()
-
-          
-
-        // document.getElementById('set_avg_cycle').onclick= function(){
-          
-        // }
-
-        function CircularArray(PersistenceLength) {
-            this.PersistenceLength = PersistenceLength;
-            // console.log("Persistence length:::::::",this.PersistenceLength)
-          }
-
-          CircularArray.prototype = Object.create(Array.prototype);
-
-          CircularArray.prototype.push = function(element) {
-            Array.prototype.push.call(this, element);
-            while (this.length > this.PersistenceLength) {
-              // console.log("Persistence length:::::::",this.PersistenceLength)
-                this.shift();
-              }
-          }
-
-
-
-          function getCol(matrix, col){
-                var column = [];
-                for(var i=0; i<matrix.length; i++){
-                    column.push(matrix[i][col]);
-                }
-                return column; // return column data..
-          }
-          
-         
-          function PersistenceCircular(number){
-              caPersistence = new CircularArray(number)
-          }
-          function get_Persistence_hold(){
-            
-              var store = [];
-                  
-                  for(var j=0;j<caPersistence[0].length;j++){
-                      var index = getCol(caPersistence, j);
-                      store.push(Math.max(...index));       
-              }
-              return store;
-          }
-          
-
-          function minCircular(number){
-              caMin = new CircularArray(number)
-          }
-
-
-          function get_min_hold(){
-              var store = [];
-                  
-                  for(var j=0;j<caMin[0].length;j++){
-                      var index = getCol(caMin, j);
-                      store.push(Math.min(...index));       
-              }
-              return store;
-          }
-
-          var caAverage = new CircularArray(parseInt(AverageLevel));
-
-
-        //   window.parent.document.getElementById('avg_input').oninput = function() {
-        //     if(window.parent.document.getElementById('avg_input').value>0){
-        //       AverageLevel = window.parent.document.getElementById('avg_input').value;
-        //       caAverage = new CircularArray(parseInt(AverageLevel));
-        //     //   console.log('AverageLevel',AverageLevel)
-        //       // ws.send(JSON.stringify({ status: "setting", average_counter:parseInt(avg_max_cycle)}));
-        //     }
-        //     else{
-        //       window.parent.document.getElementById('avg_input').value = ''
-        //       document.getElementById('avg_input').focus()
-              
-        //     }
-        //   }
-
-          const average = (...args) => args.reduce((a, b) => a + b) / args.length;  
-
-
-
-        function AverageCircular(number){
-            caAverage = new CircularArray(number);
-        }
-
-
-        function get_Average_data(){
-            var store = [];
-                
-                for(var j=0;j<caAverage[0].length;j++){
-                    var index = getCol(caAverage, j);
-                    store.push(average(...index));       
-            }
-            return store;
-        }
-       
-        var caMaincurve = new CircularArray(parseInt(5));
-        function get_maincurve_data(){
-            var store = [];
-                
-                for(var j=0;j<caMaincurve[0].length;j++){
-                    var index = getCol(caMaincurve, j);
-                    store.push(average(...index));       
-            }
-            return store;
-        }
-      
-        function set_y_axis(){
-
-            start_y = parseInt(window.parent.document.getElementById('minY').value)
-            stop_y = parseInt(window.parent.document.getElementById('maxY').value)
-            set_min_max_amp(start_y, stop_y)
-    
-        }
-
-        // =================================   Series Hold End  ===========================================
-       
-       
-       
-       
-        // =================================   WEBSOCKET RECV DATA  ===========================================
-        var cnt = 0,old_threshold;
-        var Persistencelevel =  window.parent.document.getElementById("Persistence_hold_value").value
-        var Minlevel =  window.parent.document.getElementById("min_hold_value").value
-        var caMin = new CircularArray(parseInt(Minlevel));
-        var caPersistence = new CircularArray(parseInt(Persistencelevel));
-        freq_cnt= 0
-
+        // Optimized websocket data handler
         function websocket_data(evt) {
-            dataVal = evt;
+            performanceMonitor.updateFrame();
             
-            if (freq_cnt <= 3){
-                freq_cnt = freq_cnt+1
-
-                console.log("Len",(dataVal.y).length,"freq_start",(dataVal.x[0]),"Freq_stop",(dataVal.x[(dataVal.x).length-1]),"Powe 0",dataVal.y[0],"Powe -1",dataVal.y[(dataVal.x).length-1],)
-
-                // var start_freq = (dataVal.x[0])/1e6
-
-                // var stop_freq = (dataVal.x[(dataVal.x).length-1])/1e6
-                
-            } 
-
-            caMaincurve.push(dataVal.y)
-            // dataVal.y = get_maincurve_data()
-            // console.log(dataVal.x,"this is x value")
-            cnt += 1
-            // console.log(cnt)
-            if(dataVal.hasOwnProperty('y')){
-                close_loader()
+            if (appState.isProcessing) {
+                appState.framesBehind++;
+                if (appState.framesBehind > 10) {
+                    console.warn('Frames behind:', appState.framesBehind);
+                    return; // Skip frame to catch up
+                }
             }
-            if (cnt == 3) {
-                
-                reload_bands()
-                // min_step_avg = parseInt(dataVal.y.reduce((a, b) => a + b) / dataVal.y.length);
-                reconfig_lut()
-            }
-
-            //------- handling frequency change -------
-
             
-
-            if (peak_data_flag == true) {
-                peak_count = dataVal.auto_data.length
-                // parent.document.getElementById("number_peaks").innerHTML = "Peaks :" + peak_count
-                updateSeriespeak(dataVal.auto_data);
-            }
-
-            else {
-                seriespeak.clear()
-            }
-
-            if (auto_threshold_flag == true || parent.document.getElementById("auto_threshold").checked) {
-
-                av_int = getAverage(dataVal.y)
-                set_threshold1(Math.round(av_int))
-                if(old_threshold != Math.round(av_int) ){
-                    window.parent.update_parameters({ 'threshold': Math.round(av_int) })
-                    old_threshold = Math.round(av_int)
+            appState.isProcessing = true;
+            
+            chartUpdateThrottler.throttle(() => {
+                try {
+                    processWebSocketData(evt);
+                } finally {
+                    appState.isProcessing = false;
+                    appState.framesBehind = Math.max(0, appState.framesBehind - 1);
                 }
+            }, 1); // High priority
+        }
 
+        function processWebSocketData(dataVal) {
+            if (!dataVal || !dataVal.y || !Array.isArray(dataVal.y)) {
+                return;
             }
 
-            caAverage.push(dataVal.y)
-            heatmapSeries.addIntensityValues([get_maincurve_data()])
-            // heatmapSeries.addIntensityValues([dataVal.y])
+            const now = performance.now();
+            appState.lastDataUpdate = now;
+            appState.freq_cnt = Math.min(appState.freq_cnt + 1, 5);
 
-            if (button_click_main == true) {
-                updateSeries(dataVal.x, dataVal.y);
-
+            // Adaptive quality based on performance
+            if (appState.adaptiveQuality && performanceMonitor.getAverageFPS() < 25) {
+                // Reduce data processing frequency during low performance
+                if (appState.freq_cnt % 2 !== 0) return;
             }
 
-            //  =================== auto y axis =======================
-            if (auto_Y_axis_flag == true) {
-                chart.getDefaultAxisY().setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
+            // Process main data
+            if (window.caMaincurve) {
+                window.caMaincurve.push(dataVal.y);
             }
-            // else {
-            //         start_y = parseInt(window.parent.document.getElementById('minY').value)
-            //         stop_y = parseInt(window.parent.document.getElementById('maxY').value)
-            //         set_min_max_amp(start_y, stop_y)
-            //     }
 
+            // Handle different message types
+            if (dataVal.hasOwnProperty('message')) {
+                handleMessage(dataVal);
+            } else {
+                processChartData(dataVal);
+            }
 
-            // else {
+            // Periodic cleanup
+            if (now - chartData.lastClear > PERFORMANCE_CONFIG.CLEANUP_INTERVAL_MS) {
+                cleanupChartData();
+                chartData.lastClear = now;
+            }
+        }
 
-            //     start_y = window.parent.document.getElementById('minY').value
-            //     stop_y = window.parent.document.getElementById('maxY').value
-            //     set_min_max_amp(start_y, stop_y)
+        function handleMessage(dataVal) {
+            switch (dataVal.message) {
+                case "connect":
+                    console.log("WebSocket connecting...");
+                    break;
+                case "connected":
+                    console.log("WebSocket connected");
+                    setTimeout(() => {
+                        const loader = DOM_CACHE.get('websocket_loader');
+                        if (loader) $('#websocket_loader').modal('hide');
+                    }, 1000);
+                    break;
+            }
+        }
 
-            // }
+        function processChartData(dataVal) {
+            // Close loader on first data
+            if (appState.freq_cnt === 1) {
+                const loader = DOM_CACHE.get('websocket_loader');
+                if (loader) $('#websocket_loader').modal('hide');
+            }
 
-            for (let key in xAxisBand) {
-                // console.log(`${key}`);
-                if (button_click_band == true) {
-                    // console.log("Hi in if ",button_click_band)
-                        if (xAxisBand[key]) {
-                            xActualBand[key].setVisible(true)
-                            wActualBand[key].setVisible(true)
-                            xAxisBand[key].setVisible(true)
-                            wxAxisBand[key].setVisible(true)
-                            // console.log("Hi",i['channel'])
-                        }
+            // Process traces with throttling
+            processTraces(dataVal);
+            processBands(dataVal);
+            processMarkers(dataVal);
+            processPeaks(dataVal);
+        }
+
+        function processTraces(dataVal) {
+            if (appState.button_click_main && window.updateSeries) {
+                chartUpdateThrottler.throttle(() => {
+                    window.updateSeries(dataVal.x, dataVal.y);
+                }, 2);
+            }
+
+            if (appState.button_click_avg && window.caAverage) {
+                window.caAverage.push(dataVal.y);
+                if (window.updateAvg && window.get_Average_data) {
+                    chartUpdateThrottler.throttle(() => {
+                        window.updateAvg(dataVal.x, window.get_Average_data());
+                    }, 1);
                 }
-                else {
-                        if (xAxisBand[key]) {
-                            // console.log("Hi",i['channel'])
-                            xActualBand[key].setVisible(false)
-                            wActualBand[key].setVisible(false)
-                            xAxisBand[key].setVisible(false)
-                            wxAxisBand[key].setVisible(false)
-                        }
+            }
+
+            // Auto Y-axis adjustment
+            if (appState.auto_Y_axis_flag && window.chart) {
+                const minY = Math.min(...dataVal.y);
+                const maxY = Math.max(...dataVal.y);
+                chartUpdateThrottler.throttle(() => {
+                    window.chart.getDefaultAxisY().setDefaultInterval({ start: minY, end: maxY });
+                }, 3);
+            }
+        }
+
+        function processBands(dataVal) {
+            if (!appState.button_click_band) return;
+            
+            for (const [key, band] of chartData.xAxisBand) {
+                if (band) {
+                    const elements = [
+                        chartData.xActualBand.get(key),
+                        chartData.wActualBand.get(key),
+                        chartData.xAxisBand.get(key),
+                        chartData.wxAxisBand.get(key)
+                    ];
+
+                    chartUpdateThrottler.throttle(() => {
+                        elements.forEach(element => {
+                            if (element && element.setVisible) {
+                                element.setVisible(true);
+                            }
+                        });
+                    }, 3);
                 }
             }
+        }
 
+        function processMarkers(dataVal) {
+            if (!appState.mark_data_flag) return;
 
-
-            //  ================== New Traces              =======================
-
-            if (button_click_max == true ) {
-
-                cycleData.push(dataVal);
-                if (cycleData.length > Max_cycles) {
-                    cycleData.shift()
-
-                    for (const cycle of cycleData) {
-                        for (let i = 0; i < cycle.y.length; i++) {
-                            // minValues[i] = Math.min(minValues[i], cycle.y[i]);
-                            maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
-                            // avgValues[i] += cycle.y[i] / Max_cycles;
-                        }
-                    }
-                    cycleData = [];
-                
-                // Old Series Plotting
-
-                    updateMax(dataVal.x, maxValues);
-                  }
-
-            // maxValues.fill(0);
-
-            }
-
-
-            if(button_click_min == true){
-                if(caMin){
-                    caMin.push(dataVal.y)
-                }
-                updateMin(dataVal.x, get_min_hold());
-            }
-
-            if(button_click_avg == true){   
-                caAverage.push(dataVal.y)
-                updateAvg(dataVal.x, get_Average_data());
-            }
-
-            if(button_click_persistence == true){
-                if(caPersistence){
-                    caPersistence.push(dataVal.y)
-                }
-                updatePersistence(dataVal.x, get_Persistence_hold());
-            }
-
-            if (button_click_max == false && button_click_min == false && button_click_avg == false) {
-                // minValues.fill(Infinity)
-                maxValues.fill(-Infinity)
-
-            }
-
-            //  ================== for traces =========================
-
-            // //  all truee
-            // if (button_click_max == true && button_click_min == true && button_click_avg == true && button_click_persistence == true) {
-
-            //     cycleData.push(dataVal);
-            //     if (cycleData.length > Max_cycles) {
-            //         cycleData.shift()
-
-            //         for (const cycle of cycleData) {
-            //             for (let i = 0; i < cycle.y.length; i++) {
-            //                 minValues[i] = Math.min(minValues[i], cycle.y[i]);
-            //                 maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
-            //                 avgValues[i] += cycle.y[i] / Max_cycles;
-            //             }
-            //         }
-            //         cycleData = [];
-                
-            //     // Old Series Plotting
-
-            //         updateMax(dataVal.x, maxValues);
-            //         // updateMin(dataVal.x, minValues);
-            //         // updateAvg(dataVal.x, avgValues);
-            //         avgValues.fill(0);
-            //     }
-
-            // // New Series Plotting
-
-            // if(caPersistence){
-            //     caPersistence.push(dataVal.y)
-            // }
-            // if(caMin){
-            //     caMin.push(dataVal.y)
-            // }
-            // caAverage.push(dataVal.y)
-            // updatePersistence(dataVal.x, get_Persistence_hold());
-            // updateMin(dataVal.x, get_min_hold());
-            // updateAvg(dataVal.x, get_Average_data());
-            // avgValues.fill(0);
-
-
-
-
-
-
-            // }
-
-            // if (button_click_max === true && button_click_min === false && button_click_avg === false) {
-
-            //     // cycleData.push(dataVal);
-            //     // if (cycleData.length > Max_cycles) {
-            //     //     cycleData.shift()
-
-            //     //     for (const cycle of cycleData) {
-            //     //         for (let i = 0; i < cycle.y.length; i++) {
-            //     //             maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
-            //     //         }
-            //     //     }
-            //     //     const allOnes = maxValues.every(value => value === 1);
-            //     //     const allZeros = maxValues.every(value => value === 0);
-            //     //     if (allOnes || allZeros) {
-            //     //         maxValues.fill(-Infinity)
-            //     //         maxSeries.clear()
-            //     //     } else {
-            //     //         // updateMax(dataVal.x, maxValues);
-            //     //         cycleData = [];
-            //     //     }
-            //         // cycleData = [];
-            //         // updateMax(dataVal.x, maxValues);
-            //         // }
-            //     caPersistence.push(dataVal.y)
-            //     updatePersistence(dataVal.x, get_Persistence_hold());
-            // }
-
-            // if (button_click_max == true && button_click_min == true && button_click_avg == false) {
-            //     // cycleData.push(dataVal);
-            //     // if (cycleData.length > Max_cycles) {
-            //     //     cycleData.shift()
-            //     //     for (const cycle of cycleData) {
-            //     //         for (let i = 0; i < cycle.y.length; i++) {
-            //     //             minValues[i] = Math.min(minValues[i], cycle.y[i]);
-            //     //             maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
-            //     //             avgValues[i] += cycle.y[i] / Max_cycles;
-
-            //     //         }
-            //     //     }
-            //     //     cycleData = [];
-            //     //     updateMax(dataVal.x, maxValues);
-            //     //     updateMin(dataVal.x, minValues);
-            //     // }
-            //     caPersistence.push(dataVal.y)
-            //     caMin.push(dataVal.y)
-            //     updatePersistence(dataVal.x, get_Persistence_hold());
-            //     updateMin(dataVal.x, get_min_hold());
-            // }
-            // // if min and avg true
-            // if (button_click_max == false && button_click_min == true && button_click_avg == true) {
-            //     // cycleData.push(dataVal);
-            //     // if (cycleData.length > Max_cycles) {
-            //     //     cycleData.shift()
-            //     //     for (const cycle of cycleData) {
-            //     //         for (let i = 0; i < cycle.y.length; i++) {
-            //     //             minValues[i] = Math.min(minValues[i], cycle.y[i]);
-            //     //             avgValues[i] += cycle.y[i] / Max_cycles;
-            //     //         }
-            //     //     }
-            //     //     cycleData = [];
-            //     //     updateMin(dataVal.x, minValues);
-            //     //     updateAvg(dataVal.x, avgValues);
-            //     //     avgValues.fill(0);
-
-            //     // }
-            //     caMin.push(dataVal.y)
-            //     caAverage.push(dataVal.y)
-            //     updateMin(dataVal.x, get_min_hold());
-            //     updateAvg(dataVal.x, get_Average_data());
-            // }
-            // // if min true
-            // if (button_click_max == false && button_click_min == true && button_click_avg == false) {
-            //     cycleData.push(dataVal);
-            //     // if (cycleData.length > Max_cycles) {
-            //     //     cycleData.shift()
-
-            //     //     for (const cycle of cycleData) {
-            //     //         for (let i = 0; i < cycle.y.length; i++) {
-            //     //             minValues[i] = Math.min(minValues[i], cycle.y[i]);
-            //     //         }
-            //     //     }
-            //     //     cycleData = [];
-
-            //     //     updateMin(dataVal.x, minValues);
-
-            //     // }
-            //     caMin.push(dataVal.y)
-            //     updateMin(dataVal.x, get_min_hold());
-            // }
-            // // if avg true
-            // if (button_click_max == false && button_click_min == false && button_click_avg == true) {
-            //     cycleData.push(dataVal);
-            //     // if (cycleData.length > avg_max_cycle) {
-            //     //     cycleData.shift()
-            //     //     for (const cycle of cycleData) {
-            //     //         for (let i = 0; i < cycle.y.length; i++) {
-            //     //             avgValues[i] += cycle.y[i] / avg_max_cycle;
-            //     //         }
-            //     //     }
-            //     //     cycleData = [];
-            //     //     updateAvg(dataVal.x, avgValues);
-            //     //     avgValues.fill(0);
-
-
-            //     // }
-
-            //     caAverage.push(dataVal.y)
-            //     updateAvg(dataVal.x, get_Average_data());
-
-            // }
-            // // if max and avg true
-            // if (button_click_max == true && button_click_min == false && button_click_avg == true) {
-            //     // cycleData.push(dataVal);
-            //     // if (cycleData.length > Max_cycles) {
-            //     //     cycleData.shift()
-            //     //     for (const cycle of cycleData) {
-            //     //         for (let i = 0; i < cycle.y.length; i++) {
-            //     //             maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
-            //     //             avgValues[i] += cycle.y[i] / Max_cycles;
-            //     //         }
-            //     //     }
-            //     //     cycleData = [];
-            //     //     updateAvg(dataVal.x, avgValues);
-            //     //     updateMax(dataVal.x, maxValues);
-            //     //     avgValues.fill(0);
-            //     // }
-            //     caPersistence.push(dataVal.y)
-            //     caAverage.push(dataVal.y)
-            //     updateAvg(dataVal.x, get_Average_data());
-            //     updatePersistence(dataVal.x,  get_Persistence_hold());
-            // }
-
-            // else if (button_click_max == false && button_click_min == false && button_click_avg == false) {
-            //     minValues.fill(Infinity)
-            //     maxValues.fill(-Infinity)
-            //     avgValues.fill(0)
-            // }
-
-            for (var i = 0; i <= chartMarker.length; i++) {
-
-                if (mark_data_flag == true) {
-                    for (var i = 0; i <= chartMarker.length; i++) {
-                        if (chartMarker[i]) {
-
-                            update_marker(i)
-                        }
+            markerUpdateThrottler.throttle(() => {
+                for (let i = 0; i < chartData.chartMarker.length; i++) {
+                    if (chartData.chartMarker[i] && window.update_marker) {
+                        window.update_marker(i);
                     }
                 }
+            }, 2);
+        }
+
+        function processPeaks(dataVal) {
+            if (!appState.peak_data_flag || !dataVal.auto_data) return;
+            
+            const peaks = Array.isArray(dataVal.auto_data) ? dataVal.auto_data : [];
+            if (window.updateSeriespeak) {
+                chartUpdateThrottler.throttle(() => {
+                    window.updateSeriespeak(peaks);
+                }, 2);
             }
         }
 
+        function cleanupChartData() {
+            // Clear old markers
+            chartData.addMarkerData = chartData.addMarkerData.filter(marker => 
+                marker && (Date.now() - marker.timestamp) < 30000
+            );
 
-        function open_loader() {
-            $('#websocket_loader').modal('show')
+            // Clear cached elements
+            if (DOM_CACHE.elements.size > 50) {
+                DOM_CACHE.clear();
+            }
+
+            // Force garbage collection if available
+            if (window.gc) {
+                window.gc();
+            }
+
+            console.log('Chart data cleanup completed');
         }
 
+        // Optimized stub functions for backward compatibility
+        const optimizedShowMainCurve = debounce(() => {
+            appState.button_click_main = !appState.button_click_main;
+            console.log('Main curve toggled:', appState.button_click_main);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
 
-        function close_loader() {
-            $('#websocket_loader').modal('hide')
+        const optimizedShowTracesAvg = debounce(() => {
+            appState.button_click_avg = !appState.button_click_avg;
+            console.log('Average trace toggled:', appState.button_click_avg);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedShowTracesMax = debounce(() => {
+            appState.button_click_max = !appState.button_click_max;
+            console.log('Max trace toggled:', appState.button_click_max);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedShowTracesMin = debounce(() => {
+            appState.button_click_min = !appState.button_click_min;
+            console.log('Min trace toggled:', appState.button_click_min);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedShowTracesPersis = debounce(() => {
+            appState.button_click_persistence = !appState.button_click_persistence;
+            console.log('Persistence trace toggled:', appState.button_click_persistence);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedShowPeakData = debounce(() => {
+            appState.peak_data_flag = !appState.peak_data_flag;
+            console.log('Peak data toggled:', appState.peak_data_flag);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedShowMarkData = debounce(() => {
+            appState.mark_data_flag = !appState.mark_data_flag;
+            console.log('Marker data toggled:', appState.mark_data_flag);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedShowTracesBand = debounce(() => {
+            appState.button_click_band = !appState.button_click_band;
+            console.log('Band trace toggled:', appState.button_click_band);
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        const optimizedFullScreenChart = debounce(() => {
+            if (window.parent && window.parent.full_screen_chart) {
+                window.parent.full_screen_chart();
+            }
+        }, PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS);
+
+        // Initialize optimized circular arrays
+        function initializeCircularArrays() {
+            try {
+                const avgLevel = window.parent?.document?.getElementById('avg_input')?.value || 5;
+                const minLevel = window.parent?.document?.getElementById('min_hold_value')?.value || 5;
+                const persistenceLevel = window.parent?.document?.getElementById('Persistence_hold_value')?.value || 5;
+
+                window.caAverage = new OptimizedCircularArray(parseInt(avgLevel));
+                window.caMin = new OptimizedCircularArray(parseInt(minLevel));
+                window.caPersistence = new OptimizedCircularArray(parseInt(persistenceLevel));
+                window.caMaincurve = new OptimizedCircularArray(5);
+
+                console.log('Optimized circular arrays initialized');
+            } catch (error) {
+                console.error('Error initializing circular arrays:', error);
+            }
         }
 
+        // Initialize everything when DOM is ready
+        document.addEventListener('DOMContentLoaded', () => {
+            initializeCircularArrays();
+            
+            // Set up performance monitoring
+            setInterval(() => {
+                const avgFPS = performanceMonitor.getAverageFPS();
+                if (avgFPS > 0 && avgFPS < 20) {
+                    console.warn('Performance degraded. Average FPS:', avgFPS.toFixed(2));
+                }
+            }, 5000);
 
-        $(document).ready(function () {
-            open_loader()
-            setTimeout(function () {
-                window.parent.iq_data()
+            // Set up screenshot handler
+            const screenshotBtn = DOM_CACHE.get('screenshot_img');
+            if (screenshotBtn) {
+                screenshotBtn.onclick = debounce(() => {
+                    if (window.chart) {
+                        window.chart.saveToFile('Spectrum_screenshot');
+                    }
+                }, 1000);
+            }
 
-            }, 500)
+            // Set up CSV export handler
+            const csvExportBtn = DOM_CACHE.get('csv_export');
+            if (csvExportBtn) {
+                csvExportBtn.onclick = debounce(() => {
+                    if (window.export_csv_data) {
+                        window.export_csv_data();
+                    }
+                }, 1000);
+            }
+
+            console.log('Optimized spectrum waterfall initialized');
         });
 
-        collapse_trace("dwn")
-        waterfall_XYAxis()
-
-        
-        plot_all_demods();
-        traces_setting() 
-
-
-
-        if( data['threshold'] == {} ||  data['threshold'] == null ||  data['threshold'] == ""){
-            console.log('not OK')
-            data['threshold'] = -70
-            set_threshold1(data['threshold'])
-            parent.update_parameters({'threshold' : data['threshold']})
+        // Memory cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            performanceMonitor.disable();
+            chartUpdateThrottler.clear();
+            markerUpdateThrottler.clear();
             
+            if (window.caAverage) window.caAverage.destroy();
+            if (window.caMin) window.caMin.destroy();
+            if (window.caPersistence) window.caPersistence.destroy();
+            if (window.caMaincurve) window.caMaincurve.destroy();
+
+            dataProcessor.clearCaches();
+            DOM_CACHE.clear();
             
-        }else{
-            console.log(' OK')
-            try{
-                set_threshold1(data['threshold'])
-            }catch(e){
-                data['threshold'] = -70
-                set_threshold1(data['threshold'])
-                parent.update_parameters({'threshold' : data['threshold']})
-            }
-        }
+            console.log('Memory cleanup completed');
+        });
 
-      function clear_spectrum_chart(){
-        
-        series.clear()
-        avgValues.fill(0)
-        avgSeries.clear()
-        minValues.fill(Infinity)
-        minSeries.clear()
-        var checkBox_persis = document.getElementById("persistence_data_btn");
-        if (checkBox_persis.checked == true) {
-            setTimeout(function(){
-                maxValues.fill(-Infinity)
-                maxSeries.clear()
-            },2000)
-        }else{
-            setTimeout(function(){
-                maxValues.fill(-Infinity)
-                maxSeries.clear()
-            },1000)
-        }
-      }
-        
+        // Export optimized functions for backward compatibility
+        window.optimizedSpectrum = {
+            appState,
+            chartData,
+            config,
+            performanceMonitor,
+            websocket_data,
+            optimizedFullScreen,
+            optimizedCollapseTrace,
+            DOM_CACHE
+        };
 
+        console.log('Optimized real-time spectrum waterfall loaded successfully');
     </script>
 </body>
-
 
 {% endblock %}

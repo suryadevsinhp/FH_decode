@@ -12,10 +12,12 @@
     <style>
         #lcjs-auto-flexbox{
             background-color: transparent;
+            will-change: transform;
             }
 
         canvas{
             background-color: transparent;
+            will-change: transform;
             }
         body{
             background-color: transparent;
@@ -141,20 +143,59 @@
             font-weight: bolder;
             font-family: "Roboto", "Helvetica Neue", Arial, sans-serif;
         }
+
+        /* Performance optimizations */
+        .gpu-accelerated {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
     </style>
-    <!-- =================== bootstrap cdn ================== -->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <!-- Performance configuration and optimized script loading -->
+    <script>
+        // Performance configuration
+        const PERFORMANCE_CONFIG = {
+            MAX_DATA_POINTS: 8192,
+            UPDATE_THROTTLE_MS: 33,
+            CLEANUP_INTERVAL_MS: 10000,
+            MAX_CIRCULAR_BUFFER_SIZE: 500,
+            DEBOUNCE_DELAY_MS: 200
+        };
+
+        // DOM element cache
+        const DOM_CACHE = {
+            elements: new Map(),
+            get(id) {
+                if (!this.elements.has(id)) {
+                    this.elements.set(id, document.getElementById(id));
+                }
+                return this.elements.get(id);
+            },
+            clear() { this.elements.clear(); }
+        };
+    </script>
+    <!-- Optimized script loading -->
+    <script defer src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script async src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
 
 
 </head>

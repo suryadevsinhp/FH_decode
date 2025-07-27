@@ -250,6 +250,36 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Performance configuration for main app
+        const APP_PERFORMANCE_CONFIG = {
+            POLL_INTERVAL_MS: 1000,
+            MAX_RETRIES: 3,
+            FILE_CHUNK_SIZE: 1024 * 1024, // 1MB chunks
+            CLEANUP_INTERVAL_MS: 30000,
+            DEBOUNCE_DELAY_MS: 300
+        };
+
+        // Debounce function for performance
+        function debounce(func, delay) {
+            let timeoutId;
+            return function (...args) {
+                clearTimeout(timeoutId);
+                timeoutId = setTimeout(() => func.apply(this, args), delay);
+            };
+        }
+
+        // Throttle function for performance
+        function throttle(func, delay) {
+            let lastCall = 0;
+            return function (...args) {
+                const now = Date.now();
+                if (now - lastCall >= delay) {
+                    lastCall = now;
+                    return func.apply(this, args);
+                }
+            };
+        }
+
         // App without WebSocket dependencies - uses HTTP polling
         class FrequencyHoppingApp {
             constructor() {
@@ -269,9 +299,9 @@
                 });
                 
                 const fileInput = document.getElementById('fileInput');
-                fileInput.addEventListener('change', (e) => {
+                fileInput.addEventListener('change', debounce((e) => {
                     this.validateFileInput(e.target);
-                });
+                }, APP_PERFORMANCE_CONFIG.DEBOUNCE_DELAY_MS));
             }
             
             validateFileInput(input) {
@@ -400,7 +430,7 @@
             }
             
             startProgressPolling() {
-                this.progressInterval = setInterval(async () => {
+                const pollProgress = throttle(async () => {
                     try {
                         const response = await fetch(`/progress/${this.currentJobId}`);
                         const progress = await response.json();
@@ -413,8 +443,16 @@
                         }
                     } catch (error) {
                         console.error('Progress polling error:', error);
+                        // Implement exponential backoff for errors
+                        this.pollRetries = (this.pollRetries || 0) + 1;
+                        if (this.pollRetries >= APP_PERFORMANCE_CONFIG.MAX_RETRIES) {
+                            clearInterval(this.progressInterval);
+                            this.showError('Progress polling failed. Please refresh the page.');
+                        }
                     }
-                }, 1000); // Poll every second
+                }, APP_PERFORMANCE_CONFIG.POLL_INTERVAL_MS);
+
+                this.progressInterval = setInterval(pollProgress, APP_PERFORMANCE_CONFIG.POLL_INTERVAL_MS);
             }
             
             async checkForResult() {

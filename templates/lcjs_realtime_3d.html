@@ -10,27 +10,51 @@
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
-    <!-- <script src="https://cdn.jsdelivr.net/npm/@arction/lcjs@5.2.0/dist/lcjs.iife.js"></script> -->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <!-- Performance optimized script loading -->
+    <script>
+        // Performance configuration for 3D charts
+        const PERFORMANCE_CONFIG_3D = {
+            MAX_SURFACE_POINTS: 4096,
+            UPDATE_THROTTLE_MS: 50, // Slightly higher for 3D
+            CLEANUP_INTERVAL_MS: 15000,
+            MAX_BUFFER_SIZE: 300,
+            DEBOUNCE_DELAY_MS: 300
+        };
+
+        // Optimized DOM cache
+        const DOM_CACHE_3D = {
+            elements: new Map(),
+            get(id) {
+                if (!this.elements.has(id)) {
+                    this.elements.set(id, document.getElementById(id));
+                }
+                return this.elements.get(id);
+            },
+            clear() { this.elements.clear(); }
+        };
+    </script>
+    <script defer src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script async src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script async src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
     <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
     <style>
          #lcjs-auto-flexbox{
             background-color: transparent;
+            will-change: transform;
             }
 
         canvas{
             background-color: transparent;
+            will-change: transform;
             }
             
         body{
@@ -453,67 +477,133 @@
         }
 
 
-        // =================================   WEBSOCKET RECV DATA  ===========================================
-        var cnt = 0
+        // =================================   OPTIMIZED WEBSOCKET RECV DATA  ===========================================
+        let cnt = 0;
+        let lastDataUpdate = 0;
+        let isProcessing = false;
+        let framesBehind = 0;
+        
+        // Performance throttling
+        function createThrottler(delay) {
+            let lastExecution = 0;
+            let timeoutId = null;
+            
+            return function(func) {
+                const now = performance.now();
+                
+                if (now - lastExecution >= delay) {
+                    func();
+                    lastExecution = now;
+                } else if (!timeoutId) {
+                    timeoutId = setTimeout(() => {
+                        func();
+                        lastExecution = performance.now();
+                        timeoutId = null;
+                    }, delay - (now - lastExecution));
+                }
+            };
+        }
+        
+        const throttle3D = createThrottler(PERFORMANCE_CONFIG_3D.UPDATE_THROTTLE_MS);
+        
         function websocket_data(evt) {
-            dataVal = evt;
-            if (dataVal.hasOwnProperty('message') === true) {
-                if (dataVal['message'] == "connect") {
-                    // $(window.parent.document).find('#websocket_loader').modal({backdrop : 'static'})
-                    //  $(window.parent.document).find('#websocket_loader').modal('show')
+            // Skip frames if processing is behind
+            if (isProcessing) {
+                framesBehind++;
+                if (framesBehind > 5) {
+                    console.warn('3D Chart frames behind:', framesBehind);
+                    return;
                 }
-                if (dataVal['message'] == "connected") {
-                    // setTimeout(function(){
-                    //     $(window.parent.document).find('#websocket_loader').modal('hide')
-                    // },1000)
-                }
-            } else {
-                // spectrum
-               
-                y_array = dataVal.y
-                x_array = dataVal.x
-                data_points = sample_length
-                sample_length = dataVal.x.length
-                // surfaceSeries3D.addValues({ yValues: y_array})
-                cnt += 1
-                if (cnt == 3) {
-                    reconfig_lut()
-                }
-                if (auto_Y_axis_flag == true) {
-                    chart3D.getDefaultAxisY().setInterval({ start: -140, end: -20 }).setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
-                }
-                else {
-
-                    start_y = parseInt(window.parent.document.getElementById('minY').value)
-                    stop_y = parseInt(window.parent.document.getElementById('maxY').value)
-                    set_min_max_amp(start_y, stop_y)
-
-                }
-                // let tStart = window.performance.now()
-                let pushedDataCount = 0
-                // const sampleRateHz = 100
-                const streamData = () => {
-                    // const tNow = window.performance.now()
-                    // const shouldBeDataPointsCount = Math.floor((sampleRateHz * (tNow - tStart)) / 1000)
-                    const newDataPointsCount = 1 // Add max 100 samples per frame into a series. This prevents massive performance spikes when switching tabs for long times
-                    if (newDataPointsCount > 0) {
-                        // console.log(dataVal.y.length)
-                        const newDataPoints = []
-                        const newDataPointsX = []
-                        for (let iDp = 0; iDp < newDataPointsCount; iDp++) {
-                            // const iData = (pushedDataCount + iDp) % sample_length
-                            // const sample = dataVal.y
-                            newDataPoints.push(dataVal.y)
-                            newDataPointsX.push(dataVal.x)
-                        }
-                        // console.log(dataVal.y)
-                        surfaceSeries3D.addValues({  yValues: newDataPoints})
-
-                    }
-                    pushedDataCount += newDataPointsCount
-                }   
-                requestAnimationFrame(streamData)
             }
+            
+            isProcessing = true;
+            
+            throttle3D(() => {
+                try {
+                    processWebSocketData3D(evt);
+                } finally {
+                    isProcessing = false;
+                    framesBehind = Math.max(0, framesBehind - 1);
+                }
+            });
+        }
+        
+        function processWebSocketData3D(dataVal) {
+            if (dataVal.hasOwnProperty('message') === true) {
+                handleMessage3D(dataVal);
+                return;
+            }
+            
+            if (!dataVal.y || !Array.isArray(dataVal.y)) {
+                return;
+            }
+            
+            // Optimized data processing
+            const y_array = dataVal.y;
+            const x_array = dataVal.x;
+            data_points = sample_length;
+            sample_length = dataVal.x.length;
+            
+            cnt += 1;
+            lastDataUpdate = performance.now();
+            
+            if (cnt === 3) {
+                reconfig_lut();
+            }
+            
+            // Throttled Y-axis updates
+            if (auto_Y_axis_flag === true) {
+                throttle3D(() => {
+                    const minY = Math.min(...dataVal.y);
+                    const maxY = Math.max(...dataVal.y);
+                    chart3D.getDefaultAxisY().setInterval({ start: -140, end: -20 })
+                          .setDefaultInterval({ start: minY, end: maxY });
+                });
+            } else {
+                throttle3D(() => {
+                    const start_y = parseInt(window.parent?.document?.getElementById('minY')?.value || -140);
+                    const stop_y = parseInt(window.parent?.document?.getElementById('maxY')?.value || -20);
+                    set_min_max_amp(start_y, stop_y);
+                });
+            }
+            
+            // Optimized streaming with performance monitoring
+            streamData3D(y_array, x_array);
+        }
+        
+        function handleMessage3D(dataVal) {
+            switch (dataVal.message) {
+                case "connect":
+                    console.log("3D Chart WebSocket connecting...");
+                    break;
+                case "connected":
+                    console.log("3D Chart WebSocket connected");
+                    setTimeout(() => {
+                        const loader = DOM_CACHE_3D.get('websocket_loader');
+                        if (loader) {
+                            $('#websocket_loader').modal('hide');
+                        }
+                    }, 1000);
+                    break;
+            }
+        }
+        
+        function streamData3D(yValues, xValues) {
+            // Optimize data streaming for 3D surface
+            requestAnimationFrame(() => {
+                try {
+                    if (surfaceSeries3D && yValues) {
+                        // Limit data points to prevent performance issues
+                        const maxPoints = PERFORMANCE_CONFIG_3D.MAX_SURFACE_POINTS;
+                        const dataToAdd = yValues.length > maxPoints ? 
+                            yValues.slice(0, maxPoints) : yValues;
+                        
+                        surfaceSeries3D.addValues({ yValues: [dataToAdd] });
+                    }
+                } catch (error) {
+                    console.error('3D streaming error:', error);
+                }
+            });
         }
 
         function open_loader() {
