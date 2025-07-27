@@ -1,81 +1,204 @@
-// Frequency Hopping Decoder - Frontend JavaScript
+// Frequency Hopping Decoder - Frontend JavaScript (Optimized)
+
+// Performance configuration
+const PERF_CONFIG = {
+    RECONNECT_DELAY: 3000,       // WebSocket reconnection delay
+    MAX_RECONNECT_ATTEMPTS: 5,   // Maximum reconnection attempts
+    DOM_CACHE_CLEANUP: 30000,    // DOM cache cleanup interval
+    UPDATE_THROTTLE_MS: 100,     // Throttle UI updates
+    REQUEST_TIMEOUT: 10000       // Request timeout
+};
+
+// Performance: DOM element cache
+const DOM_CACHE = {};
+function cacheDOMElements() {
+    DOM_CACHE.uploadForm = document.getElementById('uploadForm');
+    DOM_CACHE.fileInput = document.getElementById('fileInput');
+    DOM_CACHE.processBtn = document.getElementById('processBtn');
+    DOM_CACHE.progressBar = document.getElementById('progressBar');
+    DOM_CACHE.progressText = document.getElementById('progressText');
+    DOM_CACHE.statusMessage = document.getElementById('statusMessage');
+    DOM_CACHE.connectionStatus = document.getElementById('connectionStatus');
+    DOM_CACHE.recentJobs = document.getElementById('recentJobs');
+}
+
+// Performance: Throttle function
+function createThrottledFunction(func, delay) {
+    let lastCall = 0;
+    let timeoutId = null;
+    return function(...args) {
+        const now = Date.now();
+        if (now - lastCall >= delay) {
+            func.apply(this, args);
+            lastCall = now;
+        } else {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func.apply(this, args);
+                lastCall = Date.now();
+            }, delay - (now - lastCall));
+        }
+    };
+}
 
 class FrequencyHoppingApp {
     constructor() {
         this.socket = null;
         this.currentJobId = null;
         this.isProcessing = false;
+        this.reconnectAttempts = 0;
+        this.isConnected = false;
+        
+        // Performance: Create throttled functions
+        this.throttledProgressUpdate = createThrottledFunction(
+            this.updateProgress.bind(this), 
+            PERF_CONFIG.UPDATE_THROTTLE_MS
+        );
+        
+        // Performance: Cache DOM elements
+        cacheDOMElements();
         
         this.initializeSocket();
         this.bindEvents();
         this.loadRecentJobs();
+        this.setupCleanup();
     }
     
+    // Performance: Setup cleanup and memory management
+    setupCleanup() {
+        // Performance: Periodic cleanup
+        setInterval(() => {
+            try {
+                if (window.gc) window.gc(); // Force garbage collection if available
+            } catch (e) {
+                console.warn('GC not available');
+            }
+        }, PERF_CONFIG.DOM_CACHE_CLEANUP);
+        
+        // Performance: Cleanup on page unload
+        window.addEventListener('beforeunload', () => {
+            this.cleanup();
+        });
+    }
+
+    // Performance: Optimized socket initialization with reconnection logic
     initializeSocket() {
-        // Initialize Socket.IO connection
-        this.socket = io();
-        
-        // Connection events
-        this.socket.on('connect', () => {
-            console.log('Connected to server');
-            this.updateConnectionStatus(true);
-        });
-        
-        this.socket.on('disconnect', () => {
-            console.log('Disconnected from server');
-            this.updateConnectionStatus(false);
-        });
-        
-        // Processing events
-        this.socket.on('progress_update', (data) => {
-            if (data.job_id === this.currentJobId) {
-                this.updateProgress(data.progress, data.message);
-            }
-        });
-        
-        this.socket.on('processing_complete', (data) => {
-            if (data.job_id === this.currentJobId) {
-                this.handleProcessingComplete(data.result);
-            }
-        });
-        
-        this.socket.on('error', (error) => {
-            console.error('Socket error:', error);
-            this.showError('Connection error: ' + error);
-        });
+        try {
+            // Initialize Socket.IO connection
+            this.socket = io({
+                timeout: PERF_CONFIG.REQUEST_TIMEOUT,
+                forceNew: true
+            });
+            
+            // Connection events
+            this.socket.on('connect', () => {
+                console.log('Connected to server');
+                this.isConnected = true;
+                this.reconnectAttempts = 0;
+                this.updateConnectionStatus(true);
+            });
+            
+            this.socket.on('disconnect', (reason) => {
+                console.log('Disconnected from server:', reason);
+                this.isConnected = false;
+                this.updateConnectionStatus(false);
+                this.handleReconnection();
+            });
+            
+            // Processing events with throttling
+            this.socket.on('progress_update', (data) => {
+                if (data.job_id === this.currentJobId) {
+                    this.throttledProgressUpdate(data.progress, data.message);
+                }
+            });
+            
+            this.socket.on('processing_complete', (data) => {
+                if (data.job_id === this.currentJobId) {
+                    this.handleProcessingComplete(data.result);
+                }
+            });
+            
+            this.socket.on('error', (error) => {
+                console.error('Socket error:', error);
+                this.showError('Connection error: ' + error);
+            });
+            
+            this.socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                this.handleReconnection();
+            });
+            
+        } catch (error) {
+            console.error('Socket initialization error:', error);
+            this.showError('Failed to initialize connection');
+        }
     }
-    
-    bindEvents() {
-        // Form submission
-        const uploadForm = document.getElementById('uploadForm');
-        uploadForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            this.handleFileUpload();
-        });
-        
-        // File input change
-        const fileInput = document.getElementById('fileInput');
-        fileInput.addEventListener('change', (e) => {
-            this.validateFileInput(e.target);
-        });
-        
-        // Window events
-        window.addEventListener('beforeunload', (e) => {
-            if (this.isProcessing) {
-                e.preventDefault();
-                e.returnValue = 'Processing is in progress. Are you sure you want to leave?';
-            }
-        });
-    }
-    
-    updateConnectionStatus(connected) {
-        const statusElement = document.getElementById('connectionStatus');
-        if (connected) {
-            statusElement.innerHTML = '<i class="fas fa-circle me-1"></i>Connected';
-            statusElement.className = 'badge bg-success connected';
+
+    // Performance: Handle reconnection with exponential backoff
+    handleReconnection() {
+        if (this.reconnectAttempts < PERF_CONFIG.MAX_RECONNECT_ATTEMPTS) {
+            this.reconnectAttempts++;
+            const delay = Math.min(PERF_CONFIG.RECONNECT_DELAY * Math.pow(2, this.reconnectAttempts - 1), 30000);
+            
+            console.log(`Attempting to reconnect in ${delay}ms (attempt ${this.reconnectAttempts})`);
+            
+            setTimeout(() => {
+                if (!this.isConnected) {
+                    this.initializeSocket();
+                }
+            }, delay);
         } else {
-            statusElement.innerHTML = '<i class="fas fa-circle me-1"></i>Disconnected';
-            statusElement.className = 'badge bg-danger disconnected';
+            this.showError('Connection lost. Please refresh the page.');
+        }
+    }
+    
+    // Performance: Optimized event binding with cached DOM elements
+    bindEvents() {
+        try {
+            // Form submission
+            const uploadForm = DOM_CACHE.uploadForm || document.getElementById('uploadForm');
+            if (uploadForm) {
+                uploadForm.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.handleFileUpload();
+                });
+            }
+            
+            // File input change
+            const fileInput = DOM_CACHE.fileInput || document.getElementById('fileInput');
+            if (fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    this.validateFileInput(e.target);
+                });
+            }
+            
+            // Window events
+            window.addEventListener('beforeunload', (e) => {
+                if (this.isProcessing) {
+                    e.preventDefault();
+                    e.returnValue = 'Processing is in progress. Are you sure you want to leave?';
+                }
+            });
+        } catch (error) {
+            console.error('Event binding error:', error);
+        }
+    }
+    
+    // Performance: Optimized connection status update with cached DOM
+    updateConnectionStatus(connected) {
+        try {
+            const statusElement = DOM_CACHE.connectionStatus || document.getElementById('connectionStatus');
+            if (statusElement) {
+                if (connected) {
+                    statusElement.innerHTML = '<i class="fas fa-circle me-1"></i>Connected';
+                    statusElement.className = 'badge bg-success connected';
+                } else {
+                    statusElement.innerHTML = '<i class="fas fa-circle me-1"></i>Disconnected';
+                    statusElement.className = 'badge bg-danger disconnected';
+                }
+            }
+        } catch (error) {
+            console.warn('Connection status update error:', error);
         }
     }
     
@@ -358,16 +481,59 @@ class FrequencyHoppingApp {
         
         return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
     }
+
+    // Performance: Cleanup method
+    cleanup() {
+        try {
+            // Disconnect socket
+            if (this.socket) {
+                this.socket.disconnect();
+                this.socket = null;
+            }
+            
+            // Clear intervals and timeouts
+            this.isProcessing = false;
+            this.currentJobId = null;
+            this.reconnectAttempts = 0;
+            this.isConnected = false;
+            
+            // Clear DOM cache
+            Object.keys(DOM_CACHE).forEach(key => {
+                DOM_CACHE[key] = null;
+            });
+            
+            console.log('Application cleanup completed');
+        } catch (error) {
+            console.warn('Cleanup error:', error);
+        }
+    }
 }
 
-// Initialize the application when DOM is loaded
+// Performance: Optimized application initialization
 document.addEventListener('DOMContentLoaded', () => {
-    const app = new FrequencyHoppingApp();
-    
-    // Make app instance globally available for debugging
-    window.fhApp = app;
-    
-    console.log('Frequency Hopping Decoder initialized');
+    try {
+        // Performance: Cache DOM elements first
+        cacheDOMElements();
+        
+        const app = new FrequencyHoppingApp();
+        
+        // Make app instance globally available for debugging
+        window.fhApp = app;
+        
+        // Performance: Setup global error handling
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+        });
+        
+        window.addEventListener('unhandledrejection', (event) => {
+            console.error('Unhandled promise rejection:', event.reason);
+        });
+        
+        console.log('Frequency Hopping Decoder initialized (Optimized WebSocket version)');
+    } catch (error) {
+        console.error('Initialization error:', error);
+        alert('Application failed to initialize. Please refresh the page.');
+    }
 });
 
 // Service Worker registration for offline support (optional)
