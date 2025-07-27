@@ -1,0 +1,3135 @@
+{% block content %}
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Spectrum and Water fall</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/bootstrap_4_lcjs.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awsome-4.7.min.css')}}" />
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/openwebrx.css')}}" />
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.all.min.css')}}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/fontawesome.min.css')}}">
+    <!--    <script src="https://cdn.jsdelivr.net/npm/@arction/lcjs@5.2.0/dist/lcjs.iife.js"></script>-->
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
+    <!-- =================== bootstrap cdn ================== -->
+    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <!-- <link rel="stylesheet" href="/static/css/{{theme_mode}}/theme.css"> -->
+    <!-- <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='css/font-awesome.min.css')}}" /> -->
+    <!-- <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css"> -->
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/bracket_epass.css')}}"> -->
+    <!-- <link rel="stylesheet" href="{{ url_for('static', filename='css/jquery-ui.css')}}"> -->
+    <!-- <script src="{{ url_for('static', filename='js/jquery-ui.js')}}"></script> -->
+    <!-- <script src="{{ url_for('static', filename='js/openwebrx_realtime.js')}}"></script> -->
+    <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+
+    <!-- <script type="text/javascript" src="http://www.gstatic.com/charts/loader.js"></script> -->
+    <!-- <script type="text/javascript" src="{{ url_for('static', filename='js/loader.js')}}"></script>
+        <script src="{{ url_for('static', filename='js/bracket.js')}}"></script>
+        <script src="{{ url_for('static', filename='js/moment.js')}}"></script> -->
+
+
+    <style>
+        #lcjs-auto-flexbox{
+            background-color: transparent;
+            }
+
+        canvas{
+            background-color: transparent;
+            }
+            
+        body{
+            background-color: transparent;
+            }
+
+        .full-screen-div {
+
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 29px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+
+        }
+
+        .screen-shot-div {
+            position: absolute;
+            color: rgb(0, 0, 0);
+            top: 38px;
+            right: 42px;
+            z-index: 1001;
+            height: 25px;
+            width: 25px;
+        }
+
+        #trace_dwn {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+        }
+
+        #trace_up {
+            position: absolute;
+            top: 15px;
+            right: 30px;
+            z-index: 1001;
+        }
+
+        #outer_trace {
+            padding-top: 2px;
+        }
+
+        /* #tracemenu{
+        padding: 5px 5px 0px 5px;  
+        } */
+        #custom-legend {
+            background:rgb(0, 0, 0, 38%);
+            padding: 10px;
+            border: 1px solid #FFFFFF;
+            /* border-radius: 5px; */
+            color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+            position: absolute;
+            top: 22px;
+            right: 30px;
+            z-index: 1000;
+            height: 210px;
+            width: 116px;
+            transition:
+                width 2s,
+                height 2s,
+                background-color 2s,
+        }
+
+        #custom_legend_camera {
+            background: transparent;
+            padding: 5px;
+            border-radius: 5px;
+            color: white;
+            /* box-shadow: 0 0 10px rgba(0, 0, 0, 0.2); */
+            position: absolute;
+            left: 0px;
+            bottom: 0px;
+            z-index: 1000;
+            height: auto;
+            width: auto;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: small;
+        }
+
+        .legend-checkbox {
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            border: 2px solid #ccc;
+            outline: none;
+            cursor: pointer;
+            margin-right: 8px;
+            position: relative;
+        }
+
+        .legend-checkbox:checked::after {
+            content: "";
+            display: block;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #d79c3c;
+            position: absolute;
+            /* top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%); */
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="modal modal-backdrop fade" id="websocket_loader" tabindex="-1" role="dialog aria-labelledby="
+        MultipleDeleteTargetModelLabel>
+        <div class="modal-dialog modal-dialog-centered text-center " role="document">
+            <div class="modal-body ">
+                <!-- <div class="card" style="border: 1px solid var(--green-custom-color);"> -->
+                <div class="m-0 px-0 py-5" style="background-color:white">
+                    <i class="fa fa-spinner fa-spin fa-4x" style="color:black"></i>
+                </div>
+                <!-- </div> -->
+            </div>
+        </div>
+    </div>
+
+
+    <div class="full-screen-div ml-1">
+        <div class="">
+            <label for="full_screen" class="full_screen uil uil-expand-arrows-alt" id="full_screen_label"
+                style="color: #ffffff; cursor: pointer;" onclick="full_screen()"><i style='font-size:15px'
+                    data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen"
+                    class='fas fa-expand-arrows-alt'></i></label>
+        </div>
+    </div>
+
+
+    <div id="custom-legend">
+        <div id="outer_trace">
+            <label for="" id="traces_label">Traces</label>
+
+            <i class="fa fa-caret-down" id="trace_dwn" style="display: block;" onclick="collapse_trace('dwn')"></i>
+            <i class="fa fa-caret-up" id="trace_up" style="display:none ;" onclick="collapse_trace('up')"></i>
+
+            <div id="tracemenu" style="display:none ;">
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="main_curve"  onclick="show_main_curve()">
+                    <label for="main_curve" class="main_curve" style="color: green;" id="main_curve_label">Main-Curve</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="avg_hold" checked onclick="show_traces_avg()">
+                    <label for="avg_hold" class="avg_hold" id="avg_hold_label" >Avg-hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="max_hold" onclick="show_traces_max()">
+                    <label for="max_hold" class="max_hold" style="color: #8300c4;">Max-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="min_hold" onclick="show_traces_min()">
+                    <label for="min_hold" class="min_hold" style="color: #37a6de">Min-Hold</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="persistence_data_btn" checked
+                        onclick="show_traces_persis()">
+                    <label for="persistence_data_btn" class="peak_data_btn" style="color: red;">Persistence</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="peak_data_btn" checked
+                        onclick="show_peak_data()">
+                    <label for="peak_data_btn" class="peak_data_btn" style="color: #66cc35;">Peaks</label>
+                </div>
+                <div class="legend-item">
+                    <input type="checkbox" class="legend-checkbox" id="mark_data_btn" checked
+                        onclick="show_mark_data()">
+                    <label for="mark_data_btn" id="marker_color_label" class="mark_data_btn"
+                        style="color:#d7d6db">Markers</label>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div id="custom_legend_camera">
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Screenshot"
+            id="screenshot_img"><i class="fa fa-camera" aria-hidden="true"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" title="Export to csv"
+            id="csv_export"><i class="fa fa-solid fa-file-csv"></i>
+        </button>
+        <button style="color: white;background-color: transparent;border: 0px solid;" id="full_screen_btn" class="mx-1"
+            title="ChartView" onclick="window.parent.full_screen_chart()"><i id="full_screen_icon"
+                class="fa fa-solid fa-expand"></i>
+        </button>
+    </div>
+
+
+
+    <script type="text/javascript">
+        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
+        var page_mode = data['mode']
+        var button_click_max = false
+        var button_click_min = false
+        var button_click_avg = false
+        var button_click_main = false
+        var button_click_persistence = false
+
+        var wxAxisBand = {};
+        var xAxisBand = {};
+
+        var constantLine1 = {}
+        var constantLine2 = {}
+        var auto_threshold_flag = false
+        var auto_Y_axis_flag = false
+        var peak_data_flag = true
+
+        const minBandSize = 100000;
+        const maxBandSize = 200000;
+
+        var mark_data_flag = true
+        var clicks = 0;
+        var addMarkerData = new Array();
+
+        var active_port = "{{active_port}}";
+        var peak_port = "{{peak_port}}"
+        var page_theme = "{{theme_mode}}"
+
+        var active_channel = "{{active_channel}}";
+        var data = JSON.parse('{{ spectrum_data | tojson | safe}}');
+        var active_mode = data['mode']
+        console.log(active_mode)
+
+        var type_of_mode = {
+            "fm": "audio",
+            "wfm": "audio",
+            "drm": "audio",
+            "am": "audio",
+            "lsb": "audio",
+            "usb": "audio",
+            'dmr': "data",
+            'dstar': "audio",
+            'nxdn': "audio",
+            'ysf': "audio",
+            'm17': "audio",
+            'nbfm': "audio"
+        }
+
+        var unit_conversion = {
+            "khz": 1e3,
+            "mhz": 1e6,
+            "ghz": 1e9
+        }
+
+        var freq = data['freq']
+        var start_freq = data['start_frequency'] / 1e6
+        var stop_freq = data['stop_frequency'] / 1e6
+        var start_WF_freq = data['start_frequency'] / 1e6
+        var stop_WF_freq = data['stop_frequency'] / 1e6
+        var sample_length = parseInt(data['fft_points'])
+        var dataSampleSize = sample_length
+        var sampleRateHz = 35
+        var heatmapMinTimeStepMs = 1  // 1 millisecond
+        let viewMs = 100;
+        var waterFall;
+        var chart, surfaceSeries3D;
+        var marker_color, theme_color, threshold_color;
+        var select_color = ''
+        var freqDict = [];
+
+        Max_cycles = 5;
+        avg_max_cycle = 30
+
+        let cycleData = [];
+        // let minValues;
+        // let maxValues;
+        // let avgValues;
+        let dataSampleSize_1 = sample_length;
+
+
+        function collapse_trace(event) {
+            if (event == "dwn") {
+                document.getElementById("trace_dwn").style.display = "none"
+                document.getElementById("trace_up").style.display = "block"
+                document.getElementById("custom-legend").style.height = "205px"
+                document.getElementById("tracemenu").style.display = "block"
+            } else {
+                document.getElementById("trace_dwn").style.display = "block"
+                document.getElementById("trace_up").style.display = "none"
+                document.getElementById("custom-legend").style.height = "40px"
+                document.getElementById("tracemenu").style.display = "none"
+
+                // height: 195px;
+            }
+        }
+        collapse_trace("dwn")
+        try {
+            var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
+
+            if (wf_speed === 'fast') {
+                viewMs = 100;
+            } else if (wf_speed === 'medium') {
+                viewMs = 1024;
+            } else if (wf_speed === 'slow') {
+                viewMs = 2048;
+            } else {
+                viewMs = 100;
+            }
+        }
+        catch (error) {
+            viewMs = 100;
+        }
+        var time_counter = 0 // change in value also dosent affect anything                      
+        // =================== lc js import ====================
+        const {
+            lightningChart, DashedLine, emptyFill, individualPointColorEnabled, PointShape, PalettedFill, LUT, ColorHSV, emptyLine, AxisScrollStrategies, AxisTickStrategies, SolidFill, Themes,
+            LegendBoxBuilders, UIElementBuilders, UIOrigins, AutoCursorModes, UIVisibilityModes, UIDraggingModes, SolidLine, tickStrategy,
+            regularColorSteps, synchronizeAxisIntervals, Axis, onMouseDoubleClick, ColorRGBA, setLabel, removeMarker, ColorHEX
+        } = lcjs;
+
+
+     
+
+
+        // ==================== dashboard ========================= Dashboard to divide into waterfall and spectrum 
+
+        // const dashboard = lcc.Dashboard({
+        //     numberOfColumns: 1,
+        //     numberOfRows: 2,
+        // theme: Themes.light,//extra themes for dashboard
+        // })
+        
+
+        if (page_theme == 'dark') {
+            const dashboard = lcc.Dashboard({
+                numberOfColumns: 2,
+                numberOfRows: 2,
+                // theme: Themes.light,//extra themes for dashboard
+            })
+            waterFall = dashboard.createChartXY({
+                rowIndex: 1,
+                columnIndex: 0,
+                container: 'waterFallContainer',
+                Width: 70
+            })
+
+            chart = dashboard.createChartXY({
+                container: 'chartContainer',// Specify the container element
+                rowIndex: 0,
+                columnIndex: 0,
+            });
+
+            waterfall_3d = dashboard.createChart3D({
+                container: '3dContainer',// Specify the container element
+                rowIndex: 0,
+                columnIndex: 1,
+                rowSpan: 2
+            });
+
+        }
+        else {
+            const dashboard = lcc.Dashboard({
+                numberOfColumns: 2,
+                numberOfRows: 2,
+                theme: Themes.light,//extra themes for dashboard
+            })
+            waterFall = dashboard.createChartXY({
+                rowIndex: 1,
+                columnIndex: 0,
+                container: 'waterFallContainer',
+                Width: 70
+            })
+
+            chart = dashboard.createChartXY({
+                container: 'chartContainer',// Specify the container element
+                rowIndex: 0,
+                columnIndex: 0,
+            });
+
+            waterfall_3d = dashboard.createChart3D({
+                container: '3dContainer',// Specify the container element
+                rowIndex: 0,
+                columnIndex: 1,
+                rowSpan: 2
+            });
+
+
+        }
+
+        // ==================== waterfall Axis FUNCTIONS in dashboard =========================
+        // ==================== waterfall Axis FUNCTIONS in dashboard =========================
+        function waterfall_XYAxis() {
+
+            waterFall.setTitle(false)
+                .getDefaultAxisY()
+                .setTitle('Time')
+                .setScrollStrategy(AxisScrollStrategies.progressive)
+                .setTickStrategy(AxisTickStrategies.Time, tickStrategy => tickStrategy
+                    .setTickStyle(ticks => ticks
+                        .setLabelFont(font => font.setSize(12))
+                        .setTickStyle(emptyLine)
+                    )
+                )
+
+            waterFall.getDefaultAxisX().setTitle('Frequency (MHz)').setInterval({ start: start_freq, end: stop_freq })
+            //disable cursor
+            waterFall.setAutoCursorMode(AutoCursorModes.disabled)
+                .setMouseInteractionRectangleFit(true)
+
+            try {
+                var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
+
+                if (wf_speed === 'fast') {
+                    viewMs = 100;
+                } else if (wf_speed === 'medium') {
+                    viewMs = 1024;
+                } else if (wf_speed === 'slow') {
+                    viewMs = 2048;
+                } else {
+                    viewMs = 100;
+                }
+                // waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: ( 0) - viewMs, stopAxisAfter: false }))
+            }
+            catch (error) {
+                viewMs = 100;
+            }
+
+            waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - viewMs, stopAxisAfter: false }))
+        }
+
+
+
+        // ==================== waterfall COLOR constants in dashboard =========================
+
+        const theme = waterFall.getTheme()
+        var lut,paletteFill
+        // var array = -100
+        //     var total = 0
+        //     for(var i = 0; i < dataVal.y.length; i++) {
+        //         total += dataVal.y[i];
+        //     }
+            var avg = 0
+            min_step_avg = -100;
+            mid_step_avg = min_step_avg + 10
+            max_step_avg = min_step_avg + 20
+            console.log("Start",avg,min_step_avg)
+            if(parent.document.getElementById('waterfall_theme').value == "custom"){
+
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        { value: parseInt(parent.document.getElementById('max_step_theme').value), color: ColorHEX(parent.max_step) },//green
+                        { value: parseInt(parent.document.getElementById('mid_step_theme').value), color: ColorHEX(parent.mid_step1) },//red
+                        { value: parseInt(parent.document.getElementById('min_step_theme').value), color: ColorHEX(parent.min_step) },//green
+
+
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+
+            }
+            else if(parent.document.getElementById('waterfall_theme').value == "theme_1" || parent.document.getElementById('waterfall_theme').value == "theme_3"){
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        { value: min_step_avg + 40, color: ColorHEX(parent.max_step) },//blue
+                        { value: min_step_avg + 25, color: ColorHEX(parent.mid_step1) },//green
+                        { value: min_step_avg + 20 , color: ColorHEX(parent.mid_step2) },//yellow
+                        { value: min_step_avg , color: ColorHEX(parent.min_step) },//green
+
+
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+
+            }
+            else{
+
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                            { value: max_step_avg, color: ColorHEX(parent.max_step) },//green
+                        { value: mid_step_avg, color: ColorHEX(parent.mid_step1) },//red
+                        { value: min_step_avg, color: ColorHEX(parent.min_step) },//green
+
+
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+
+            }
+            
+            paletteFill = new PalettedFill({ lut, lookUpProperty: 'y' })
+        // ==================== ======================================= =========================
+
+
+        // ==============================================Create Scrolling Heatmap Grid Series ============================
+
+
+        var heatmapSeries = waterFall
+            .addHeatmapScrollingGridSeries({
+
+                scrollDimension: 'rows',
+                resolution: sample_length,
+
+                start: { x: start_freq, y: 0 },
+                step: { x: (stop_freq - start_freq) / (sample_length - 1), y: heatmapMinTimeStepMs },
+
+            })
+            .setFillStyle(paletteFill)
+            .setWireframeStyle(emptyLine)
+            .setName('Waterfall')
+
+            // Configure automatic data cleaning.
+            .setDataCleaning({
+                // Out of view data can be lazily removed as long as total columns count remains over 1000.
+                minDataPointCount: 10,
+            })
+
+            // var paletteFill1;
+            console.log("Hello")
+        var min_step_avg;
+        function reconfig_lut(){
+            //console.log("Start",parent.max_step))
+            array = dataVal.y
+            var total = 0
+            for(var i = 0; i < dataVal.y.length; i++) {
+                total += dataVal.y[i];
+            }
+            var avg = total / dataVal.y.length;
+            min_step_avg = parseInt(dataVal.y.reduce((a, b) => a + b) / dataVal.y.length);
+            mid_step_avg = min_step_avg + 10
+            max_step_avg = min_step_avg + 20
+            console.log("Start",avg,min_step_avg)
+            if(((parent.document.getElementById('waterfall_theme').value).slice(0,-2)) == "preset"){
+                // console.log("preset")
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0 , color: ColorHEX("#00000000") },//green
+                        { value: parseInt(parent.document.getElementById('min_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color3").value) },//green
+                        { value: parseInt(parent.document.getElementById('mid_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color2").value) },//red
+                        { value: parseInt(parent.document.getElementById('max_step_theme').value), color: ColorHEX(parent.document.getElementById("b_color1").value) },//green
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+            else if(parent.document.getElementById('waterfall_theme').value == "theme_1" || parent.document.getElementById('waterfall_theme').value == "theme_3"){
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0, color: ColorHEX("#00000000") },
+                        { value: min_step_avg + 25, color: ColorHEX(parent.max_step) },
+                        { value: min_step_avg + 15, color: ColorHEX(parent.mid_step1) },
+                        { value: min_step_avg + 10 , color: ColorHEX(parent.mid_step2) },
+                        { value: min_step_avg , color: ColorHEX(parent.min_step) },
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+           else if(parent.document.getElementById('waterfall_theme').value == "theme_2"){
+
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0, color: ColorHEX("#00000000") },//blue
+                        { value: max_step_avg, color: ColorHEX(parent.max_step) },//green
+                        { value: mid_step_avg, color: ColorHEX(parent.mid_step1) },//red
+                        { value: min_step_avg, color: ColorHEX(parent.min_step) },//green
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+            else {
+
+                lut = new LUT({
+                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
+                    steps: [
+                        // { value: 0, color: ColorHEX("#00000000") },//blue
+                        { value: parseInt(parent.max_step_val), color: ColorHEX(parent.max_step) },//green
+                        { value: parseInt(parent.mid_step_val), color: ColorHEX(parent.mid_step1) },//red
+                        { value: parseInt(parent.min_step_val), color: ColorHEX(parent.min_step) },//green
+                    ],
+                    units: 'dBm',
+                    interpolate: true,
+                })
+            }
+            
+            paletteFill = new PalettedFill({ lut, lookUpProperty: 'y' })
+
+            surfaceSeries3D.setFillStyle(paletteFill)
+           
+
+                if(legend2 || legend1){
+                    legend1.dispose()
+                    legend2.dispose()
+                }
+                legend1 = waterfall_3d
+                    .addLegendBox(legendBuilder)
+                    .setTitle(false)
+                    .setPosition({ x: 78, y: 2 })
+
+                legend1.setBackground((background) => background
+                    .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
+                    .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
+                )
+                legend1.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+                legend1.setDraggingMode(0)
+                heatmapSeries.setFillStyle(paletteFill)
+                legend2 = waterFall
+                    .addLegendBox(legendBuilder)
+                    .setTitle(false)
+                    .setPosition({ x: 95, y: 95 })
+
+                legend2.setBackground((background) => background
+                    .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
+                    .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
+                )
+                legend2.add(heatmapSeries, { toggleVisibilityOnClick: false })
+                legend2.setDraggingMode(0)
+            // console.log("End")
+            
+        }
+
+
+
+
+        function load_setting_data() {
+
+
+            json_data = {
+                "mode": "realtime",
+                "channel": active_channel
+            }
+
+            $.ajax({
+                type: 'POST',
+                url: '/get_reflevel_amp',
+                data: JSON.stringify(json_data),
+                contentType: 'application/json',
+                success: function (data) {
+                    surfaceSeries3D.clear()
+                    heatmapSeries.clear()
+
+                    waterFall.getDefaultAxisX().setInterval({ start: parseInt(data['start_frequency']) / 1e6, end: parseInt(data['stop_frequency']) / 1e6, stopAxisAfter: true })
+                    heatmapSeries.setStart({ x: parseInt(data['start_frequency']) / 1e6, y: 0 }) //.setStep({ x: (stop_freq - start_freq) / (sample_length-1), y: heatmapMinTimeStepMs })
+                    waterFall.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Time)
+                    .setScrollStrategy(AxisScrollStrategies.progressive)
+                    .setDefaultInterval((state) => ({ end: state.dataMax, start: (0) - viewMs, stopAxisAfter: false }))
+                    
+                    waterfall_3d.getDefaultAxisX().setInterval({ start: parseInt(data['start_frequency']) / 1e6, end: parseInt(data['stop_frequency']) / 1e6, stopAxisAfter: true })
+                    surfaceSeries3D.setStart({ x: parseInt(data['start_frequency']) / 1e6, z: 0 })
+                    waterfall_3d.getDefaultAxisZ().setTickStrategy(AxisTickStrategies.Time)
+                    .setScrollStrategy(AxisScrollStrategies.progressive)
+                    .setDefaultInterval((state) => ({ end: state.dataMax, start: (0) - historyMs, stopAxisAfter: false }))
+
+                    clear_spectrum_chart()
+                    
+                }
+            });
+
+
+        }
+
+
+        // Enable automatic cleaning of data that is not visible
+        heatmapSeries.setDataCleaning({ minDataPointCount: 1 })
+        // ======================================= ==========End Waterfall ===================================================
+
+
+        // ======================================= ==========3D Waterfall ===================================================
+
+        const historyMs = 27 * 1000
+        // Sampling rate as samples per second.
+        var sampleRateHz = 100
+        const sampleIntervalMs = 1000 / sampleRateHz
+
+
+
+        waterfall_3d
+            .getDefaultAxisX()
+            .setTitle('Frequency (MHz)').setDefaultInterval((state) => ({start: start_freq , end: stop_freq , stopAxisAfter: false}))
+           
+
+            waterfall_3d.getDefaultAxisY()
+            .setTitle('Intensity (dB)')
+            .setDefaultInterval({ end: -20, start: -140 })
+
+
+            waterfall_3d.getDefaultAxisZ().setTickStrategy(AxisTickStrategies.Time)
+            // .setScrollStrategy(AxisScrollStrategies.progressive)
+            .setScrollStrategy(AxisScrollStrategies.progressive)
+            .setDefaultInterval((state) => ({ end: state.dataMax, start: (state.dataMax ?? 0) - historyMs, stopAxisAfter: false }))
+           
+
+        waterfall_3d.setTitle(false)
+
+
+
+        // ======================================= ==========End 3D Waterfall ===================================================
+
+        //  colour adding to series (spectrum)
+        const fillRed = new SolidFill({ color: ColorRGBA(255, 0, 0, 255) })
+        const fillYellow = new SolidFill({ color: ColorHEX('#FFFF00') })
+        const fillBlue = new SolidFill({ color: ColorHEX('#37a6de') })
+        const fillGreen = new SolidFill({ color: ColorHEX('#008000') })
+        const fillNavyBlue = new SolidFill({ color: ColorHEX('#00008B') })
+        const fillBlack = new SolidFill({ color: ColorHEX('#000000') })
+        const fillQSRGreen = new SolidFill({ color: ColorHEX('#66cc35') })
+        const fillPurple = new SolidFill({ color: ColorHEX('#8300c4') })
+
+
+
+        // ================================================== Spectrum Start===================================================
+
+        // const series = chart.addLineSeries();
+        // const series = chart.addLineSeries()
+
+        // .setPointShape(PointShape.Circle)
+        // .setPointSize(10)
+        // .setAreaFillStyle(emptyFill)
+        // .setStrokeStyle(emptyLine)
+
+        // series.setStrokeStyle((stroke) => stroke.setThickness(-1))
+
+        // .addMarker(SeriesMarkerBuilder)
+        // .setPointStyle((points) => points.setFillStyle(new IndividualPointFill()))
+        // .setPointShape(PointShape.Circle)
+        // .setPointSize(10)
+
+        const maxSeries = chart.addLineSeries().setName('Min Hold').setStrokeStyle((stroke) => stroke.setThickness(1))
+        const persistenceSeries = chart.addPointLineAreaSeries({sizes:true}).setStrokeStyle((stroke) => stroke.setThickness(-1)).setPointSize(0).setPointFillStyle(new SolidFill({ color: ColorRGBA(255, 0, 0,100) })).setName('Persistence Hold')
+
+        const series = chart.addLineSeries().setStrokeStyle((stroke) => stroke.setThickness(-1));
+        const minSeries = chart.addLineSeries().setName('Min Hold').setStrokeStyle((stroke) => stroke.setThickness(-1));
+        const avgSeries = chart.addLineSeries().setName('Avg Hold').setStrokeStyle((stroke) => stroke.setThickness(1));
+        
+        const seriespeak = chart.addPointSeries({ pointShape: PointShape.Circle })
+            .setPointSize(12).setAutoScrollingEnabled(false)
+
+
+        function get_spectrum_setting(active_channel) {
+            json = { "channel": active_channel, "mode": "realtime" }
+            $.ajax({
+                type: 'POST',
+                url: '/get_realtime_setting',
+                data: JSON.stringify(json),
+                contentType: 'application/json',
+                success: function (data1) {
+
+                }
+            })
+
+        }
+
+
+        // Customize the chart appearance
+        chart.setTitle(false);
+        // chart.getDefaultAxisX().setInterval({ start: start_freq, end: stop_freq });
+
+        // chart.getDefaultAxisY().setTitle('Amplitude (dBm)').setInterval({ start: -140, end: -20 }).setDefaultInterval({ start: -140, end: -20 })
+        chart.getDefaultAxisY().setTitle('Amplitude (dBm)')
+        chart.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false) //.setInterval({ start: 138.2, end: 147.8, stopAxisAfter: true })
+        chart.setMouseInteractionWheelZoom(true)
+
+
+
+        // Function to generate data from arrays
+
+        function generateData(xArray, yArray) {
+
+            return xArray.map((x, i) => ({ x: xArray[i] / 1e6, y: yArray[i] }));
+        }
+        function generateDatapeak(xArray, yArray) {
+
+            return xArray.map((x, i) => ({ x: xArray[i] / 1e6, y: yArray[i] }));
+        }
+        // Function to update the series with new data
+        function updateSeries(xArray, yArray) {
+            series.clear();
+            series.add(generateData(xArray, yArray));
+        }
+
+        function updateMin(xArray, yArray) {
+            minSeries.clear();
+            minSeries.add(generateData(xArray, yArray));
+
+        }
+
+        function updateMax(xArray, yArray) {
+            maxSeries.clear();
+            maxSeries.add(generateData(xArray, yArray));
+        }
+
+        function updateAvg(xArray, yArray) {
+            avgSeries.clear();
+            avgSeries.add(generateData(xArray, yArray));
+        }
+
+        function updatePersistence(xArray, yArray) {
+            persistenceSeries.clear();
+            persistenceSeries.add(generateData(xArray, yArray));
+        }
+
+
+        function updateSeriespeak(data) {
+            seriespeak.clear();
+            seriespeak.add(data);
+        }
+
+
+        persistenceSeries.setAreaFillStyle(new SolidFill({ color: ColorRGBA(255, 0, 0,50) }))
+
+        if (page_theme == 'light') {
+            series.setStrokeStyle((stroke) => stroke.setFillStyle(fillGreen))
+            avgSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillNavyBlue))
+
+            chart
+                .setBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundStrokeStyle(new SolidLine({ thickness: 2, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
+            chart.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+
+                )
+            )
+            chart.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+                )
+            )
+
+            waterFall
+                .setBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundStrokeStyle(new SolidLine({ thickness: 2, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
+            waterFall.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+
+                )
+            )
+            waterFall.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+                )
+            )
+            waterfall_3d
+                .setBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundFillStyle(new SolidFill({ color: ColorHEX('#F5F5F5') }))
+                .setSeriesBackgroundStrokeStyle(new SolidLine({ thickness: 2, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
+            waterfall_3d.getDefaultAxisY().setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+
+                )
+            )
+            waterfall_3d.getDefaultAxisZ().setTickStrategy(AxisTickStrategies.Time, tickStrategy => tickStrategy
+                .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))
+
+                )
+            )
+            // waterfall_3d.getDefaultAxisX().setAxisInteractionReleaseByDoubleClicking(false).setTickStrategy(AxisTickStrategies.Numeric, tickStrategy => tickStrategy
+            //     .setTickStyle(ticks => ticks.setGridStrokeStyle((new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(128, 128, 128) }) })))    
+            //     )
+            // )
+
+            marker_color = '#FF13F0'
+            theme_color = "#000000"
+            threshold_color = '#000000'
+
+            // document.getElementById('main_curve_label').style.color = '#0827F5'
+            document.getElementById('avg_hold_label').style.color = '#0827F5'
+            document.getElementById('trace_up').style.color = '#4B5320'
+            document.getElementById('traces_label').style.color = '#4B5320'
+            document.getElementById('custom-legend').style.background = '#ffffffcf'
+            document.getElementById('full_screen_label').style.color = '#4B5320'
+            document.getElementById('screenshot_img').style.color = '#4B5320'
+            document.getElementById('csv_export').style.color = '#4B5320'
+            document.getElementById('full_screen_btn').style.color = '#4B5320'
+
+
+        }
+        else {
+            series.setStrokeStyle((stroke) => stroke.setFillStyle(fillGreen))
+            avgSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillYellow))
+            marker_color = '#FF13F0'
+            theme_color = '#808080'
+            threshold_color = '#FFFFFF'
+
+            document.getElementById('avg_hold_label').style.color = '#FFFF00'
+            document.getElementById('trace_dwn').style.color = threshold_color
+            document.getElementById('trace_up').style.color = threshold_color
+            document.getElementById('traces_label').style.color = threshold_color
+            document.getElementById('full_screen_label').style.color = threshold_color
+
+        }
+
+
+        document.getElementById("marker_color_label").style.color = marker_color
+
+
+        maxSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillPurple))
+        minSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillBlue))
+        persistenceSeries.setStrokeStyle((stroke) => stroke.setFillStyle(fillRed))
+        seriespeak.setPointFillStyle(fillQSRGreen)
+
+        //disable cursor
+        // chart.setAutoCursorMode(AutoCursorModes.disabled); 
+        // chart
+        //     .addUIElement(UIElementBuilders.ButtonBox)
+        //     // .setPosition({ x: 20, y: -100 })
+        //     // .setOrigin(UIOrigins.RightTop)
+        //     .setText('Download PNG Image')
+        //     .setPadding({ top: 5, right: 2, bottom: 5, left: 2 })
+        //     .setButtonSize(0)
+        //     .setDraggingMode(UIDraggingModes.notDraggable)
+        // chart.onMouseClick((event) => {
+        // })
+        // set chart on dbclick
+
+
+
+        function get_bookmark_data_clear() {
+            document.getElementById('openwebrx-dialog-bookmark').style.display = "none";
+        }
+
+        // const seriesMarker = series.addMarker(SeriesMarkerBuilder).setPosition({ x: 140, y: -140 })
+        // chart.zoom({x: 1, y: 1}, {x: -100, y: -500})
+        chart.setPadding({ left: 20 })
+        // margin
+        // chart.setTitleMargin(40)
+
+
+        // =================================================== End Spectrum chart===================================================
+
+        //=========================================== synchronize Axis ======================================================
+        synchronizeAxisIntervals(waterFall.getDefaultAxisX(), chart.getDefaultAxisX());
+        // synchronizeAxisIntervals(waterFall.getDefaultAxisY(), chart.getDefaultAxisX());
+
+        // band 
+        // const xAxis = chart.getDefaultAxisX(); 
+        // const xAxisBand = xAxis.addBand();
+        // xAxisBand.setValueStart(142).setValueEnd(143);
+
+        // const wxAxis = waterFall.getDefaultAxisX();
+        // const wxAxisBand = wxAxis.addBand(true);
+        // wxAxisBand.setValueEnd(142).setValueStart(143) 
+
+
+
+        //  convert color hexToRgb
+        function hexToRgb(hex) {
+            var result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex);
+            return result ? {
+                r: parseInt(result[1], 16),
+                g: parseInt(result[2], 16),
+                b: parseInt(result[3], 16)
+            } : null;
+
+        }
+
+
+
+        chart.onSeriesBackgroundMouseDoubleClick((_, event) => {
+            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
+            document.getElementById("frequency").value = (locationAxis.x / 1e6).toFixed(3);
+            document.getElementById("name").value = document.getElementById("modulation").value
+
+            document.getElementById("unit").value = "mhz"
+
+            document.getElementById("b_color").value = getRandomColor()
+
+            document.getElementById('openwebrx-dialog-bookmark').style.display = "block";
+
+            // get_bookmark_data()
+        })
+
+
+        series.onMouseDoubleClick((_, event) => {
+            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
+            document.getElementById("frequency").value = (locationAxis.x / 1e6).toFixed(3);
+            document.getElementById("name").value = document.getElementById("modulation").value
+
+            document.getElementById("unit").value = "mhz"
+
+
+            document.getElementById('openwebrx-dialog-bookmark').style.display = "block";
+
+            // get_bookmark_data()
+        })
+
+
+
+        function set_min_max_amp(min, max) {
+            // chart.setInterval
+            chart.getDefaultAxisY().setInterval({ start: min, end: max }).setDefaultInterval({ start: min, end: max })
+            waterfall_3d.getDefaultAxisY().setInterval({ start: min, end: max }).setDefaultInterval({ start: min, end: max })
+
+        }
+
+
+        function generateRGBFromRange(min, max) {
+
+            // Function to generate a random number within the range [min, max]
+            const getRandomInRange = (min, max) => Math.round(min + Math.random() * (max - min));
+
+            // Generate RGB values
+            return {
+                r: getRandomInRange(min, max),
+                g: getRandomInRange(min, max),
+                b: getRandomInRange(min, max),
+            };
+        }
+
+
+        function set_min_max_amp_wf(min, max) {
+            // chart.setInterval
+            rgbval = generateRGBFromRange(min, max)
+
+
+        }
+
+
+
+        // ============================ Select or random band color ================================
+        function generateColor() {
+            var select_color = document.getElementById('b_color').value;
+
+            if (select_color == '') {
+                var color = getRandomColor()
+                return color
+            }
+            else {
+                var color = select_color
+                if (color == '#ffff00' || color == '#ff0000') {
+                    return color = '#0000ff';
+                }
+                return color
+            }
+
+        }
+
+
+        function getRandomColor() {
+            const letters = '0123456789ABCDEF';
+            let color = '#';
+            for (let i = 0; i < 6; i++) {
+                color += letters[Math.floor(Math.random() * 16)];
+            }
+            if (color === '#FFFF00' || color === '#FF0000') {
+                return '#0000FF';
+            }
+
+            document.getElementById('b_color').value = color
+            return color;
+        }
+
+
+        function get_bookmark_data() {
+            if (document.getElementById("name").value == "") {
+                return
+            }
+
+
+            var fre_val = parseFloat(document.getElementById("frequency").value)
+            var unit = document.getElementById("unit").value
+            var channel = active_channel
+            if (unit != "ghz") {
+                fre_val = (fre_val * unit_conversion[unit])
+            } else {
+                fre_val *= 1e9
+            }
+
+            var dateStr = new Date()
+            //    var dateStr = date.format("DDMMYY_HHmmss");
+            var n = document.getElementById("name").value + "_" + dateStr.toISOString()
+
+            save_demod(fre_val, channel, n,
+                document.getElementById("modulation").value,
+                generateColor(),
+                parseInt(document.getElementById("sample_rate_bm").value) * 1e3);
+        }
+
+
+
+        function save_demod(fre_val, channel, name, modulation, color, sample_rate, sq) {
+
+            if (sq == null) {
+                sq = -90
+            }
+
+            bookmark_data = {
+                "name": name,
+                "start_frequency": fre_val - ((sample_rate / 2)),
+                "stop_frequency": fre_val + ((sample_rate / 2)),
+                "frequency": fre_val,
+                "modulation": modulation,
+                // "position":scale_px_from_freq(fre_val , get_visible_freq_range()), 
+                "color": color,
+                "enabled": false,
+                "channel": channel,
+                //"channel":1 ,//document.getElementById("realtime_channel").value
+                "channel_type": "Realtime",
+                "sample_rate": sample_rate,
+                // "offset": fre_val - center_freq,
+                "device_name": "Realtime_ADI_AD9361",
+                "board_name": "Quasar 1S",
+                "ip_address": "192.168.1.173",
+                "status": "realtime",
+                "auto_status": 'pause',
+                "id": 1,
+                "mute_status": "OFF",
+                "maxHold": 10,
+                "minHold": 10,
+                "persistnece": 10,
+                "fft_filter": 10,
+                'squelch': sq,
+                'const': 1,
+                'audio_gain': 0.5,
+                'gnu_status': 'ACTIVE',
+                'recording_status': 'OFF',
+                'deleted': false,
+                'timestamp': "",
+                'udp_port': '0.0.0.0',
+                'realtime_center_freq': fre_val,
+                'realtime_sample_rate': parent.sample_rate,
+                "recordings": [],
+                "mode_type": "audio",
+                "channel": active_channel,
+                "mode": "realtime",
+
+
+            }
+
+            if (modulation == 'psk') {
+                bookmark_data["constellation_type"] = 1 // BPSK - 0, QPSK - 1,DQPSK-2, 8PSK -3 , 16QAM -4
+                bookmark_data["soft_decisions_precision"] = 8
+                bookmark_data["decoder_type"] = 0 // soft - 0 , hard -1
+            }
+
+
+            document.getElementById('openwebrx-dialog-bookmark').style.display = "none";
+            $.ajax({
+                type: 'POST',
+                url: '/save_realtime_decoding_data',
+                data: JSON.stringify(bookmark_data),
+                contentType: 'application/json',
+                success: function (data) {
+
+                    addBand(data[data.length - 1]['start_frequency'], data[data.length - 1]['stop_frequency'], 100000, data[data.length - 1]['name'], data[data.length - 1]['uid'], data[data.length - 1]['color'])
+                    parent.get_demodulators_for_active_channel()
+                    // plot_all_demods()
+
+                }
+            });
+        }
+
+
+        // =============================================== Add Band =================================================
+        const yAxis = chart.getDefaultAxisY()
+
+        const threshold = yAxis.addConstantLine()
+        threshold.setStrokeStyle(new SolidLine({
+            thickness: 1,
+            fillStyle: new SolidFill({ color: ColorHEX(threshold_color) })
+        }))
+
+        const threshold1 = yAxis
+        .addCustomTick(UIElementBuilders.PointableTextBox)
+        .setMouseInteractions(true)
+        // .setAllocatesAxisSpace(true)
+        .setTickLabelPadding(1)
+        .setTextFormatter(
+          (value) => "Threshold"
+        );
+        threshold1.setGridStrokeStyle(
+            new SolidLine({
+                thickness: 0,
+                fillStyle: new SolidFill({ color: ColorHEX(threshold_color) }),
+                // pattern: StipplePatterns.Dashed,
+                patternScale: 4,
+            }),
+        )
+
+        threshold.onMouseDrag((_,event) => {
+            const locationAxis = chart.translateCoordinate(event,chart.coordsAxis)
+            const displayTimeNew = locationAxis.y;
+            threshold1.setValue(threshold.getValue())
+            parent.document.getElementById('threshold').value = threshold.getValue().toFixed(0)
+        })
+        threshold1.getMarker().onMouseDrag((_,event) => {
+            const locationAxis = chart.translateCoordinate(event,chart.coordsAxis)
+            const displayTimeNew = locationAxis.y;
+            threshold1.setValue(parseInt(displayTimeNew))
+            threshold.setValue(parseInt(displayTimeNew))
+            parent.document.getElementById('threshold').value = threshold.getValue().toFixed(0)
+            
+        })
+
+        function set_threshold1(upd_threshold) {
+            // threshold.dispose()
+            threshold.setValue(upd_threshold)
+            threshold1.setValue(upd_threshold)
+            window.parent.document.getElementById('threshold').value = (upd_threshold)
+            const yPalette = new PalettedFill({
+                lookUpProperty: 'y',
+                lut: new LUT({
+                    interpolate: false,
+                    steps: [
+                        { value: -20, color: ColorRGBA(60, 179, 113) },//green
+                        { value: Math.round(upd_threshold ), color: ColorRGBA(255, 69, 0) },//red
+                        { value: -150, color: ColorHEX('#FFFF00') },//green
+                    ],
+                }),
+            })
+            // ele = window.parent.document.getElementById('threshold')
+            // parent.get_all_data(ele)
+        }
+
+
+        ele = window.parent.document.getElementById('threshold')
+        parent.get_all_data(ele)
+
+
+        threshold.onMouseDragStop((_, event, Value) => {
+
+            window.parent.document.getElementById('threshold').value = parseInt(threshold.getValue())
+            parent.set_threshold(parseInt(threshold.getValue()))
+            window.parent.update_parameters({ 'threshold': parseInt(threshold.getValue()) })
+        })
+        
+        threshold1.getMarker().onMouseDragStop((_, event, Value) => {
+
+            window.parent.document.getElementById('threshold').value = parseInt(threshold.getValue())
+            parent.set_threshold(parseInt(threshold.getValue()))
+            window.parent.update_parameters({ 'threshold': parseInt(threshold.getValue()) })
+        })  
+        const yPalette = new PalettedFill({
+            lookUpProperty: 'y',
+            lut: new LUT({
+                interpolate: false,
+                steps: [
+                    { value: -20, color: ColorRGBA(60, 179, 113) },//green
+                    { value: Math.round(threshold.getValue()), color: ColorRGBA(255, 69, 0) },//red
+                    { value: -150, color: ColorHEX('#FFFF00') },//green
+                ],
+            }),
+        })
+
+
+        function update_band(uid, freq, band_bw) {
+            data = {
+                "uid": uid,
+                "frequency": freq,
+                "sample_rate": band_bw
+
+            }
+            $.ajax({
+                type: 'POST',
+                url: '/update_demode_settings',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                success: function (data) {
+                    parent.decoder_bookmark12(uid)
+                }
+            })
+        }
+
+
+        threshold.onTouchMove((_, event, Value) => {
+
+            window.parent.document.getElementById('threshold').value = Math.round(threshold.getValue())
+
+            ele = window.parent.document.getElementById('threshold')
+
+            threshold1.setValue(threshold.getValue())
+
+            parent.get_all_data(ele)
+
+        })
+
+
+        function addBand(freq_stop, freq_start, size, name, uid, colorhex) {
+
+            // function addBand(freq, size, name, uid, colorhex) {
+
+            const frequency = freq
+            // const bandsize = 50000
+
+            const colorPicker = "white"
+            const colorPicker1 = "white"
+            const bname = name
+            const xAxis = chart.getDefaultAxisX();
+            var color = hexToRgb(colorhex)
+
+            xAxisBand[uid] = xAxis.addBand();
+            xAxisBand[uid].setValueStart(freq_start).setValueEnd(freq_stop).setName(bname)
+            xAxisBand[uid].setFillStyle(new SolidFill({ color: ColorRGBA(color.r, color.g, color.b, 100) }));
+            xAxisBand[uid].setStrokeStyle(new SolidLine({
+                thickness: 1,
+                fillStyle: new SolidFill({ color: ColorHEX("#05183dff") })
+            }));
+
+            // ======================== waterfall ========================
+            const wxAxis = waterFall.getDefaultAxisX();
+            wxAxisBand[uid] = wxAxis.addBand();
+            wxAxisBand[uid].setValueStart(freq_start).setValueEnd(freq_stop).setName(bname)
+            wxAxisBand[uid].setFillStyle(new SolidFill({ color: ColorRGBA(color.r, color.g, color.b, 100) }));
+            wxAxisBand[uid].setStrokeStyle(new SolidLine({
+                thickness: 1,
+                fillStyle: new SolidFill({ color: ColorHEX("#05183dff") })
+            }));
+
+            // =============== drag function =================    
+            xAxisBand[uid].onMouseDrag((_, event, ValueEnd, ValueStart) => {
+                const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
+                wxAxisBand[uid].setValueStart(xAxisBand[uid].getValueStart()).setValueEnd(xAxisBand[uid].getValueEnd())
+                update_band(uid, (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2, xAxisBand[uid].getValueStart() - xAxisBand[uid].getValueEnd())
+
+            });
+
+
+            wxAxisBand[uid].onMouseDrag((_, event, ValueEnd, ValueStart) => {
+                const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
+                xAxisBand[uid].setValueStart(wxAxisBand[uid].getValueStart()).setValueEnd(wxAxisBand[uid].getValueEnd())
+                if ((xAxisBand[uid].getValueStart() - xAxisBand[uid].getValueEnd()) > 200000) {
+                    update_band(uid, (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2, 200000)
+                }
+                else {
+                    update_band(uid, (xAxisBand[uid].getValueEnd() + xAxisBand[uid].getValueStart()) / 2, xAxisBand[uid].getValueStart() - xAxisBand[uid].getValueEnd())
+                }
+
+            });
+
+        }
+
+        // ===============End drag function =================    
+
+        var legendBuilder,legend_backgrd;
+        if(page_theme =='light'){
+            legendBuilder = LegendBoxBuilders.HorizontalLegendBox.styleEntries((entry) => entry
+            .setTextFillStyle(new SolidFill({ color: ColorHEX('#000000') }))
+            .setLUTLength(200)
+            )
+            legend_backgrd = "#ffffffcf"
+
+        }
+        else{
+            legendBuilder = LegendBoxBuilders.HorizontalLegendBox.styleEntries((entry) => entry
+            .setTextFillStyle(new SolidFill({ color: ColorHEX('#FFFFFF') }))
+            .setLUTLength(200)
+            )
+            legend_backgrd = "#00000061"
+
+        }
+
+
+        function min_hold_change() {
+
+            if(window.parent.document.getElementById("min_hold_value").value == 0 || window.parent.document.getElementById("min_hold_value").value == '' ){
+              window.parent.document.getElementById("min_hold_value").focus()
+              window.parent.document.getElementById("min_hold_value").value= 5
+            }else if(window.parent.document.getElementById("min_hold_value").value <= 300  && window.parent.document.getElementById("min_hold_value").value > 0 ){
+                Minlevel = window.parent.document.getElementById("min_hold_value").value
+                minCircular(Minlevel)
+              
+            }else{
+                window.parent.document.getElementById("min_hold_value").focus()
+                window.parent.document.getElementById("min_hold_value").value= 5
+              // caPersistence = new CircularArray(parseInt(Persistencelevel));
+              // Minlevel = window.parent.document.getElementById("min_hold_value").value
+            }
+        };
+
+        function avg_hold_change() {
+        
+            // console.log("HI hold change")
+            if(window.parent.document.getElementById("avg_input").value == 0 || window.parent.document.getElementById("avg_input").value == '' ){
+                // console.log("HI hold change IF")
+              window.parent.document.getElementById("avg_input").focus()
+              window.parent.document.getElementById("avg_input").value= 5
+            }else if(window.parent.document.getElementById("avg_input").value <= 300  && window.parent.document.getElementById("avg_input").value > 0 ){
+                // console.log("HI hold change ELSE IF")
+                  AverageLevel = window.parent.document.getElementById('avg_input').value;
+              caAverage = new CircularArray(parseInt(AverageLevel));
+              
+            }else{
+                console.log("HI hold change ELse")
+                window.parent.document.getElementById("avg_input").focus()
+                window.parent.document.getElementById("avg_input").value= 5
+              // caPersistence = new CircularArray(parseInt(Persistencelevel));
+              // Minlevel = window.parent.document.getElementById("min_hold_value").value
+            }
+          }
+
+        
+        function Persistence_hold_change() {
+            if(window.parent.document.getElementById("Persistence_hold_value").value == '0' || window.parent.document.getElementById("Persistence_hold_value").value == '' ){
+              window.parent.document.getElementById("Persistence_hold_value").focus()
+              window.parent.document.getElementById("Persistence_hold_value").value= 5
+            }else if(window.parent.document.getElementById("Persistence_hold_value").value <= 300  && window.parent.document.getElementById("Persistence_hold_value").value > 0 ){
+                Persistencelevel = window.parent.document.getElementById("Persistence_hold_value").value
+                PersistenceCircular(Persistencelevel)
+              
+            }else{
+                window.parent.document.getElementById("Persistence_hold_value").focus()
+                window.parent.document.getElementById("Persistence_hold_value").value= 5
+              // caPersistence = new CircularArray(parseInt(Persistencelevel));
+              // Minlevel = window.parent.document.getElementById("min_hold_value").value
+            }
+          };
+
+
+        
+        var legend2 = waterFall
+            .addLegendBox(legendBuilder)
+            .setTitle(false)
+            .setPosition({ x: 95, y: 95 })
+
+        legend2.setBackground((background) => background
+            .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
+            .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
+        )
+
+        legend2.add(heatmapSeries, { toggleVisibilityOnClick: false })
+        legend2.setDraggingMode(0)
+
+
+        var legend1 = waterfall_3d
+            .addLegendBox(legendBuilder)
+            .setTitle(false)
+            .setPosition({ x: 78, y: 2 })
+
+        legend1.setBackground((background) => background
+            .setFillStyle(new SolidFill({ color: ColorHEX(legend_backgrd) }))
+            .setStrokeStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX('#FFFFFF') }) }))
+        )
+
+        // legend1.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+        legend1.setDraggingMode(0)
+
+        function showLegendBox() {
+            legend2.setVisible(true);
+        }
+
+        function hideLegendBox() {
+            legend2.setVisible(false);
+        }
+        function delete_band(uid) {
+
+            wxAxisBand[uid].dispose()
+            xAxisBand[uid].dispose()
+        }
+
+        // cursor style
+        chart.setAutoCursor((cursor) => cursor
+            .setGridStrokeXStyle(new SolidLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorRGBA(255, 255, 255) }) }))
+        )
+
+
+        function change_mod(val) {
+            document.getElementById("modulation").value = val;
+            document.getElementById("sample_rate_bm").value = banwidth_val_of_mode[document.getElementById("modulation").value]
+
+
+            document.getElementById("name").value = val
+
+        }
+
+        // ##########################################################################
+
+
+        auto_axis_btn = window.parent.document.getElementById('auto_y_axis')
+        if (auto_axis_btn.checked) {
+            auto_Y_axis_flag = true
+        }
+
+        peak_btn_parent = window.parent.document.getElementById('hide_peak')
+        if (peak_btn_parent.checked) {
+            peak_data_flag = true
+        }
+
+        auto_threshold_btn = window.parent.document.getElementById('auto_threshold')
+        if (auto_threshold_btn.checked) {
+            auto_threshold_flag = true
+
+        }
+
+        //  =================== for traces ===================================
+
+
+        var minValues = new Array(dataSampleSize_1).fill(Infinity)
+
+        var maxValues = new Array(dataSampleSize_1).fill(-Infinity)
+
+        var avgValues = new Array(dataSampleSize_1).fill(Infinity)
+        function getAverage(array) {
+            let sum = 0;
+            for (let i = 0; i < array.length; i++) {
+                sum += array[i];
+            }
+            return sum / array.length;
+        }
+
+
+
+        function open_loader() {
+            // $('#websocket_loader').modal({backdrop : 'static'})
+            $('#websocket_loader').modal('show')
+        }
+
+        function close_loader() {
+            $('#websocket_loader').modal('hide')
+        }
+
+
+        // $(document).ready(function () {
+        //     open_loader()
+        //     setTimeout(function () {
+        //         window.parent.iq_data()
+        //     }, 500)
+        // });
+
+        // ----------------------------------- ScreenShot Btn ------------------------------------
+
+        document.getElementById('screenshot_img').onclick = function () {
+            chart.saveToFile('Spectrum_screenshot')
+        }
+
+
+
+        // =================================  Series Hold Starts  ===========================================
+       
+        var Persistence_cycles = window.parent.document.getElementById('Persistence_hold_value').value;
+        var avg_max_cycle = window.parent.document.getElementById('avg_input').value;
+        var AverageLevel = window.parent.document.getElementById('avg_input').value;
+
+
+        window.parent.document.getElementById("Persistence_hold_value").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                Persistence_hold_change()
+            }
+        });
+        
+        window.parent.document.getElementById("avg_input").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                avg_hold_change()
+            }
+        });
+        
+        window.parent.document.getElementById("min_hold_value").addEventListener("keypress", function (event) {
+            if (event.key === "Enter") {
+                min_hold_change()
+            }
+        });
+
+          
+
+
+
+
+
+        //   window.parent.document.getElementById("min_hold_value").oninput = avg_hold_change()
+
+          
+
+        // document.getElementById('set_avg_cycle').onclick= function(){
+          
+        // }
+
+        function CircularArray(PersistenceLength) {
+            this.PersistenceLength = PersistenceLength;
+            // console.log("Persistence length:::::::",this.PersistenceLength)
+          }
+
+          CircularArray.prototype = Object.create(Array.prototype);
+
+          CircularArray.prototype.push = function(element) {
+            Array.prototype.push.call(this, element);
+            while (this.length > this.PersistenceLength) {
+              // console.log("Persistence length:::::::",this.PersistenceLength)
+                this.shift();
+              }
+          }
+
+
+
+          function getCol(matrix, col){
+                var column = [];
+                for(var i=0; i<matrix.length; i++){
+                    column.push(matrix[i][col]);
+                }
+                return column; // return column data..
+          }
+          
+         
+          function PersistenceCircular(number){
+              caPersistence = new CircularArray(number)
+          }
+          function get_Persistence_hold(){
+            
+              var store = [];
+                  
+                  for(var j=0;j<caPersistence[0].length;j++){
+                      var index = getCol(caPersistence, j);
+                      store.push(Math.max(...index));       
+              }
+              return store;
+          }
+          
+
+          function minCircular(number){
+              caMin = new CircularArray(number)
+          }
+
+
+          function get_min_hold(){
+              var store = [];
+                  
+                  for(var j=0;j<caMin[0].length;j++){
+                      var index = getCol(caMin, j);
+                      store.push(Math.min(...index));       
+              }
+              return store;
+          }
+
+          var caAverage = new CircularArray(parseInt(AverageLevel));
+
+
+        //   window.parent.document.getElementById('avg_input').oninput = function() {
+        //     if(window.parent.document.getElementById('avg_input').value>0){
+        //       AverageLevel = window.parent.document.getElementById('avg_input').value;
+        //       caAverage = new CircularArray(parseInt(AverageLevel));
+        //     //   console.log('AverageLevel',AverageLevel)
+        //       // ws.send(JSON.stringify({ status: "setting", average_counter:parseInt(avg_max_cycle)}));
+        //     }
+        //     else{
+        //       window.parent.document.getElementById('avg_input').value = ''
+        //       document.getElementById('avg_input').focus()
+              
+        //     }
+        //   }
+
+          const average = (...args) => args.reduce((a, b) => a + b) / args.length;  
+
+
+
+        function AverageCircular(number){
+            caAverage = new CircularArray(number);
+        }
+
+
+        function get_Average_data(){
+            var store = [];
+                
+                for(var j=0;j<caAverage[0].length;j++){
+                    var index = getCol(caAverage, j);
+                    store.push(average(...index));       
+            }
+            return store;
+        }
+       
+        var caMaincurve = new CircularArray(parseInt(5));
+        function get_maincurve_data(){
+            var store = [];
+                
+                for(var j=0;j<caMaincurve[0].length;j++){
+                    var index = getCol(caMaincurve, j);
+                    store.push(average(...index));       
+            }
+            return store;
+        }
+       
+        function set_y_axis(){
+
+            start_y = parseInt(window.parent.document.getElementById('minY').value)
+            stop_y = parseInt(window.parent.document.getElementById('maxY').value)
+            set_min_max_amp(start_y, stop_y)
+    
+        }
+               
+        // =================================   Series Hold End  ===========================================
+       
+  
+
+
+        // =================================   WEBSOCKET RECV DATA  ===========================================
+
+        var dataVal,cnt = 0;
+        var Persistencelevel =  window.parent.document.getElementById("Persistence_hold_value").value
+        var Minlevel =  window.parent.document.getElementById("min_hold_value").value
+        var caMin = new CircularArray(parseInt(Minlevel));
+        var caPersistence = new CircularArray(parseInt(Persistencelevel));
+        function websocket_data(evt) {
+            dataVal = evt;
+            caMaincurve.push(dataVal.y)     
+            // console.log(cnt)
+            
+
+            if (dataVal.hasOwnProperty('message') === true) {
+                if (dataVal['message'] == "connect") {
+                    // $(window.parent.document).find('#websocket_loader').modal({backdrop : 'static'})
+                    //  $(window.parent.document).find('#websocket_loader').modal('show')
+                }
+                if (dataVal['message'] == "connected") {
+                    // setTimeout(function(){
+                    //     $('#websocket_loader').modal('hide')
+                    // },1000)
+
+
+                }
+            } else {
+
+                cnt+=1
+
+                if (auto_threshold_flag == true) {
+
+                    av_int = getAverage(dataVal.y)
+                    set_threshold(Math.round(av_int + 20))
+                }
+
+                if (peak_data_flag == true) {
+
+                    updateSeriespeak(dataVal.auto_data);
+
+                }
+
+                else {
+                    seriespeak.clear()
+
+                }
+
+
+                if(cnt == 3){
+
+
+
+                  console.log("updated the sample")
+                    sample_length = dataVal.x.length
+                    minValues = new Array(sample_length).fill(Infinity)
+
+                    maxValues = new Array(sample_length).fill(-Infinity)
+
+                    avgValues = new Array(sample_length).fill(Infinity)
+                    console.log("updated the sample",dataVal.x.length)
+
+                    surfaceSeries3D = waterfall_3d.addSurfaceScrollingGridSeries({
+                        scrollDimension: 'rows',
+                        dataOrder:'rows',
+                        columns:  sample_length,
+                        rows : Math.ceil(historyMs / sampleIntervalMs)  ,
+                    })
+                    .setStep({ x: (stop_freq-start_freq)/(sample_length-1), z: sampleIntervalMs })
+                    .setFillStyle(new PalettedFill({ lut, lookUpProperty: 'y' }))
+                    .setWireframeStyle(emptyLine)
+                    .setStart({ x: start_freq,z:0})
+
+
+                    legend1.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+
+                    heatmapSeries = waterFall
+                    .addHeatmapScrollingGridSeries({
+
+                        scrollDimension: 'rows',
+                        resolution: sample_length,
+
+                        start: { x: start_freq, y:0 },
+                        step: { x: (stop_freq - start_freq) / (sample_length), y: heatmapMinTimeStepMs },
+                        
+                    })
+                    .setFillStyle(paletteFill)
+                    .setWireframeStyle(emptyLine)
+                    .setName('Waterfall')
+                    
+                    reconfig_lut()
+                    traces_setting()
+                    
+
+
+                    // legend2.add(surfaceSeries3D, { toggleVisibilityOnClick: false })
+
+
+
+                    // surfaceSeries3D.setDataCleaning({ minDataPointCount: 1 })
+                    // .setMaxSampleCount({ mode: 'auto', max: 10_000 })
+
+
+
+                    }
+
+                //  waterfall ====================
+
+
+                    caAverage.push(dataVal.y)
+                    heatmapSeries.addIntensityValues([get_maincurve_data()])
+
+                // heatmapSeries.addIntensityValues([dataVal.y])
+
+
+                time_counter = time_counter + 1
+
+                // 3d waterfall ==================
+                y_array = dataVal.y
+                x_array = dataVal.x
+                data_points = sample_length
+
+                let tStart = window.performance.now()
+                let pushedDataCount = 0
+                const streamData = () => {
+                    // const tNow = window.performance.now()
+                    // const shouldBeDataPointsCount = Math.floor((sampleRateHz * (tNow - tStart)) / 1000)
+                    const newDataPointsCount = 1 // Add max 100 samples per frame into a series. This prevents massive performance spikes when switching tabs for long times
+                    if (newDataPointsCount > 0) {
+                        // console.log(dataVal.y.length)
+                        const newDataPoints = []
+                        const newDataPointsX = []
+                        for (let iDp = 0; iDp < newDataPointsCount; iDp++) {
+                            // const iData = (pushedDataCount + iDp) % sample_length
+                            // const sample = dataVal.y
+                            newDataPoints.push(get_maincurve_data())
+                            newDataPointsX.push(dataVal.x)
+                        }
+                        // console.log(dataVal.y)
+                        surfaceSeries3D.addValues({  yValues: newDataPoints})
+
+                    }
+                    pushedDataCount += newDataPointsCount
+                }   
+                requestAnimationFrame(streamData)
+
+
+
+                //  spectrum ====================
+                if (button_click_main == true) {
+                    updateSeries(dataVal.x, dataVal.y);
+                }
+
+
+                //  =================== auto y axis =======================
+                if (auto_Y_axis_flag == true) {
+                    chart.getDefaultAxisY().setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
+                    waterfall_3d.getDefaultAxisY().setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
+                }
+                // else {
+
+                //     start_y = parseInt(window.parent.document.getElementById('minY').value)
+                //     stop_y = parseInt(window.parent.document.getElementById('maxY').value)
+                //     set_min_max_amp(start_y, stop_y)
+
+                // }
+
+
+                //  ================== New Traces              =======================
+
+            if (button_click_max == true ) {
+
+                cycleData.push(dataVal);
+                if (cycleData.length > Max_cycles) {
+                    cycleData.shift()
+
+                    for (const cycle of cycleData) {
+                        for (let i = 0; i < cycle.y.length; i++) {
+                            // minValues[i] = Math.min(minValues[i], cycle.y[i]);
+                            maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+                            // avgValues[i] += cycle.y[i] / Max_cycles;
+                        }
+                    }
+                    cycleData = [];
+                
+                // Old Series Plotting
+
+                    updateMax(dataVal.x, maxValues);
+                  }
+
+            // maxValues.fill(0);
+
+            }
+
+
+            if(button_click_min == true){
+                if(caMin){
+                    caMin.push(dataVal.y)
+                }
+                updateMin(dataVal.x, get_min_hold());
+            }
+
+            if(button_click_avg == true){   
+                caAverage.push(dataVal.y)
+                updateAvg(dataVal.x, get_Average_data());
+            }
+
+            if(button_click_persistence == true){
+                if(caPersistence){
+                    caPersistence.push(dataVal.y)
+                }
+                updatePersistence(dataVal.x, get_Persistence_hold());
+            }
+
+            if (button_click_max == false && button_click_min == false && button_click_avg == false) {
+                // minValues.fill(Infinity)
+                maxValues.fill(-Infinity)
+
+            }
+
+
+                //  ================== for traces =========================
+                //  all truee
+            //     if (button_click_max == true && button_click_min == true && button_click_avg == true) {
+
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > Max_cycles) {
+            //             cycleData.shift()
+
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     minValues[i] = Math.min(minValues[i], cycle.y[i]);
+            //                     maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+            //                     avgValues[i] += cycle.y[i] / Max_cycles;
+            //                 }
+            //             }
+            //             cycleData = [];
+
+            //             updateMax(dataVal.x, maxValues);
+            //             updateMin(dataVal.x, minValues);
+            //             updateAvg(dataVal.x, avgValues);
+            //             avgValues.fill(0);
+            //         }
+            //     }
+
+            //     // if max true
+            //     if (button_click_max == true && button_click_min == false && button_click_avg == false) {
+
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > Max_cycles) {
+            //             cycleData.shift()
+
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+            //                 }
+            //             }
+            //             const allOnes = maxValues.every(value => value === 1);
+            //             const allZeros = maxValues.every(value => value === 0);
+            //             if (allOnes || allZeros) {
+
+            //                 maxValues.fill(-Infinity)
+            //                 maxSeries.clear()
+            //             } else {
+            //                 updateMax(dataVal.x, maxValues);
+            //                 cycleData = [];
+            //             }
+            //             // cycleData = [];
+            //             // updateMax(dataVal.x, maxValues);
+            //         }
+            //     }
+            //     //  if max and min true
+            //     if (button_click_max == true && button_click_min == true && button_click_avg == false) {
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > Max_cycles) {
+            //             cycleData.shift()
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     minValues[i] = Math.min(minValues[i], cycle.y[i]);
+            //                     maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+            //                     avgValues[i] += cycle.y[i] / Max_cycles;
+
+            //                 }
+            //             }
+            //             cycleData = [];
+            //             updateMax(dataVal.x, maxValues);
+            //             updateMin(dataVal.x, minValues);
+            //         }
+            //     }
+            //     // if min and avg true
+            //     if (button_click_max == false && button_click_min == true && button_click_avg == true) {
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > Max_cycles) {
+            //             cycleData.shift()
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     minValues[i] = Math.min(minValues[i], cycle.y[i]);
+            //                     avgValues[i] += cycle.y[i] / Max_cycles;
+            //                 }
+            //             }
+            //             cycleData = [];
+            //             updateMin(dataVal.x, minValues);
+            //             updateAvg(dataVal.x, avgValues);
+            //             avgValues.fill(0);
+
+            //         }
+            //     }
+            //     // if min true
+            //     if (button_click_max == false && button_click_min == true && button_click_avg == false) {
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > Max_cycles) {
+            //             cycleData.shift()
+
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     minValues[i] = Math.min(minValues[i], cycle.y[i]);
+
+            //                 }
+            //             }
+            //             cycleData = [];
+
+
+            //             updateMin(dataVal.x, minValues);
+
+            //         }
+            //     }
+            //     // if avg true
+            //     if (button_click_max == false && button_click_min == false && button_click_avg == true) {
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > avg_max_cycle) {
+            //             cycleData.shift()
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     avgValues[i] += cycle.y[i] / avg_max_cycle;
+            //                 }
+            //             }
+            //             cycleData = [];
+            //             updateAvg(dataVal.x, avgValues);
+            //             avgValues.fill(0);
+
+
+            //         }
+            //     }
+            //     // if max and avg true
+            //     if (button_click_max == true && button_click_min == false && button_click_avg == true) {
+            //         cycleData.push(dataVal);
+            //         if (cycleData.length > Max_cycles) {
+            //             cycleData.shift()
+            //             for (const cycle of cycleData) {
+            //                 for (let i = 0; i < cycle.y.length; i++) {
+            //                     maxValues[i] = Math.max(maxValues[i], cycle.y[i]);
+            //                     avgValues[i] += cycle.y[i] / Max_cycles;
+            //                 }
+            //             }
+            //             cycleData = [];
+            //             updateAvg(dataVal.x, avgValues);
+            //             updateMax(dataVal.x, maxValues);
+            //             avgValues.fill(0);
+            //         }
+            //     }
+
+            //     else if (button_click_max == false && button_click_min == false && button_click_avg == false) {
+            //         minValues.fill(Infinity)
+            //         maxValues.fill(-Infinity)
+            //         avgValues.fill(0)
+            //     }
+            }
+
+
+            for (var i = 0; i <= chartMarker.length; i++) {
+
+                if (mark_data_flag == true) {
+                    for (var i = 0; i <= chartMarker.length; i++) {
+                        if (chartMarker[i]) {
+
+                            update_marker(i)
+                        }
+
+                    }
+
+                }
+
+
+            }
+        }
+
+        document.getElementById('csv_export').onclick = function () {
+            var rows = [
+                [
+                    "Frequency(MHz)",
+                    "Power(dBm)"
+                ],
+                ...dataVal.x.map((x, i) => ([(dataVal.x[i] * 1e-6).toFixed(3), dataVal.y[i].toFixed(1)]))]
+                .map(e => e.join(","))
+                .join("\n");
+            let csvContent = "data:text/csv;charset=utf-8,"
+                + rows;
+            var encodedUri = encodeURI(csvContent);
+            window.open(encodedUri);
+        }
+
+
+
+
+
+
+        var chartMarker = [];
+
+
+        var counter = 0
+
+
+        // cursor style
+        chart.setAutoCursor((cursor) => cursor
+            .setGridStrokeXStyle(new DashedLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX(theme_color) }) }))
+            .setGridStrokeYStyle(new DashedLine({ thickness: 1, fillStyle: new SolidFill({ color: ColorHEX(theme_color) }) }))
+            .setGridStrokeXCut(true).setGridStrokeYCut(true)
+        )
+
+        
+        function addMarkernew(x, y) {
+
+            if(document.getElementById("mark_data_btn").checked == true)
+            {
+
+                i = counter
+
+                if (i <= 4) {
+                    var color = '#FFFFFF';
+
+                    if (page_theme == 'light') {
+                        color = "#0000FF"
+                    }
+
+                    
+
+                    if(active_mode == "realtime"){
+                        $.ajax({
+                        type: 'GET',
+                        url: '/set_marker',
+                        contentType: 'application/json',
+                        success: function (res) {
+                            var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                            var marker_data=0
+                            for(var l=0; l< res.length; l++){
+                                var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                                if( (res.findIndex(p => p.frequency == x))==-1){
+                                    if (chartMarker[i]) {
+                                        chartMarker[i].dispose()
+                                    }
+                                    if (window.parent.removed_marker.length > 0) {
+                                        for (var j = 0; j < window.parent.removed_marker.length; j++) {
+                                            i = parseInt(window.parent.removed_marker[j])
+                                            window.parent.removed_marker.splice(j, 1)
+                                            break;
+                                        }
+                                    }
+                                    else {
+                                        i = counter
+                                    }
+                                    // console.log('add new marker',(res.findIndex(p => p.frequency == x)))
+                                    chartMarker[i] = chart.addChartMarkerXY()
+                                    chartMarker[i].setPosition({ x: x, y: y })
+                                    chartMarker[i].setMouseInteractions(true)
+                                    chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M ${i + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+
+
+                                    data = chartMarker[i].getPosition()
+                                    var frequency
+                                    var power
+                                    var marker_name
+                                    var data1 = {
+                                        frequency: data.x,
+                                        power: data.y,
+                                        'marker_index': i,
+                                        color: color
+                                    }
+
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: "/get_marker_new",
+                                        data: JSON.stringify(data1),
+                                        dataType: 'json',
+                                        success: function (data) {
+                                            parent.marked_positions_table()
+                                            // set_marked_positions()
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Error :", error);
+                                        },
+                                    });
+                                    counter = counter + 1
+                                    break;
+                                }
+                                else{
+                                    // console.log('dont add new marker',(res.findIndex(p => p.frequency == x)))
+                                    var tr = window.parent.document.getElementById(`table_row_${index}`)
+                                    highlight_fn(tr, 3);
+                                    break;
+                                }
+                            }
+                        },
+                            error: function (xhr, status, error) {
+                                console.error("Error :", error);
+                            },
+                        });
+                    
+                    }
+                    else if(active_mode == "sweep"){
+                        $.ajax({
+                        type: 'GET',
+                        url: '/set_marker_sweep',
+                        contentType: 'application/json',
+                        success: function (res) {
+                            var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                            var marker_data=0
+                            for(var l=0; l< res.length; l++){
+                                var index = res.map(function(f) { return f.frequency; }).indexOf(x);
+                                if( (res.findIndex(p => p.frequency == x))==-1){
+                                    if (chartMarker[i]) {
+                                        chartMarker[i].dispose()
+                                    }
+                                    if (window.parent.removed_marker.length > 0) {
+                                        for (var j = 0; j < window.parent.removed_marker.length; j++) {
+                                            i = parseInt(window.parent.removed_marker[j])
+                                            window.parent.removed_marker.splice(j, 1)
+                                            break;
+                                        }
+                                    }
+                                    else {
+                                        i = counter
+                                    }
+                                    // console.log('add new marker',(res.findIndex(p => p.frequency == x)))
+                                    chartMarker[i] = chart.addChartMarkerXY()
+                                    chartMarker[i].setPosition({ x: x, y: y })
+                                    chartMarker[i].setMouseInteractions(true)
+                                    chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M ${i + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+
+
+                                    data = chartMarker[i].getPosition()
+                                    var frequency
+                                    var power
+                                    var marker_name
+                                    var data1 = {
+                                        frequency: data.x,
+                                        power: data.y,
+                                        'marker_index': i,
+                                        color: color
+                                    }
+
+                                    $.ajax({
+                                        type: 'POST',
+                                        url: "/get_marker_sweep",
+                                        data: JSON.stringify(data1),
+                                        dataType: 'json',
+                                        success: function (data) {
+                                            parent.marked_positions_table()
+                                            // set_marked_positions()
+                                        },
+                                        error: function (xhr, status, error) {
+                                            console.error("Error :", error);
+                                        },
+                                    });
+                                    counter = counter + 1
+                                    break;
+                                }
+                                else{
+                                    // console.log('dont add new marker',(res.findIndex(p => p.frequency == x)))
+                                    var tr = window.parent.document.getElementById(`table_row_${index}`)
+                                    highlight_fn(tr, 3);
+                                    break;
+                                }
+                            }
+                        },
+                            error: function (xhr, status, error) {
+                                console.error("Error :", error);
+                            },
+                        });
+                    
+                    }
+                    
+                    
+
+
+                    
+                }
+                else {
+                    counter = 4
+                    addMarkerAgain(x, y)
+                }
+            }
+
+
+        }
+
+
+        function highlight_fn(inputElement, times) {
+            for (let i = 0; i < times; i++) {
+                inputElement.style.background = 'red';
+                // inputElement.style.transform = 'scale(1.15)'
+                inputElement.classList.add('transition_cls');
+                setTimeout(() => {
+                inputElement.style.background = '';
+                inputElement.style.transform = 'scale(1)'
+
+                }, 200);
+                setTimeout(() => {
+                inputElement.style.background = 'red';
+                // inputElement.style.transform = 'scale(1.15)'
+                inputElement.classList.add('transition_cls');
+
+
+                }, 400);
+                setTimeout(() => {
+                inputElement.style.background = '';
+                inputElement.style.transform = 'scale(1)'
+
+
+                }, 600);
+                setTimeout(() => {
+                inputElement.style.background = 'red';
+                // inputElement.style.transform = 'scale(1.15)'
+                inputElement.classList.add('transition_cls');
+
+
+                }, 800);
+            }
+            setTimeout(() => {
+                inputElement.style.background = '';
+                inputElement.style.transform = 'scale(1)'
+
+
+            //    inputElement.value = '';
+            }, 1000);
+            inputElement.style.border = 'revert';
+        // inputElement.style.border = 'revert';
+      }
+        function addMarkerAgain(x, y) {
+
+            addMarkernew(x, y)
+        }
+
+
+        var local_store, pos_x = [5], new_pos = [5]
+
+
+        function set_marked_positions() {
+            if (page_mode == 'realtime') {
+                $.ajax({
+                    type: 'GET',
+                    url: '/set_marker',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var marker_data = 0
+                        if (marker_data < 5) {
+                            for (var i = 0; i < data.length; i++) {
+                                if (chartMarker[i]) {
+                                    chartMarker[i].dispose()
+                                }
+                                var j = 0
+                                local_store = data;
+                                if (data[i].frequency != null) {
+                                    counter = data.length - 1
+                                    if (mark_data_flag == true) {
+                                        chartMarker[i] = chart.addChartMarkerXY().setPosition({ x: data[i].frequency, y: data[i].power })
+                                        chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M${data[i].marker_index + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+                                        addMarkerData.push({ x: data[i].frequency, y: data[i].power });
+                                        pos_x[i] = data[i].frequency
+                                    }
+                                    else {
+
+                                        hide_markers(data)
+
+                                    }
+
+                                }
+                                else {
+                                    if (!window.parent.removed_marker.includes(i)) {
+                                        window.parent.removed_marker.push(i)
+                                    }
+
+                                }
+
+
+                                marker_data = marker_data + 1
+                            }
+                        }
+
+                    }
+
+
+                })
+            }
+            else if (page_mode == 'sweep') {
+                $.ajax({
+                    type: 'GET',
+                    url: '/set_marker_sweep',
+                    contentType: 'application/json',
+                    success: function (data) {
+                        var marker_data = 0
+                        var start_freq = parseFloat((parent.document.getElementById('Start_number').value));
+                        var stop_freq = parseFloat((parent.document.getElementById('Stop_number').value))
+                        if (marker_data < 5) {
+                            for (var i = 0; i < data.length; i++) {
+                                if (chartMarker[i]) {
+                                    chartMarker[i].dispose()
+                                }
+                                var j = 0
+                                local_store = data;
+                                
+                                if (data[i].frequency != null ) {
+                                    console.log(parseFloat((parent.document.getElementById('Start_number').value)).toFixed(3) , data[i].frequency.toFixed(3) , parseFloat((parent.document.getElementById('Stop_number').value)).toFixed(3))
+                                    if( start_freq > data[i].frequency.toFixed(3) || data[i].frequency.toFixed(3) > stop_freq){
+                                        window.parent.removed_marker.push(i)
+                                        // window.parent.remove_marker(`M_${i}`)
+                                        // console.log('removed',data[i].frequency.toFixed(3))
+                                    }
+                                    else{
+                                        // console.log('added',data[i].frequency.toFixed(3))
+
+                                            counter = data.length - 1
+                                        if (mark_data_flag == true) {
+                                            chartMarker[i] = chart.addChartMarkerXY().setPosition({ x: data[i].frequency, y: data[i].power })
+                                            chartMarker[i].setPointMarker(marker => marker.setShape(PointShape.Diamond).setSize({ x: 12, y: 12 }).setFillStyle(new SolidFill({ color: ColorHEX(`${marker_color}`) }))).setResultTableVisibility(UIVisibilityModes.always).setGridStrokeXCut(true).setGridStrokeYCut(true).setResultTable((table) => table.setContent([[`M${data[i].marker_index + 1}`]])).setGridStrokeXVisibility(UIVisibilityModes.always).setGridStrokeYVisibility(UIVisibilityModes.always).setTickMarkerXVisibility(UIVisibilityModes.always).setTickMarkerYVisibility(UIVisibilityModes.always).setGridStrokeXStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) })).setGridStrokeYStyle(new DashedLine({ fillStyle: new SolidFill({ color: ColorHEX("#a639f9") }) }))
+                                            addMarkerData.push({ x: data[i].frequency, y: data[i].power });
+                                            pos_x[i] = data[i].frequency
+                                        }
+                                        else {
+    
+                                            hide_markers(data)
+    
+                                        }
+                                    }
+
+                                }
+                                else {
+                                    if (!window.parent.removed_marker.includes(i)) {
+                                        window.parent.removed_marker.push(i)
+                                    }
+
+                                }
+
+                                if(i == data.length-1){
+                                    remove_marker_using_list_sweep(window.parent.removed_marker)
+                                }
+                                marker_data = marker_data + 1
+                            }
+                        }
+                    }
+                })
+            }
+        }
+
+
+        function remove_marker_using_list_sweep(marker_list) {
+            var data = {
+            'index_list': marker_list
+            }
+            $.ajax({
+            type: 'POST',
+            url: '/remove_marker_using_list_sweep',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            success: function (data) {
+                parent.marked_positions_table()
+            }
+            });
+        }
+
+
+        function hide_markers(data) {
+            for (var i = 0; i < data.length; i++) {
+                if(chartMarker[i]){
+                    if (chartMarker[i].getVisible()) {
+                        chartMarker[i].setVisible(false);
+                    }
+                }
+            }
+        }
+
+
+        let rightMbPress
+
+        series.onMouseDown((_, e) => {
+            if (event.button !== 2) return
+            rightMbPress = performance.now()
+        });
+        series.onMouseUp((_, e) => {
+            if (!rightMbPress || performance.now() - rightMbPress > 500) return
+            const locationAxis = chart.translateCoordinate(event, chart.coordsAxis)
+            var x = locationAxis.x
+            var y = locationAxis.y
+            addMarkernew(x, y)
+        })
+
+        // =============================================== update Markar =================================================
+
+
+
+
+        function update_marker(i) {
+
+            if (chartMarker[i]) {
+                var pos = chartMarker[i].getPosition()
+                pos_in_hz = pos.x * 1e6
+                if (dataVal.x) {
+                    var index = findClosest(dataVal.x, pos_in_hz)
+                    chartMarker[i].setPosition({ x: pos.x, y: dataVal.y[index.index] })
+                    window.parent.update_power(i, dataVal.y[index.index])
+                }
+
+            }
+
+            if (pos_x[i]) {
+                // console.log(i)
+                chartMarker[i].getPointMarker().onMouseDragStop(() => {
+                    if (chartMarker[i]) {
+                        // new_pos[i] = new_pos_q
+                        new_pos[i] = chartMarker[i].getPosition().x
+                        if (pos_x[i] != new_pos[i]) {
+                            // console.log("hello",new_pos[i])
+                            pos_x[i] = new_pos[i];
+                            data = chartMarker[i].getPosition()
+                            var frequency
+                            var power
+                            var marker_name
+                            var data1 = {
+                                frequency: data.x,
+                                power: data.y,
+                                'marker_index': i,
+                                'color': '#FFFFFF'
+                            }
+
+                            $.ajax({
+                                type: 'POST',
+                                url: "/get_marker_new",
+                                contentType: 'application/json',
+                                data: JSON.stringify(data1),
+                                dataType: 'json',
+                                success: function (data) {
+                                  // console.log("updated")
+                                    parent.update_freq(i, chartMarker[i].getPosition().x)
+                                    // set_marked_positions()
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Error :", error);
+                                },
+                            });
+
+
+                        }
+                    }
+
+                });
+
+                chartMarker[i].getTickMarkerX().onMouseDragStop(() => {
+                    if (chartMarker[i]) {
+                        // new_pos[i] = new_pos_q
+                        new_pos[i] = chartMarker[i].getPosition().x
+                        if (pos_x[i] != new_pos[i]) {
+                            // console.log("hello",new_pos[i])
+                            pos_x[i] = new_pos[i];
+                            data = chartMarker[i].getPosition()
+                            var frequency
+                            var power
+                            var marker_name
+                            var data1 = {
+                                frequency: data.x,
+                                power: data.y,
+                                'marker_index': i,
+                                'color': '#FFFFFF'
+                            }
+
+                            $.ajax({
+                                type: 'POST',
+                                url: "/get_marker_new",
+                                contentType: 'application/json',
+                                data: JSON.stringify(data1),
+                                dataType: 'json',
+                                success: function (data) {
+                                  // console.log("updated")
+                                    parent.update_freq(i, chartMarker[i].getPosition().x)
+                                    // set_marked_positions()
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Error :", error);
+                                },
+                            });
+
+
+
+                        }
+                    }
+
+                });
+
+
+            }
+        }
+
+
+        function findClosest(arr, target) {
+            let n = arr.length;
+            let i = 0, j = n - 1, mid = 0;
+
+            // Corner cases
+            if (target <= arr[0]) {
+                return { "val": arr[0], "index": 0 };
+            }
+            if (target >= arr[n - 1]) {
+                return { "val": arr[n - 1], "index": n - 1 };
+            }
+
+            // Binary search
+            while (i <= j) {
+                mid = Math.floor((i + j) / 2);
+
+                // If target is found, return it immediately
+                if (arr[mid] === target) {
+                    return { "val": arr[mid], "index": mid };
+                }
+
+                // If target is less than arr[mid], search in the left half
+                if (target < arr[mid]) {
+                    j = mid - 1;
+                }
+                // If target is greater than arr[mid], search in the right half
+                else {
+                    i = mid + 1;
+                }
+            }
+
+            // After binary search, i is the first element greater than the target
+            // and j is the last element less than the target.
+            // We compare the closest two values arr[j] and arr[i]
+            if (i < n && arr[i] === target) {
+                return { "val": arr[i], "index": i };
+            }
+            if (j >= 0 && arr[j] === target) {
+                return { "val": arr[j], "index": j };
+            }
+
+            // Now determine the closest value
+            let left = arr[j] !== undefined ? arr[j] : Infinity;
+            let right = arr[i] !== undefined ? arr[i] : Infinity;
+
+            if (Math.abs(target - left) <= Math.abs(target - right)) {
+                return { "val": left, "index": j };
+            } else {
+                return { "val": right, "index": i };
+            }
+        }
+
+
+
+        // iq_data();
+
+        // function peak_data() {
+        //     // console.log("peakkk_porttttt", peak_port)
+        //     const ws = new WebSocket("ws://" + document.domain + ":" + peak_port);
+        //     // const ws = new WebSocket("ws://0.0.0.0:8006");
+
+        //     ws.onopen = onWsOpened;
+        //     ws.onmessage = onWsRecvpeak;
+        //     ws.onclose = onWsClosedpeak;
+        //     ws.onerror = onWsError;
+        //     ws.binaryType = "arraybuffer";
+
+        //     window.onbeforeunload = () => {
+        //         ws.onclose = () => { };
+        //         ws.close();
+        //     };
+        // }
+        // peak_data()
+
+
+
+        // function get_data() {
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '/get_demodulators_for_active_channel',
+        //         data: JSON.stringify(),
+        //         contentType: 'application/json',
+        //         success: function (data) {
+
+        //             var valid_data = data['active']
+
+        //             for (var i = 0; i < valid_data.length; i++) {
+
+        //                 xAxisBand[valid_data[i]['uid']] = valid_data[i]
+        //                 addBand(valid_data[i]['start_frequency'], valid_data[i]['stop_frequency'], 100000, "myband1", valid_data[i]['uid'], valid_data[i]['color'])
+        //             }
+
+        //         }
+        //     });
+        // }
+
+
+        // function plot_all_demods() {
+
+
+
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '/get_demodulators_for_active_channel',
+        //         data: JSON.stringify(),
+        //         contentType: 'application/json',
+        //         success: function (data) {
+        //             // console.log(data, "data for all demods")
+        //             var valid_data = data['active']
+
+        //             for (var i = 0; i < valid_data.length; i++) {
+        //                 addBand(valid_data[i]['start_frequency'], valid_data[i]['stop_frequency'], 100000, valid_data[i]['name'], valid_data[i]['uid'], valid_data[i]['color'])
+
+
+        //             }
+
+        //         }
+        //     });
+
+        // }
+
+        // function reload_bands() {
+
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '/get_demodulators_for_active_channel',
+        //         data: JSON.stringify(),
+        //         contentType: 'application/json',
+        //         success: function (data) {
+
+        //             // removing existing bands
+        //             for (const [key, value] of Object.entries(wxAxisBand)) {
+        //                 delete_band(key);
+        //             }
+        //           // console.log("Existing bands were removed.")
+
+
+        //             // console.log(data, "data for all demods")
+        //             var valid_data = data['active']
+
+        //             for (var i = 0; i < valid_data.length; i++) {
+        //                 addBand(valid_data[i]['start_frequency'], valid_data[i]['stop_frequency'], 100000, valid_data[i]['name'], valid_data[i]['uid'], valid_data[i]['color'])
+
+
+        //             }
+
+        //         }
+        //     });
+        // }
+
+
+
+        // function set_band() {
+
+        //     $.ajax({
+        //         type: 'POST',
+        //         url: '/get_demodulators_for_active_channel',
+        //         data: JSON.stringify(),
+        //         contentType: 'application/json',
+        //         success: function (data) {
+        //             // console.log(data, "data for all demods")
+        //             var valid_data = data['active']
+
+        //             for (var i = 0; i < valid_data.length; i++) {
+
+        //                 xAxisBand[valid_data[i]['uid']].setValueStart(valid_data[i]['stop_frequency']).setValueEnd(valid_data[i]['start_frequency'])
+        //                 wxAxisBand[valid_data[i]['uid']].setValueStart(valid_data[i]['stop_frequency']).setValueEnd(valid_data[i]['start_frequency'])
+        //             }
+
+        //         }
+        //     });
+
+        // }
+
+        var full_screen_flag = false
+        if(page_mode == "sweep"){
+            window.parent.document.getElementById("table_div").style.display = "none"
+                window.parent.document.getElementById("iframe_div").className = "col-12"
+                window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+                full_screen_flag = true
+                if(page_mode == 'sweep'){
+                    document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+                    window.parent.document.getElementById("table_div").style.display = "none"
+                    //window.parent.document.getElementById("table_col_div").style.display = "none"
+                    window.parent.document.getElementById("iframe_div").className = "col-12"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+
+                }
+        }
+        function full_screen() {
+            var checkBox_full_screen = document.getElementById("full_screen");
+            if (full_screen_flag == false) {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-compress-arrows-alt'></i>`
+                //window.parent.document.getElementById("table_col").style.display = "none"
+                if(page_mode == 'sweep'){
+                    window.parent.document.getElementById("table_div").style.display = "none"
+                    //window.parent.document.getElementById("table_col_div").style.display = "none"
+                    window.parent.document.getElementById("iframe_div").className = "col-12"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+
+                }
+                else if (page_mode == 'realtime'){
+                    window.parent.document.getElementById("table_col").style.display = "none"
+                    //window.parent.document.getElementById("table_col_div").style.display = "none"
+                    window.parent.document.getElementById("iframe_col").className = "col-12"
+                    window.parent.document.getElementById("iframe_col").style.paddingRight = "25px"
+                }
+                //window.parent.document.getElementById("iframe_col").className = "col-12"
+                //window.parent.document.getElementById("iframe_div").style.paddingRight = "15px"
+              // console.log('in full screen function')
+                full_screen_flag = true
+
+            }
+            else {
+                document.getElementById('full_screen_label').innerHTML = `<i style='font-size:15px' data-bs-toggle="tooltip" data-bs-placement="left" title="Full Screen" class='fas fa-expand-arrows-alt'></i>`
+                //window.parent.document.getElementById("table_col").style.display = "block"
+                if(page_mode == 'sweep'){
+                    window.parent.document.getElementById("table_div").style.display = "block"
+                    //window.parent.document.getElementById("table_col_div").style.display = "block"
+                    window.parent.document.getElementById("iframe_div").className = "col-8"
+                    window.parent.document.getElementById("iframe_div").style.paddingRight = "5px"
+                }
+                else if (page_mode == 'realtime'){
+                    window.parent.document.getElementById("table_col").style.display = "block"
+                   // window.parent.document.getElementById("table_col_div").style.display = "block"
+                    window.parent.document.getElementById("iframe_col").className = "col-8"
+                    window.parent.document.getElementById("iframe_col").style.paddingRight = "15px"
+                }
+                //window.parent.document.getElementById("iframe_col").className = "col-8"
+                //window.parent.document.getElementById("iframe_div").style.paddingRight = "7px"
+                full_screen_flag = false
+
+            }
+        }
+
+
+        function update_traces_settings() {
+            traces_json = { active_channel : active_channel,active_mode : active_mode,"button_click_max": button_click_max, "button_click_min": button_click_min, "button_click_avg": button_click_avg, "button_click_main": button_click_main,"enable_marker" : mark_data_flag ,"enable_peak" : peak_data_flag,"persistence_trace":button_click_persistence,"enable_band":true}
+            $.ajax({
+                type: 'POST',
+                url: '/update_show_traces_settings',
+                data: JSON.stringify(traces_json),
+                contentType: 'application/json',
+                success: function (data) {
+                    traces_setting()
+                }
+            })
+        }
+
+
+        function traces_setting() {
+
+            $.ajax({
+                type: 'POST',
+                url: '/get_show_traces_settings',
+                data: JSON.stringify({ active_channel : active_channel,active_mode : active_mode }),
+                contentType: 'application/json',
+                success: function (data) {
+                    console.log(data)
+                    button_click_max = data['button_click_max']
+                    button_click_min = data['button_click_min']
+                    button_click_avg = data['button_click_avg']
+                    button_click_main = data['button_click_main']
+                    mark_data_flag = data['enable_marker']
+                    peak_data_flag = data["enable_peak"]
+                    button_click_persistence = data['persistence_trace']
+                    if (button_click_max == true) {
+                        document.getElementById("max_hold").checked = true
+                    }
+                    else {
+
+                        document.getElementById("max_hold").checked = false
+                    }
+
+                    if (button_click_min == true) {
+                        document.getElementById("min_hold").checked = true
+                    }
+                    else {
+
+                        document.getElementById("min_hold").checked = false
+                    }
+
+                    if (button_click_avg == true) {
+                        document.getElementById("avg_hold").checked = true
+                    }
+                    else {
+
+                        document.getElementById("avg_hold").checked = false
+                    }
+
+                    if (button_click_main == true) {
+                        document.getElementById("main_curve").checked = true
+                    }
+                    else {
+
+                        document.getElementById("main_curve").checked = false
+                    }
+                    if (mark_data_flag == true) {
+                        document.getElementById("mark_data_btn").checked = true
+                        set_marked_positions()
+                    }
+                    else {
+
+                        document.getElementById("mark_data_btn").checked = false
+                    }
+                    if (peak_data_flag == true) {
+                        document.getElementById("peak_data_btn").checked = true
+                
+                    }
+                    else {
+
+                        document.getElementById("peak_data_btn").checked = false
+                    }
+                    if (button_click_persistence == true) {
+                        document.getElementById("persistence_data_btn").checked = true
+                        
+                    }
+                    else {
+
+                        document.getElementById("persistence_data_btn").checked = false
+                    }
+                }
+            });
+        }
+
+
+
+        function show_traces_max() {
+
+var checkBox_max = document.getElementById("max_hold");
+if (checkBox_max.checked == true) {
+    button_click_max = true
+    update_traces_settings()
+
+} else {
+    button_click_max = false
+    maxValues.fill(-Infinity)
+    maxSeries.clear()
+    update_traces_settings()
+}
+}
+
+
+function show_traces_min() {
+
+var checkBox_min = document.getElementById("min_hold");
+if (checkBox_min.checked == true) {
+    button_click_min = true
+    update_traces_settings()
+
+}
+else {
+    button_click_min = false
+    minValues.fill(Infinity)
+    minSeries.clear()
+    update_traces_settings()
+}
+}
+
+
+function show_traces_avg() {
+
+var checkBox_avg = document.getElementById("avg_hold");
+if (checkBox_avg.checked == true) {
+    button_click_avg = true
+    update_traces_settings()
+
+}
+else {
+
+    button_click_avg = false
+    avgValues.fill(0)
+    avgSeries.clear()
+    update_traces_settings()
+
+}
+
+}
+
+
+function show_traces() {
+checkBox_Showtraces = document.getElementById('show_traces')
+if (checkBox_Showtraces.checked == true) {
+    button_click_showtraces = true
+}
+else {
+    button_click_showtraces = false
+    maxValues.fill(-Infinity)
+    maxSeries.clear()
+    minValues.fill(Infinity)
+    minSeries.clear()
+    avgValues.fill(0)
+    avgSeries.clear()
+}
+}
+
+
+        function show_peak_data() {
+            var checkBox_peak = document.getElementById("peak_data_btn");
+            if (checkBox_peak.checked == false) {
+                peak_data_flag = false
+                update_traces_settings()
+            }
+            else {
+                peak_data_flag = true
+                seriespeak.clear()
+                update_traces_settings()
+            }
+
+        }
+
+
+function show_mark_data() {
+var checkBox_mark = document.getElementById("mark_data_btn");
+if (checkBox_mark.checked) {
+    mark_data_flag = true
+    set_marked_positions()
+    update_traces_settings()
+
+}
+else {
+    mark_data_flag = false
+    set_marked_positions()
+    update_traces_settings()
+}
+}
+
+
+function show_main_curve() {
+    var checkBox_main = document.getElementById("main_curve");
+    if (checkBox_main.checked == true) {
+        button_click_main = true
+        update_traces_settings()
+
+    }
+    else {
+        button_click_main = false
+        series.clear()
+        update_traces_settings()
+    }
+}
+
+
+function show_traces_persis() {
+    var checkBox_persis = document.getElementById("persistence_data_btn");
+    if (checkBox_persis.checked == true) {
+        button_click_persistence = true
+        update_traces_settings()
+
+    } else {
+        persistenceSeries.clear()
+        button_click_persistence = false
+        update_traces_settings()
+    }
+}
+
+
+
+
+function clear_spectrum_chart(){
+        
+        series.clear()
+        avgValues.fill(0)
+        avgSeries.clear()
+        minValues.fill(Infinity)
+        minSeries.clear()
+        var checkBox_persis = document.getElementById("persistence_data_btn");
+        if (checkBox_persis.checked == true) {
+            setTimeout(function(){
+                maxValues.fill(-Infinity)
+                maxSeries.clear()
+            },2000)
+        }else{
+            setTimeout(function(){
+                maxValues.fill(-Infinity)
+                maxSeries.clear()
+            },1000)
+        }
+      }
+
+
+
+waterfall_XYAxis()
+
+set_threshold1(data['threshold'])
+// plot_all_demods();
+reconfig_lut()
+traces_setting()
+    
+
+
+    </script>
+</body>
+
+
+{% endblock %}
