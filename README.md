@@ -1,382 +1,385 @@
-# Frequency Hopping Decoder
+# Frequency Hopping Signal Decoder
 
-A complete full-stack web application for analyzing and decoding frequency hopping signals from IQ recordings. Built with Flask backend, MongoDB database, WebSocket real-time communication, and a modern responsive web interface.
+A comprehensive Python3 library for detecting, synchronizing, and decoding frequency hopping spread spectrum (FHSS) signals from IQ data. This library provides advanced signal processing capabilities for analyzing signals from Software Defined Radio (SDR) devices or recorded IQ files.
 
-![Frequency Hopping Decoder](https://img.shields.io/badge/Platform-Ubuntu%2022.04-orange)
-![Python](https://img.shields.io/badge/Python-3.8%2B-blue)
-![Flask](https://img.shields.io/badge/Flask-2.3.3-green)
-![MongoDB](https://img.shields.io/badge/MongoDB-6.0-green)
+## Features
 
-## 🚀 Features
+- **Multi-format IQ Data Support**: Load data from various formats (complex64, complex128, interleaved float32)
+- **Advanced Hop Detection**: Multiple algorithms including threshold-based and clustering methods
+- **Modulation Support**: FSK, PSK, and ASK demodulation capabilities
+- **Pattern Synchronization**: Auto-detect repeating patterns or sync with known sequences
+- **Real-time Processing**: Optimized algorithms with numba acceleration
+- **Comprehensive Visualization**: Spectrograms, hop sequences, and advanced 3D plots
+- **Data Export**: Save analysis results in HDF5 format
 
-- **File Upload**: Support for .bin IQ recording files up to 500MB
-- **Real-time Processing**: Live progress tracking via WebSockets
-- **Frequency Analysis**: Advanced signal processing using STFT and spectral analysis
-- **Audio Decoding**: Extract and decode audio from frequency hopping patterns
-- **Visualization**: Interactive spectrograms and frequency analysis plots
-- **Audio Playback**: Built-in audio player with download capability
-- **Job Management**: Track processing history with MongoDB
-- **Responsive UI**: Modern Bootstrap-based interface
-- **Production Ready**: Systemd service integration and log management
+## Installation
 
-## 📋 Requirements
-
-- Ubuntu 22.04 LTS (tested and optimized)
-- Python 3.8 or higher
-- MongoDB 6.0
-- Minimum 4GB RAM (8GB recommended for large files)
-- Audio libraries and signal processing dependencies
-
-## 🛠️ Quick Installation
-
-### Automated Setup (Recommended)
+### Prerequisites
 
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd frequency-hopping-decoder
+# Install Python 3.8 or higher
+python3 --version
 
-# Make setup script executable and run
-chmod +x setup.sh
-./setup.sh
-```
-
-The automated setup script will:
-- Install all system dependencies
-- Set up MongoDB
-- Create Python virtual environment
-- Install Python packages
-- Configure systemd service
-- Set up firewall rules
-- Create necessary directories
-
-### Manual Installation
-
-<details>
-<summary>Click to expand manual installation steps</summary>
-
-1. **Update system packages:**
-```bash
-sudo apt update && sudo apt upgrade -y
-```
-
-2. **Install system dependencies:**
-```bash
-sudo apt install -y python3 python3-pip python3-venv python3-dev build-essential \
-    pkg-config libffi-dev libssl-dev curl wget git \
-    libasound2-dev libportaudio2 portaudio19-dev libsndfile1-dev \
-    libfftw3-dev liblapack-dev libblas-dev gfortran
-```
-
-3. **Install MongoDB:**
-```bash
-# Import MongoDB GPG key
-curl -fsSL https://pgp.mongodb.com/server-6.0.asc | sudo gpg -o /usr/share/keyrings/mongodb-server-6.0.gpg --dearmor
-
-# Add MongoDB repository
-echo "deb [ arch=amd64,arm64 signed-by=/usr/share/keyrings/mongodb-server-6.0.gpg ] https://repo.mongodb.org/apt/ubuntu jammy/mongodb-org/6.0 multiverse" | sudo tee /etc/apt/sources.list.d/mongodb-org-6.0.list
-
-# Install MongoDB
-sudo apt update
-sudo apt install -y mongodb-org
-sudo systemctl start mongod
-sudo systemctl enable mongod
-```
-
-4. **Set up Python environment:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
-pip install --upgrade pip setuptools wheel
+# Install required packages
 pip install -r requirements.txt
 ```
 
-5. **Create directories:**
-```bash
-mkdir -p uploads static/outputs static/plots logs
+### Dependencies
+
+The following packages are required:
+
+```
+numpy>=1.21.0
+scipy>=1.7.0
+matplotlib>=3.5.0
+pyFFTW>=0.13.0
+scikit-learn>=1.0.0
+numba>=0.56.0
+h5py>=3.6.0
+tqdm>=4.62.0
 ```
 
-</details>
+## Quick Start
 
-## 🚀 Usage
-
-### Starting the Application
-
-#### Development Mode
-```bash
-./start.sh
-```
-
-#### Production Mode
-```bash
-./start_production.sh
-```
-
-### Accessing the Web Interface
-
-Open your browser and navigate to:
-```
-http://localhost:5000
-```
-
-### Using the Application
-
-1. **Upload IQ File**: Select a .bin file containing IQ data
-2. **Configure Parameters**:
-   - Center Frequency (MHz): The center frequency of your recording
-   - Bandwidth (MHz): The bandwidth of the signal
-   - Sample Rate (MHz): The sample rate of your IQ recording
-3. **Process**: Click "Process File" to start analysis
-4. **Monitor Progress**: Watch real-time progress updates
-5. **View Results**: 
-   - Listen to decoded audio
-   - View frequency spectrogram
-   - Download processed files
-
-### Generating Test Data
-
-Create synthetic frequency hopping signals for testing:
-
-```bash
-# Generate 5-second test signal
-./generate_test_data.py --duration 5 --output test.bin
-
-# Custom parameters
-./generate_test_data.py --duration 10 --sample-rate 2000000 \
-    --center-freq 433000000 --hop-rate 50 --output custom_test.bin
-```
-
-## 📁 File Format
-
-The application expects IQ data in binary format:
-- **Format**: Interleaved I/Q samples
-- **Data Type**: 32-bit float (float32)
-- **Layout**: [I₁, Q₁, I₂, Q₂, I₃, Q₃, ...]
-- **Endianness**: Little-endian (standard)
-
-### Example IQ File Structure
-```
-Offset  | Data
---------|--------
-0x0000  | I₁ (float32)
-0x0004  | Q₁ (float32)  
-0x0008  | I₂ (float32)
-0x000C  | Q₂ (float32)
-...     | ...
-```
-
-## 🔧 Configuration
-
-### Environment Variables
-
-Create a `.env` file to customize configuration:
-
-```bash
-# Flask Configuration
-SECRET_KEY=your-secret-key-here
-FLASK_ENV=production
-
-# MongoDB Configuration
-MONGODB_URI=mongodb://localhost:27017/
-DATABASE_NAME=frequency_hopping_db
-
-# File Upload Configuration
-MAX_CONTENT_LENGTH=524288000  # 500MB
-UPLOAD_FOLDER=uploads
-OUTPUT_FOLDER=static/outputs
-
-# Application Configuration
-HOST=0.0.0.0
-PORT=5000
-DEBUG=False
-```
-
-### Advanced Signal Processing Parameters
-
-Modify these parameters in `app.py` for different signal types:
+### Basic Usage
 
 ```python
-# STFT Parameters
-nperseg = 1024          # FFT size
-noverlap = nperseg // 4 # Overlap between segments
+from frequency_hopping_decoder import FrequencyHoppingDecoder
 
-# Audio Processing
-target_sample_rate = 44100  # Output audio sample rate
+# Create decoder instance
+decoder = FrequencyHoppingDecoder(sample_rate=2e6, center_freq=915e6)
+
+# Load IQ data from file
+decoder.load_iq_file("signal.iq", file_format="complex64")
+
+# Or load from numpy array
+# decoder.load_iq_data(iq_samples)
+
+# Detect frequency hops
+hops = decoder.detect_frequency_hops(method='threshold', threshold_factor=2.5)
+
+# Decode the hops
+decoded_data = decoder.decode_all_hops(modulation='fsk')
+
+# Visualize results
+decoder.plot_spectrogram()
 ```
 
-## 🎛️ API Endpoints
-
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-| `/` | GET | Main web interface |
-| `/upload` | POST | Upload and process IQ file |
-| `/download/<filename>` | GET | Download processed audio |
-| `/plot/<filename>` | GET | View spectrogram images |
-| `/api/jobs` | GET | Get recent processing jobs |
-
-### WebSocket Events
-
-| Event | Direction | Description |
-|-------|-----------|-------------|
-| `connect` | Client → Server | Client connection established |
-| `progress_update` | Server → Client | Processing progress updates |
-| `processing_complete` | Server → Client | Processing finished |
-
-## 🔍 Technical Details
-
-### Signal Processing Pipeline
-
-1. **File Reading**: Load IQ data from binary file
-2. **STFT Analysis**: Compute Short-Time Fourier Transform
-3. **Peak Detection**: Identify frequency peaks in each time window
-4. **Hop Detection**: Track frequency changes over time
-5. **Audio Extraction**: Demodulate and extract audio from each hop
-6. **Visualization**: Generate spectrogram plots
-7. **Output**: Save processed audio and metadata
-
-### Frequency Hop Detection Algorithm
+### Generate Test Signals
 
 ```python
-# Simplified algorithm
-for each_time_window in stft_result:
-    peak_frequency = find_peak(power_spectrum[time_window])
-    hop_frequencies.append(peak_frequency)
+from frequency_hopping_decoder import generate_test_fhss_signal
+
+# Generate a test FHSS signal
+test_signal, hop_frequencies = generate_test_fhss_signal(
+    sample_rate=2e6,
+    duration=0.1,        # 100ms
+    hop_rate=1000,       # 1kHz hop rate
+    num_frequencies=10,  # 10 different frequencies
+    modulation='fsk'     # FSK modulation
+)
+```
+
+## Advanced Usage
+
+### Pattern Synchronization
+
+```python
+# Auto-detect repeating patterns
+sync_info = decoder.synchronize_hops()
+print(f"Pattern length: {sync_info['pattern_length']}")
+print(f"Confidence: {sync_info['confidence']:.2f}")
+
+# Synchronize with known pattern
+known_frequencies = [915.1e6, 915.2e6, 915.3e6, 915.4e6]  # MHz
+sync_info = decoder.synchronize_hops(reference_pattern=known_frequencies)
+```
+
+### Multiple Detection Methods
+
+```python
+# Threshold-based detection (fast, good for strong signals)
+hops_threshold = decoder.detect_frequency_hops(
+    method='threshold',
+    threshold_factor=3.0,
+    min_duration=1e-3  # 1ms minimum hop duration
+)
+
+# Clustering-based detection (better for weak signals)
+hops_clustering = decoder.detect_frequency_hops(
+    method='clustering',
+    n_hops=50
+)
+```
+
+### Different Modulation Schemes
+
+```python
+# FSK (Frequency Shift Keying)
+fsk_data = decoder.decode_all_hops(modulation='fsk')
+
+# PSK (Phase Shift Keying)
+psk_data = decoder.decode_all_hops(modulation='psk')
+
+# ASK (Amplitude Shift Keying)
+ask_data = decoder.decode_all_hops(modulation='ask')
+```
+
+## Command Line Interface
+
+Use the demonstration script for quick analysis:
+
+```bash
+# Analyze an IQ file
+python demo_fhss_decoder.py --file signal.iq --format complex64
+
+# Generate and analyze test signal
+python demo_fhss_decoder.py --test --modulation fsk --duration 0.1
+
+# Run all demonstrations with visualizations
+python demo_fhss_decoder.py --all-demos --visualize
+
+# Process file with known hop pattern
+python demo_fhss_decoder.py --file signal.iq --sync-pattern "915.1e6,915.2e6,915.3e6"
+```
+
+### CLI Options
+
+- `--file`: Path to IQ data file
+- `--format`: File format (complex64, complex128, interleaved_float32)
+- `--test`: Generate and analyze test signal
+- `--modulation`: Modulation scheme (fsk, psk, ask)
+- `--duration`: Test signal duration in seconds
+- `--sample-rate`: Sample rate in Hz
+- `--center-freq`: Center frequency in Hz
+- `--visualize`: Show advanced visualizations
+- `--all-demos`: Run all demonstration scenarios
+
+## API Reference
+
+### FrequencyHoppingDecoder Class
+
+#### Constructor
+```python
+FrequencyHoppingDecoder(sample_rate=2e6, center_freq=915e6)
+```
+- `sample_rate`: Sample rate of IQ data in Hz
+- `center_freq`: Center frequency in Hz
+
+#### Methods
+
+##### Data Loading
+```python
+load_iq_data(data)  # Load from numpy array
+load_iq_file(filename, file_format='complex64')  # Load from file
+```
+
+##### Signal Analysis
+```python
+compute_spectrogram(nperseg=None)  # Compute STFT spectrogram
+detect_frequency_hops(method='threshold', **kwargs)  # Detect hops
+synchronize_hops(reference_pattern=None)  # Synchronize timing
+```
+
+##### Demodulation
+```python
+demodulate_hop(frequency, start_time, duration, modulation='fsk')  # Single hop
+decode_all_hops(modulation='fsk')  # All detected hops
+```
+
+##### Visualization
+```python
+plot_spectrogram(figsize=(12, 8))  # Plot spectrogram with hops
+```
+
+##### Data Export
+```python
+save_results(filename)  # Save to HDF5 format
+```
+
+### Detection Methods
+
+#### Threshold-based Detection
+Best for: Strong signals, fast processing
+```python
+hops = decoder.detect_frequency_hops(
+    method='threshold',
+    threshold_factor=3.0,  # Signal strength threshold
+    min_duration=1e-3      # Minimum hop duration
+)
+```
+
+#### Clustering-based Detection
+Best for: Weak signals, complex patterns
+```python
+hops = decoder.detect_frequency_hops(
+    method='clustering',
+    n_hops=50  # Expected number of hops
+)
+```
+
+### Modulation Schemes
+
+#### FSK (Frequency Shift Keying)
+- Uses instantaneous frequency discrimination
+- Good for frequency-stable signals
+- Robust to phase noise
+
+#### PSK (Phase Shift Keying)
+- Uses phase difference detection
+- Suitable for BPSK and DPSK signals
+- Sensitive to phase coherence
+
+#### ASK (Amplitude Shift Keying)
+- Uses amplitude detection with smoothing
+- Simple but sensitive to amplitude variations
+- Good for OOK (On-Off Keying) signals
+
+## File Formats
+
+### Supported IQ Formats
+
+1. **complex64**: Native numpy complex64 format
+   ```python
+   decoder.load_iq_file("signal.iq", file_format="complex64")
+   ```
+
+2. **complex128**: Double precision complex format
+   ```python
+   decoder.load_iq_file("signal.iq", file_format="complex128")
+   ```
+
+3. **interleaved_float32**: Interleaved I/Q float32 format
+   ```python
+   decoder.load_iq_file("signal.iq", file_format="interleaved_float32")
+   ```
+
+### Output Formats
+
+Results can be saved in HDF5 format containing:
+- Original IQ data
+- Spectrogram data
+- Detected hop frequencies and timing
+- Analysis parameters
+
+## Performance Optimization
+
+### Memory Efficiency
+- Use `complex64` instead of `complex128` for large files
+- Process data in chunks for very large datasets
+- Adjust FFT size based on available memory
+
+### Processing Speed
+- Numba JIT compilation accelerates critical functions
+- Use threshold-based detection for fastest processing
+- Reduce spectrogram resolution for faster analysis
+
+### Accuracy Tuning
+- Adjust `threshold_factor` based on signal strength
+- Use clustering method for difficult signals
+- Increase FFT size for better frequency resolution
+
+## Examples
+
+### Example 1: Basic SDR Analysis
+```python
+import numpy as np
+from frequency_hopping_decoder import FrequencyHoppingDecoder
+
+# Load IQ data from SDR recording
+decoder = FrequencyHoppingDecoder(sample_rate=2.4e6, center_freq=433e6)
+decoder.load_iq_file("sdr_recording.iq")
+
+# Analyze signal
+hops = decoder.detect_frequency_hops(threshold_factor=2.0)
+print(f"Detected {len(hops)} frequency hops")
+
+# Decode FSK data
+decoded = decoder.decode_all_hops(modulation='fsk')
+```
+
+### Example 2: Pattern Analysis
+```python
+# Detect repeating hop patterns
+sync_info = decoder.synchronize_hops()
+if sync_info['synchronized']:
+    pattern_len = sync_info['pattern_length']
+    print(f"Found repeating pattern of length {pattern_len}")
     
-# Extract audio segments based on detected hops
-for each_hop in hop_frequencies:
-    audio_segment = demodulate(iq_data[hop_time_range])
-    audio_segments.append(audio_segment)
+    # Extract one complete pattern
+    pattern_freqs = decoder.hop_frequencies[:pattern_len]
+    print(f"Pattern: {[f/1e6 for f in pattern_freqs]} MHz")
 ```
 
-### Performance Considerations
-
-- **Memory Usage**: ~8x file size during processing
-- **Processing Time**: ~1-2x file duration for analysis
-- **Recommended Specs**: 
-  - 8GB RAM for files up to 100MB
-  - SSD storage for better I/O performance
-  - Multi-core CPU beneficial for FFT operations
-
-## 🔧 System Administration
-
-### Service Management
-
-```bash
-# Check service status
-sudo systemctl status frequency-hopping-decoder
-
-# View real-time logs
-sudo journalctl -u frequency-hopping-decoder -f
-
-# Restart service
-sudo systemctl restart frequency-hopping-decoder
-
-# Stop service
-sudo systemctl stop frequency-hopping-decoder
+### Example 3: Multi-format Processing
+```python
+# Process different file formats
+formats = ['complex64', 'complex128', 'interleaved_float32']
+for fmt in formats:
+    try:
+        decoder = FrequencyHoppingDecoder()
+        decoder.load_iq_file(f"signal.{fmt}", file_format=fmt)
+        hops = decoder.detect_frequency_hops()
+        print(f"{fmt}: {len(hops)} hops detected")
+    except Exception as e:
+        print(f"{fmt}: Error - {e}")
 ```
 
-### Database Management
-
-```bash
-# Connect to MongoDB
-mongosh
-
-# List databases
-show dbs
-
-# Use application database
-use frequency_hopping_db
-
-# View processing jobs
-db.processing_jobs.find().pretty()
-
-# Clear old jobs
-db.processing_jobs.deleteMany({"timestamp": {"$lt": new Date(Date.now() - 30*24*60*60*1000)}})
-```
-
-### Log Files
-
-- **Application Logs**: `/var/log/frequency-hopping-decoder/`
-- **MongoDB Logs**: `/var/log/mongodb/mongod.log`
-- **System Logs**: `journalctl -u frequency-hopping-decoder`
-
-## 🚨 Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
-1. **MongoDB Connection Failed**
-   ```bash
-   sudo systemctl start mongod
-   sudo systemctl enable mongod
-   ```
+1. **No hops detected**
+   - Lower the `threshold_factor`
+   - Check signal strength and center frequency
+   - Verify file format and sample rate
 
-2. **Permission Denied on Upload**
-   ```bash
-   chmod 755 uploads static/outputs static/plots
-   ```
+2. **Poor synchronization**
+   - Increase signal duration for pattern detection
+   - Verify hop timing consistency
+   - Check for frequency drift
 
-3. **Audio Libraries Missing**
-   ```bash
-   sudo apt install -y libsndfile1-dev portaudio19-dev
-   pip install soundfile librosa
-   ```
+3. **Low decode success rate**
+   - Adjust demodulation bandwidth
+   - Check modulation type
+   - Verify signal quality (SNR)
 
-4. **Large File Processing Fails**
-   - Check available RAM and disk space
-   - Reduce file size or increase system resources
-   - Monitor with `htop` during processing
+### Performance Issues
 
-### Performance Tuning
+1. **Slow processing**
+   - Reduce FFT size or signal duration
+   - Use threshold method instead of clustering
+   - Enable numba JIT compilation
 
-1. **Increase MongoDB memory**:
-   ```javascript
-   // In MongoDB shell
-   db.adminCommand({setParameter: 1, wiredTigerCacheSizeGB: 2})
-   ```
+2. **High memory usage**
+   - Process data in smaller chunks
+   - Use lower precision (complex64 vs complex128)
+   - Reduce spectrogram resolution
 
-2. **Optimize Python processing**:
-   ```python
-   # Reduce STFT size for faster processing
-   nperseg = 512  # Instead of 1024
-   ```
+## Contributing
 
-3. **Enable compression**:
-   ```bash
-   # Add to nginx config if using reverse proxy
-   gzip_types text/css application/javascript application/json;
-   ```
-
-## 🤝 Contributing
+Contributions are welcome! Please follow these guidelines:
 
 1. Fork the repository
 2. Create a feature branch
-3. Make your changes
-4. Add tests if applicable
+3. Add tests for new functionality
+4. Ensure all tests pass
 5. Submit a pull request
 
-## 📄 License
+## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+This project is licensed under the MIT License. See LICENSE file for details.
 
-## 🙏 Acknowledgments
+## Acknowledgments
 
-- **SciPy**: Signal processing algorithms
-- **NumPy**: Numerical computing
-- **Flask-SocketIO**: Real-time communication
-- **Librosa**: Audio processing
-- **Bootstrap**: UI framework
+- Built with NumPy, SciPy, and scikit-learn
+- Optimized with Numba for performance
+- Visualization with Matplotlib
+- SDR community for testing and feedback
 
-## 🆘 Support
+## References
 
-For issues and questions:
-
-1. Check the troubleshooting section
-2. Review system logs
-3. Create an issue with:
-   - System information
-   - Error messages
-   - Steps to reproduce
-
----
-
-**Note**: This application is designed for educational and research purposes. Ensure you have proper authorization before analyzing radio signals in your jurisdiction.
+- [Frequency Hopping Spread Spectrum](https://en.wikipedia.org/wiki/Frequency-hopping_spread_spectrum)
+- [PySDR - A Guide to SDR and DSP using Python](https://pysdr.org/)
+- [GNU Radio Documentation](https://www.gnuradio.org/doc/)
+- [Software Defined Radio with HackRF](https://greatscottgadgets.com/hackrf/)
