@@ -248,27 +248,120 @@
     </div>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
     <script>
+        // Performance optimization: Add throttling and caching
+        const PERF_CONFIG = {
+            POLL_THROTTLE_MS: 1000,      // Polling frequency
+            DOM_CACHE_CLEANUP: 30000,    // DOM cache cleanup interval
+            MAX_RETRY_ATTEMPTS: 3,       // Max retry attempts for failed requests
+            REQUEST_TIMEOUT: 10000       // Request timeout in ms
+        };
+
+        // Performance: DOM element cache
+        const DOM_CACHE = {};
+        function cacheDOMElements() {
+            DOM_CACHE.uploadForm = document.getElementById('uploadForm');
+            DOM_CACHE.fileInput = document.getElementById('fileInput');
+            DOM_CACHE.processBtn = document.getElementById('processBtn');
+            DOM_CACHE.progressBar = document.getElementById('progressBar');
+            DOM_CACHE.progressText = document.getElementById('progressText');
+            DOM_CACHE.statusMessage = document.getElementById('statusMessage');
+            DOM_CACHE.statusCard = document.getElementById('statusCard');
+            DOM_CACHE.resultsCard = document.getElementById('resultsCard');
+            DOM_CACHE.recentJobs = document.getElementById('recentJobs');
+            DOM_CACHE.errorMessage = document.getElementById('errorMessage');
+        }
+
+        // Performance: Throttle function
+        function createThrottledFunction(func, delay) {
+            let lastCall = 0;
+            let timeoutId = null;
+            return function(...args) {
+                const now = Date.now();
+                if (now - lastCall >= delay) {
+                    func.apply(this, args);
+                    lastCall = now;
+                } else {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        func.apply(this, args);
+                        lastCall = Date.now();
+                    }, delay - (now - lastCall));
+                }
+            };
+        }
+
+        // Performance: Request with timeout and retry
+        async function fetchWithTimeout(url, options = {}, timeout = PERF_CONFIG.REQUEST_TIMEOUT) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            try {
+                const response = await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+                clearTimeout(timeoutId);
+                return response;
+            } catch (error) {
+                clearTimeout(timeoutId);
+                if (error.name === 'AbortError') {
+                    throw new Error('Request timeout');
+                }
+                throw error;
+            }
+        }
+
         // App without WebSocket dependencies - uses HTTP polling
         class FrequencyHoppingApp {
             constructor() {
                 this.currentJobId = null;
                 this.isProcessing = false;
                 this.progressInterval = null;
+                this.retryCount = 0;
+                
+                // Performance: Create throttled functions
+                this.throttledProgressPoll = createThrottledFunction(
+                    this.progressPoll.bind(this), 
+                    PERF_CONFIG.POLL_THROTTLE_MS
+                );
                 
                 this.bindEvents();
                 this.loadRecentJobs();
+                
+                // Performance: Setup cleanup
+                this.setupCleanup();
             }
             
+            // Performance: Setup cleanup and memory management
+            setupCleanup() {
+                // Performance: Periodic DOM cache cleanup
+                setInterval(() => {
+                    try {
+                        if (window.gc) window.gc(); // Force garbage collection if available
+                    } catch (e) {
+                        console.warn('GC not available');
+                    }
+                }, PERF_CONFIG.DOM_CACHE_CLEANUP);
+                
+                // Performance: Cleanup on page unload
+                window.addEventListener('beforeunload', () => {
+                    this.cleanup();
+                });
+            }
+
             bindEvents() {
-                const uploadForm = document.getElementById('uploadForm');
+                // Performance: Use cached DOM elements
+                cacheDOMElements();
+                
+                const uploadForm = DOM_CACHE.uploadForm || document.getElementById('uploadForm');
                 uploadForm.addEventListener('submit', (e) => {
                     e.preventDefault();
                     this.handleFileUpload();
                 });
                 
-                const fileInput = document.getElementById('fileInput');
+                const fileInput = DOM_CACHE.fileInput || document.getElementById('fileInput');
                 fileInput.addEventListener('change', (e) => {
                     this.validateFileInput(e.target);
                 });
@@ -399,22 +492,35 @@
                 resultsCard.style.display = 'none';
             }
             
+            // Performance: Optimized progress polling with retry logic
             startProgressPolling() {
-                this.progressInterval = setInterval(async () => {
-                    try {
-                        const response = await fetch(`/progress/${this.currentJobId}`);
-                        const progress = await response.json();
-                        
-                        this.updateProgress(progress.progress, progress.message);
-                        
-                        if (progress.progress >= 100) {
-                            clearInterval(this.progressInterval);
-                            this.checkForResult();
-                        }
-                    } catch (error) {
-                        console.error('Progress polling error:', error);
+                this.progressInterval = setInterval(() => {
+                    this.throttledProgressPoll();
+                }, PERF_CONFIG.POLL_THROTTLE_MS);
+            }
+
+            async progressPoll() {
+                try {
+                    const response = await fetchWithTimeout(`/progress/${this.currentJobId}`);
+                    const progress = await response.json();
+                    
+                    this.updateProgress(progress.progress, progress.message);
+                    this.retryCount = 0; // Reset retry count on success
+                    
+                    if (progress.progress >= 100) {
+                        clearInterval(this.progressInterval);
+                        this.checkForResult();
                     }
-                }, 1000); // Poll every second
+                } catch (error) {
+                    console.error('Progress polling error:', error);
+                    this.retryCount++;
+                    
+                    if (this.retryCount >= PERF_CONFIG.MAX_RETRY_ATTEMPTS) {
+                        clearInterval(this.progressInterval);
+                        this.showError('Connection lost. Please refresh the page.');
+                        this.setProcessingState(false);
+                    }
+                }
             }
             
             async checkForResult() {
@@ -441,19 +547,32 @@
                 }
             }
             
+            // Performance: Optimized progress update with cached DOM elements
             updateProgress(progress, message) {
-                const progressBar = document.getElementById('progressBar');
-                const progressText = document.getElementById('progressText');
-                const statusMessage = document.getElementById('statusMessage');
-                
-                progressBar.style.width = progress + '%';
-                progressBar.setAttribute('aria-valuenow', progress);
-                progressText.textContent = Math.round(progress) + '%';
-                statusMessage.textContent = message;
-                
-                if (progress >= 100) {
-                    progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
-                    progressBar.classList.add('bg-success');
+                try {
+                    const progressBar = DOM_CACHE.progressBar || document.getElementById('progressBar');
+                    const progressText = DOM_CACHE.progressText || document.getElementById('progressText');
+                    const statusMessage = DOM_CACHE.statusMessage || document.getElementById('statusMessage');
+                    
+                    if (progressBar) {
+                        progressBar.style.width = progress + '%';
+                        progressBar.setAttribute('aria-valuenow', progress);
+                    }
+                    
+                    if (progressText) {
+                        progressText.textContent = Math.round(progress) + '%';
+                    }
+                    
+                    if (statusMessage) {
+                        statusMessage.textContent = message;
+                    }
+                    
+                    if (progress >= 100 && progressBar) {
+                        progressBar.classList.remove('progress-bar-striped', 'progress-bar-animated');
+                        progressBar.classList.add('bg-success');
+                    }
+                } catch (error) {
+                    console.warn('Progress update error:', error);
                 }
             }
             
@@ -496,9 +615,10 @@
                 document.getElementById('welcomeCard').style.display = 'none';
             }
             
+            // Performance: Optimized recent jobs loading with timeout
             async loadRecentJobs() {
                 try {
-                    const response = await fetch('/api/jobs');
+                    const response = await fetchWithTimeout('/api/jobs');
                     const jobs = await response.json();
                     
                     if (response.ok) {
@@ -509,8 +629,14 @@
                 }
             }
             
+            // Performance: Optimized job display with cached DOM and batch updates
             displayRecentJobs(jobs) {
-                const container = document.getElementById('recentJobs');
+                const container = DOM_CACHE.recentJobs || document.getElementById('recentJobs');
+                
+                if (!container) {
+                    console.warn('Recent jobs container not found');
+                    return;
+                }
                 
                 if (jobs.length === 0) {
                     container.innerHTML = `
@@ -544,11 +670,43 @@
                 container.innerHTML = jobsHtml;
             }
             
+            // Performance: Optimized error display with cached DOM
             showError(message) {
-                const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
-                document.getElementById('errorMessage').textContent = message;
-                errorModal.show();
-                console.error('App Error:', message);
+                try {
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    const errorMessage = DOM_CACHE.errorMessage || document.getElementById('errorMessage');
+                    
+                    if (errorMessage) {
+                        errorMessage.textContent = message;
+                    }
+                    
+                    errorModal.show();
+                    console.error('App Error:', message);
+                } catch (error) {
+                    console.error('Error showing error modal:', error);
+                    alert(message); // Fallback to alert
+                }
+            }
+
+            // Performance: Cleanup method
+            cleanup() {
+                try {
+                    if (this.progressInterval) {
+                        clearInterval(this.progressInterval);
+                        this.progressInterval = null;
+                    }
+                    
+                    // Clear DOM cache
+                    Object.keys(DOM_CACHE).forEach(key => {
+                        DOM_CACHE[key] = null;
+                    });
+                    
+                    this.isProcessing = false;
+                    this.currentJobId = null;
+                    this.retryCount = 0;
+                } catch (error) {
+                    console.warn('Cleanup error:', error);
+                }
             }
             
             formatFileSize(bytes) {
@@ -562,11 +720,29 @@
             }
         }
 
-        // Initialize the application
+        // Performance: Optimized application initialization
         document.addEventListener('DOMContentLoaded', () => {
-            const app = new FrequencyHoppingApp();
-            window.fhApp = app;
-            console.log('✅ Frequency Hopping Decoder initialized (HTTP polling version)');
+            try {
+                // Performance: Cache DOM elements first
+                cacheDOMElements();
+                
+                const app = new FrequencyHoppingApp();
+                window.fhApp = app;
+                
+                // Performance: Setup global error handling
+                window.addEventListener('error', (event) => {
+                    console.error('Global error:', event.error);
+                });
+                
+                window.addEventListener('unhandledrejection', (event) => {
+                    console.error('Unhandled promise rejection:', event.reason);
+                });
+                
+                console.log('✅ Frequency Hopping Decoder initialized (Optimized HTTP polling version)');
+            } catch (error) {
+                console.error('Initialization error:', error);
+                alert('Application failed to initialize. Please refresh the page.');
+            }
         });
     </script>
 </body>

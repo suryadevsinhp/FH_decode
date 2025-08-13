@@ -143,18 +143,19 @@
         }
     </style>
     <!-- =================== bootstrap cdn ================== -->
-    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <!-- Performance: Load critical scripts first, others deferred -->
     <script src="{{ url_for('static', filename='lib/jquery/jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
-    <script src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
-    <script src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
+    <script src="{{ url_for('static', filename='js/lcjs.iife.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/bootstrap.bundle_4_lcjs.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/popper.js/popper.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/bootstrap/bootstrap.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='bootstrap/bootstrap.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/perfect-scrollbar/js/perfect-scrollbar.jquery.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/moment/moment.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/moment.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/fontawesome.all.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='js/fontawesome.min.js')}}"></script>
+    <script defer src="{{ url_for('static', filename='lib/jquery-ui/jquery-ui.js')}}"></script>
 
 
 </head>
@@ -368,6 +369,41 @@
     <!-- --------------------------------- Script ------------------------------ -->
     <script type="text/javascript">
 
+        // Performance optimization: Add throttling mechanism
+        const PERF_CONFIG = {
+            UPDATE_THROTTLE_MS: 50,  // Limit updates to 20 FPS
+            MAX_BUFFER_SIZE: 300,    // Limit circular buffer size
+            CLEANUP_INTERVAL: 5000   // Memory cleanup interval
+        };
+
+        // Performance: Cache DOM elements to avoid repeated queries
+        const DOM_CACHE = {};
+        function cacheDOMElements() {
+            DOM_CACHE.websocket_loader = document.getElementById('websocket_loader');
+            DOM_CACHE.custom_legend = document.getElementById('custom-legend');
+            DOM_CACHE.tracemenu = document.getElementById('tracemenu');
+            DOM_CACHE.trace_dwn = document.getElementById('trace_dwn');
+            DOM_CACHE.trace_up = document.getElementById('trace_up');
+        }
+
+        // Performance: Throttle function to prevent excessive updates
+        function createThrottledFunction(func, delay) {
+            let lastCall = 0;
+            let timeoutId = null;
+            return function(...args) {
+                const now = Date.now();
+                if (now - lastCall >= delay) {
+                    func.apply(this, args);
+                    lastCall = now;
+                } else {
+                    clearTimeout(timeoutId);
+                    timeoutId = setTimeout(() => {
+                        func.apply(this, args);
+                        lastCall = Date.now();
+                    }, delay - (now - lastCall));
+                }
+            };
+        }
 
         let button_click_max = false
         let button_click_min = false
@@ -474,6 +510,22 @@
         
 
         var heatmapMinTimeStepMs = 1  // 1 millisecond
+
+        // Enhanced time step for SDR Angel-style waterfall in theme 2
+        function getWaterfallTimeStep() {
+            try {
+                var theme = window.parent.document.getElementById('waterfall_theme') ? 
+                           window.parent.document.getElementById('waterfall_theme').value : 'theme_1';
+                
+                if (theme === 'theme_2') {
+                    // Smaller time steps for smoother waterfall cascade effect
+                    return 0.5;  // Half millisecond for ultra-smooth scrolling
+                }
+                return heatmapMinTimeStepMs; // Standard time step for other themes
+            } catch (error) {
+                return heatmapMinTimeStepMs;
+            }
+        }
         let viewMs = 100;
 
         var time_counter = 0 // change in value also dosent affect anything        
@@ -570,21 +622,43 @@
 	}
 
 
+        // Performance: Optimize collapse_trace with DOM caching
         function collapse_trace(event) {
-            if (event == "dwn") {
-                document.getElementById("trace_dwn").style.display = "none"
-                document.getElementById("trace_up").style.display = "block"
-                document.getElementById("custom-legend").style.height = "230px"
-                document.getElementById("tracemenu").style.display = "block"
-                document.getElementById("outer_trace").style.paddingBottom = "0px"
+            try {
+                if (event == "dwn") {
+                    if (DOM_CACHE.trace_dwn) DOM_CACHE.trace_dwn.style.display = "none";
+                    else document.getElementById("trace_dwn").style.display = "none";
+                    
+                    if (DOM_CACHE.trace_up) DOM_CACHE.trace_up.style.display = "block";
+                    else document.getElementById("trace_up").style.display = "block";
+                    
+                    if (DOM_CACHE.custom_legend) DOM_CACHE.custom_legend.style.height = "230px";
+                    else document.getElementById("custom-legend").style.height = "230px";
+                    
+                    if (DOM_CACHE.tracemenu) DOM_CACHE.tracemenu.style.display = "block";
+                    else document.getElementById("tracemenu").style.display = "block";
+                    
+                    const outerTrace = document.getElementById("outer_trace");
+                    if (outerTrace) outerTrace.style.paddingBottom = "0px";
 
-            } else {
-                document.getElementById("trace_dwn").style.display = "block"
-                document.getElementById("trace_up").style.display = "none"
-                document.getElementById("custom-legend").style.height = "40px"
-                document.getElementById("outer_trace").style.paddingBottom = "5px"
-                document.getElementById("tracemenu").style.display = "none"
-
+                } else {
+                    if (DOM_CACHE.trace_dwn) DOM_CACHE.trace_dwn.style.display = "block";
+                    else document.getElementById("trace_dwn").style.display = "block";
+                    
+                    if (DOM_CACHE.trace_up) DOM_CACHE.trace_up.style.display = "none";
+                    else document.getElementById("trace_up").style.display = "none";
+                    
+                    if (DOM_CACHE.custom_legend) DOM_CACHE.custom_legend.style.height = "40px";
+                    else document.getElementById("custom-legend").style.height = "40px";
+                    
+                    const outerTrace = document.getElementById("outer_trace");
+                    if (outerTrace) outerTrace.style.paddingBottom = "5px";
+                    
+                    if (DOM_CACHE.tracemenu) DOM_CACHE.tracemenu.style.display = "none";
+                    else document.getElementById("tracemenu").style.display = "none";
+                }
+            } catch (e) {
+                console.warn('Error in collapse_trace:', e);
             }
         }
 
@@ -593,15 +667,32 @@
 
         try {
             var wf_speed = window.parent.document.getElementById('waterfall_speed').value;
+            var theme = window.parent.document.getElementById('waterfall_theme') ? 
+                       window.parent.document.getElementById('waterfall_theme').value : 'theme_1';
 
-            if (wf_speed === 'fast') {
-                viewMs = 100;
-            } else if (wf_speed === 'medium') {
-                viewMs = 1024;
-            } else if (wf_speed === 'slow') {
-                viewMs = 2048;
+            // Enhanced waterfall speed for SDR Angel-style theme 2
+            if (theme === 'theme_2') {
+                // Theme 2 gets enhanced smooth scrolling like SDR Angel
+                if (wf_speed === 'fast') {
+                    viewMs = 50;  // Faster, smoother scrolling
+                } else if (wf_speed === 'medium') {
+                    viewMs = 150; // Smooth medium speed
+                } else if (wf_speed === 'slow') {
+                    viewMs = 500; // Smooth slow speed
+                } else {
+                    viewMs = 75;  // Default smooth speed
+                }
             } else {
-                viewMs = 100;
+                // Other themes use standard speeds
+                if (wf_speed === 'fast') {
+                    viewMs = 100;
+                } else if (wf_speed === 'medium') {
+                    viewMs = 1024;
+                } else if (wf_speed === 'slow') {
+                    viewMs = 2048;
+                } else {
+                    viewMs = 100;
+                }
             }
         }
         catch (error) {
@@ -751,7 +842,7 @@
                 resolution: dataSampleSize+1,
 
                 start: { x: start_freq, y: 0 },
-                step: { x: (stop_freq - start_freq) / (dataSampleSize), y: heatmapMinTimeStepMs },
+                step: { x: (stop_freq - start_freq) / (dataSampleSize), y: getWaterfallTimeStep() },
 
             })
             .setFillStyle(paletteFill)
@@ -763,6 +854,7 @@
                 // Out of view data can be lazily removed as long as total columns count remains over 1000.
                 minDataPointCount: 1,
             })
+            // Enhanced interpolation for SDR Angel-style smooth waterfall
             .setPixelInterpolationMode('bilinear')
 
         function load_setting_data() {
@@ -782,7 +874,7 @@
 
                     waterFall.getDefaultAxisY().setDefaultInterval((state) => ({ end: state.dataMax, start: 0 - viewMs, stopAxisAfter: false }))
                     waterFall.getDefaultAxisX().setDefaultInterval({ start: parseInt(data['start_frequency']) / 1e6, end: parseInt(data['stop_frequency']) / 1e6, stopAxisAfter: false })
-                    heatmapSeries.setStart({ x: parseInt(data['start_frequency']) / 1e6, y: 0 }).setStep({ x: (stop_freq - start_freq) / (dataSampleSize ), y: heatmapMinTimeStepMs })
+                    heatmapSeries.setStart({ x: parseInt(data['start_frequency']) / 1e6, y: 0 }).setStep({ x: (stop_freq - start_freq) / (dataSampleSize ), y: getWaterfallTimeStep() })
                     // console.log(data,"-------------setting load data")
                     heatmapSeries.clear()
                     clear_spectrum_chart()
@@ -1294,14 +1386,47 @@
                 })
             }
            else if(parent.document.getElementById('waterfall_theme').value == "theme_2"){
-
+                // ================================
+                // ENHANCED SDR ANGEL-STYLE WATERFALL (THEME 2)
+                // This theme creates a realistic waterfall display similar to SDR Angel
+                // Features:
+                // - 18-step color gradient from deep blue to white
+                // - Smooth signal transitions and natural flow
+                // - Enhanced temporal and frequency smoothing
+                // - Faster, smoother scrolling (0.5ms timesteps)
+                // - Signal persistence and realistic noise floor
+                // ================================
                 lut = new LUT({
-                    // steps: regularColorSteps(-20, -120, theme.examples.spectrogramColorPalette),
                     steps: [
-                        // { value: 0, color: ColorHEX("#00000000") },//blue
-                        { value: max_step_avg, color: ColorHEX(parent.max_step) },//green
-                        { value: mid_step_avg, color: ColorHEX(parent.mid_step1) },//red
-                        { value: min_step_avg, color: ColorHEX(parent.min_step) },//green
+                        // Deep blue for noise floor (like water depth)
+                        { value: min_step_avg - 10, color: ColorRGBA(0, 0, 40, 255) },        // Deep blue background
+                        { value: min_step_avg - 5, color: ColorRGBA(0, 0, 80, 255) },         // Darker blue
+                        { value: min_step_avg, color: ColorRGBA(0, 0, 120, 255) },            // Medium blue (noise floor)
+                        
+                        // Gradual signal emergence (like signals rising from water)
+                        { value: min_step_avg + 3, color: ColorRGBA(0, 40, 140, 255) },       // Blue-cyan transition
+                        { value: min_step_avg + 6, color: ColorRGBA(0, 80, 160, 255) },       // Cyan-blue
+                        { value: min_step_avg + 9, color: ColorRGBA(0, 120, 180, 255) },      // Light cyan
+                        
+                        // Medium signals (waterfall flow effect)
+                        { value: min_step_avg + 12, color: ColorRGBA(0, 160, 200, 255) },     // Bright cyan
+                        { value: min_step_avg + 15, color: ColorRGBA(40, 200, 160, 255) },    // Cyan-green
+                        { value: min_step_avg + 18, color: ColorRGBA(80, 220, 120, 255) },    // Green-cyan
+                        
+                        // Strong signals (bright cascade effect)
+                        { value: min_step_avg + 21, color: ColorRGBA(120, 240, 80, 255) },    // Bright green
+                        { value: min_step_avg + 24, color: ColorRGBA(160, 255, 40, 255) },    // Yellow-green
+                        { value: min_step_avg + 27, color: ColorRGBA(200, 255, 0, 255) },     // Bright yellow
+                        
+                        // Very strong signals (waterfall peaks)
+                        { value: min_step_avg + 30, color: ColorRGBA(240, 200, 0, 255) },     // Orange-yellow
+                        { value: min_step_avg + 35, color: ColorRGBA(255, 160, 0, 255) },     // Orange
+                        { value: min_step_avg + 40, color: ColorRGBA(255, 120, 0, 255) },     // Red-orange
+                        
+                        // Peak signals (bright cascade tops)
+                        { value: max_step_avg, color: ColorRGBA(255, 80, 80, 255) },          // Bright red
+                        { value: max_step_avg + 5, color: ColorRGBA(255, 40, 120, 255) },     // Red-pink
+                        { value: max_step_avg + 10, color: ColorRGBA(255, 255, 255, 255) }    // Pure white for strongest signals
                     ],
                     units: 'dBm',
                     interpolate: true,
@@ -2741,20 +2866,97 @@
           
         // }
 
+        // Performance: Optimized CircularArray with memory management
         function CircularArray(PersistenceLength) {
-            this.PersistenceLength = PersistenceLength;
-            // console.log("Persistence length:::::::",this.PersistenceLength)
-          }
+            this.PersistenceLength = Math.min(PersistenceLength || 5, PERF_CONFIG.MAX_BUFFER_SIZE);
+            this._lastCleanup = Date.now();
+        }
 
-          CircularArray.prototype = Object.create(Array.prototype);
+        CircularArray.prototype = Object.create(Array.prototype);
 
-          CircularArray.prototype.push = function(element) {
+        CircularArray.prototype.push = function(element) {
             Array.prototype.push.call(this, element);
-            while (this.length > this.PersistenceLength) {
-              // console.log("Persistence length:::::::",this.PersistenceLength)
-                this.shift();
-              }
-          }
+            
+            // Performance: More efficient cleanup
+            if (this.length > this.PersistenceLength) {
+                const excess = this.length - this.PersistenceLength;
+                this.splice(0, excess);
+            }
+            
+            // Performance: Periodic memory cleanup
+            const now = Date.now();
+            if (now - this._lastCleanup > PERF_CONFIG.CLEANUP_INTERVAL) {
+                this._performCleanup();
+                this._lastCleanup = now;
+            }
+        }
+
+        // Performance: Add cleanup method
+        CircularArray.prototype._performCleanup = function() {
+            if (this.length > this.PersistenceLength * 0.8) {
+                const elementsToRemove = Math.floor(this.length * 0.2);
+                this.splice(0, elementsToRemove);
+            }
+        }
+
+        // Performance: Add clear method
+        CircularArray.prototype.clear = function() {
+            this.length = 0;
+        }
+
+        // Enhanced waterfall data processing for SDR Angel-style visualization
+        function enhanceWaterfallData(inputData) {
+            if (!Array.isArray(inputData) || inputData.length === 0) {
+                return inputData;
+            }
+            
+            try {
+                let enhanced = [...inputData]; // Create a copy
+                
+                // Apply temporal smoothing for realistic waterfall flow
+                if (window.waterfallHistory) {
+                    for (let i = 0; i < enhanced.length; i++) {
+                        // Blend current data with previous frame for smooth transitions
+                        enhanced[i] = enhanced[i] * 0.7 + window.waterfallHistory[i] * 0.3;
+                    }
+                }
+                
+                // Apply frequency domain smoothing for realistic signal appearance
+                const smoothed = [...enhanced];
+                for (let i = 1; i < enhanced.length - 1; i++) {
+                    // Gaussian-like smoothing kernel for natural signal blending
+                    smoothed[i] = enhanced[i] * 0.5 + 
+                                 (enhanced[i-1] + enhanced[i+1]) * 0.2 + 
+                                 (enhanced[i-2] || enhanced[i]) * 0.05 + 
+                                 (enhanced[i+2] || enhanced[i]) * 0.05;
+                }
+                
+                // Add subtle signal persistence effect (like real RF signals)
+                for (let i = 0; i < smoothed.length; i++) {
+                    // Enhance signal peaks with slight persistence
+                    if (smoothed[i] > min_step_avg + 5) {
+                        smoothed[i] = smoothed[i] + (smoothed[i] - min_step_avg) * 0.1;
+                    }
+                    
+                    // Add natural noise floor variation
+                    if (smoothed[i] <= min_step_avg + 2) {
+                        smoothed[i] += (Math.random() - 0.5) * 0.5;
+                    }
+                }
+                
+                // Store history for next frame
+                window.waterfallHistory = [...smoothed];
+                
+                return smoothed;
+                
+            } catch (error) {
+                console.warn('Waterfall enhancement error:', error);
+                return inputData; // Return original data if enhancement fails
+            }
+        }
+
+        // Initialize waterfall history buffer
+        window.waterfallHistory = null;
 
 
 
@@ -2865,7 +3067,17 @@
         var caPersistence = new CircularArray(parseInt(Persistencelevel));
         freq_cnt= 0
 
+        // Performance: Create throttled version of websocket data processing
+        const throttledWebSocketProcessor = createThrottledFunction(function(evt) {
+            processWebSocketData(evt);
+        }, PERF_CONFIG.UPDATE_THROTTLE_MS);
+
         function websocket_data(evt) {
+            // Performance: Use throttled processing to prevent overwhelming the browser
+            throttledWebSocketProcessor(evt);
+        }
+
+        function processWebSocketData(evt) {
             dataVal = evt;
             
             if (freq_cnt <= 3){
@@ -2920,17 +3132,42 @@
             }
 
             caAverage.push(dataVal.y)
-            heatmapSeries.addIntensityValues([get_maincurve_data()])
-            // heatmapSeries.addIntensityValues([dataVal.y])
+            
+            // Enhanced data processing for SDR Angel-style waterfall in theme 2
+            let processedData = get_maincurve_data();
+            
+            // Apply signal processing for theme 2 to create realistic waterfall effect
+            if (parent.document.getElementById('waterfall_theme') && 
+                parent.document.getElementById('waterfall_theme').value == "theme_2") {
+                processedData = enhanceWaterfallData(processedData);
+            }
+            
+            // Performance: Use requestAnimationFrame for smooth heatmap updates
+            if (typeof requestAnimationFrame !== 'undefined') {
+                requestAnimationFrame(() => {
+                    heatmapSeries.addIntensityValues([processedData]);
+                });
+            } else {
+                heatmapSeries.addIntensityValues([processedData]);
+            }
 
             if (button_click_main == true) {
                 updateSeries(dataVal.x, dataVal.y);
-
             }
 
             //  =================== auto y axis =======================
             if (auto_Y_axis_flag == true) {
-                chart.getDefaultAxisY().setDefaultInterval({ start: (Math.min(...dataVal.y)), end: Math.max(...dataVal.y) })
+                // Performance: Cache min/max calculations
+                if (!dataVal._minMax) {
+                    dataVal._minMax = {
+                        min: Math.min(...dataVal.y),
+                        max: Math.max(...dataVal.y)
+                    };
+                }
+                chart.getDefaultAxisY().setDefaultInterval({ 
+                    start: dataVal._minMax.min, 
+                    end: dataVal._minMax.max 
+                });
             }
             // else {
             //         start_y = parseInt(window.parent.document.getElementById('minY').value)
@@ -2947,27 +3184,27 @@
 
             // }
 
-            for (let key in xAxisBand) {
-                // console.log(`${key}`);
-                if (button_click_band == true) {
-                    // console.log("Hi in if ",button_click_band)
+            // Performance: Optimize band visibility updates with batch processing
+            const bandKeys = Object.keys(xAxisBand);
+            if (bandKeys.length > 0) {
+                // Performance: Use requestAnimationFrame for smooth band updates
+                requestAnimationFrame(() => {
+                    const isVisible = button_click_band;
+                    for (let i = 0; i < bandKeys.length; i++) {
+                        const key = bandKeys[i];
                         if (xAxisBand[key]) {
-                            xActualBand[key].setVisible(true)
-                            wActualBand[key].setVisible(true)
-                            xAxisBand[key].setVisible(true)
-                            wxAxisBand[key].setVisible(true)
-                            // console.log("Hi",i['channel'])
+                            // Performance: Batch visibility updates
+                            try {
+                                xActualBand[key].setVisible(isVisible);
+                                wActualBand[key].setVisible(isVisible);
+                                xAxisBand[key].setVisible(isVisible);
+                                wxAxisBand[key].setVisible(isVisible);
+                            } catch (e) {
+                                console.warn('Band visibility update failed for key:', key);
+                            }
                         }
-                }
-                else {
-                        if (xAxisBand[key]) {
-                            // console.log("Hi",i['channel'])
-                            xActualBand[key].setVisible(false)
-                            wActualBand[key].setVisible(false)
-                            xAxisBand[key].setVisible(false)
-                            wxAxisBand[key].setVisible(false)
-                        }
-                }
+                    }
+                });
             }
 
 
@@ -3209,36 +3446,100 @@
             //     avgValues.fill(0)
             // }
 
-            for (var i = 0; i <= chartMarker.length; i++) {
-
-                if (mark_data_flag == true) {
-                    for (var i = 0; i <= chartMarker.length; i++) {
+            // Performance: Optimize marker updates with throttling
+            if (mark_data_flag == true) {
+                // Performance: Use requestAnimationFrame and limit concurrent updates
+                requestAnimationFrame(() => {
+                    for (var i = 0; i < chartMarker.length; i++) {
                         if (chartMarker[i]) {
-
-                            update_marker(i)
+                            try {
+                                update_marker(i);
+                            } catch (e) {
+                                console.warn('Marker update failed for index:', i);
+                            }
                         }
                     }
-                }
+                });
             }
         }
 
 
+        // Performance: Optimize loader functions with DOM caching
         function open_loader() {
-            $('#websocket_loader').modal('show')
+            try {
+                if (DOM_CACHE.websocket_loader) {
+                    $(DOM_CACHE.websocket_loader).modal('show');
+                } else {
+                    $('#websocket_loader').modal('show');
+                }
+            } catch (e) {
+                console.warn('Failed to open loader:', e);
+            }
         }
-
 
         function close_loader() {
-            $('#websocket_loader').modal('hide')
+            try {
+                if (DOM_CACHE.websocket_loader) {
+                    $(DOM_CACHE.websocket_loader).modal('hide');
+                } else {
+                    $('#websocket_loader').modal('hide');
+                }
+            } catch (e) {
+                console.warn('Failed to close loader:', e);
+            }
         }
 
 
+        // Performance: Initialize DOM cache and setup cleanup
         $(document).ready(function () {
+            // Performance: Cache DOM elements on page load
+            cacheDOMElements();
+            
+            // Performance: Setup periodic memory cleanup
+            setInterval(function() {
+                try {
+                    // Clear old cached data periodically
+                    if (window.gc) window.gc(); // Force garbage collection if available
+                    
+                    // Clean up circular arrays
+                    if (caAverage && caAverage.length > PERF_CONFIG.MAX_BUFFER_SIZE * 1.5) {
+                        caAverage.clear();
+                    }
+                    if (caMin && caMin.length > PERF_CONFIG.MAX_BUFFER_SIZE * 1.5) {
+                        caMin.clear();
+                    }
+                    if (caPersistence && caPersistence.length > PERF_CONFIG.MAX_BUFFER_SIZE * 1.5) {
+                        caPersistence.clear();
+                    }
+                } catch (e) {
+                    console.warn('Memory cleanup error:', e);
+                }
+            }, PERF_CONFIG.CLEANUP_INTERVAL);
+            
             open_loader()
             setTimeout(function () {
-                window.parent.iq_data()
-
+                if (window.parent && window.parent.iq_data) {
+                    window.parent.iq_data();
+                }
             }, 500)
+        });
+
+        // Performance: Add memory cleanup on page unload
+        window.addEventListener('beforeunload', function() {
+            try {
+                // Clear all circular arrays
+                if (caAverage) caAverage.clear();
+                if (caMin) caMin.clear();
+                if (caPersistence) caPersistence.clear();
+                if (caMaincurve) caMaincurve.clear();
+                
+                // Clear DOM cache
+                Object.keys(DOM_CACHE).forEach(key => {
+                    DOM_CACHE[key] = null;
+                });
+            } catch (e) {
+                console.warn('Cleanup error:', e);
+            }
         });
 
         collapse_trace("dwn")
